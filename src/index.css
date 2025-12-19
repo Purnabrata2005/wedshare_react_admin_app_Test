@@ -1,0 +1,126 @@
+/* ================================
+   Tailwind v4 + shadcn/ui setup
+   ================================ */
+
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/* Enable class-based dark mode */
+@custom-variant dark (&:is(.dark *));
+
+/* ================================
+   Tailwind theme tokens
+   ================================ */
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* ================================
+   WedShare – Light Theme
+   ================================ */
+:root {
+  --radius: 0.625rem;
+
+  /* Background & text */
+  --background: oklch(0.98 0.01 260);      /* #F8FAFC */
+  --foreground: oklch(0.18 0.02 260);      /* #111827 */
+
+  /* Surfaces */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 260);
+
+  /* 🌹 Brand colors */
+  --primary: oklch(0.58 0.22 12);           /* #E11D48 */
+  --primary-foreground: oklch(0.98 0 0);
+
+  --secondary: oklch(0.64 0.20 15);         /* #F43F5E */
+  --secondary-foreground: oklch(0.98 0 0);
+
+  /* Supporting */
+  --muted: oklch(0.96 0.01 260);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --accent: oklch(0.96 0.01 260);
+  --accent-foreground: oklch(0.18 0.02 260);
+
+  /* Status */
+  --destructive: oklch(0.62 0.23 27);       /* error */
+
+  /* Borders & focus */
+  --border: oklch(0.90 0.01 260);
+  --input: oklch(0.90 0.01 260);
+  --ring: oklch(0.58 0.22 12);
+}
+
+/* ================================
+   WedShare – Dark Theme
+   ================================ */
+.dark {
+  --background: oklch(0.17 0.02 260);       /* #0F172A */
+  --foreground: oklch(0.98 0 0);
+
+  --card: oklch(0.20 0.02 260);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.20 0.02 260);
+  --popover-foreground: oklch(0.98 0 0);
+
+  /* 🌹 Brand colors (brighter in dark) */
+  --primary: oklch(0.65 0.22 15);            /* #F43F5E */
+  --primary-foreground: oklch(0.17 0.02 260);
+
+  --secondary: oklch(0.72 0.20 18);          /* #FB7185 */
+  --secondary-foreground: oklch(0.17 0.02 260);
+
+  --muted: oklch(0.28 0.02 260);
+  --muted-foreground: oklch(0.75 0.01 260);
+  --accent: oklch(0.28 0.02 260);
+  --accent-foreground: oklch(0.98 0 0);
+
+  --destructive: oklch(0.70 0.19 22);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.65 0.22 15);
+}
+
+/* ================================
+   Base styles
+   ================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

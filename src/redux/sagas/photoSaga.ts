@@ -1,0 +1,299 @@
+// src/redux/sagas/photoSaga.ts
+import { all, call, put, delay, takeEvery } from "redux-saga/effects"
+import AxiosWedding from "@/redux/service/axiosWedding"
+import imageCompression from "browser-image-compression"
+import { photoDB, type PendingPhoto } from "@/DB/uploadDB"
+import {
+  uploadPhotosRequest,
+  uploadPhotosEnqueued,
+  uploadPhotosCompleted,
+  uploadPhotosFailure,
+  updatePhotoProgress,
+  updatePhotoStatus,
+} from "@/redux/slices/photoSlice"
+import type { UploadPhotosPayload } from "@/redux/slices/photoSlice"
+import { store } from "@/redux/store" // ensure your store exports this
+
+const RETRY_INTERVAL = 5000
+const MAX_RETRIES = 5
+const BATCH_SIZE = 10
+
+// Track UUIDs whose metadata has already been registered (to prevent duplicate registration)
+const uploadedPhotoIds = new Set<string>()
+let hasUploadBeenRequested = false
+
+function uploadToS3(url: string, file: Blob, uuid: string, weddingId: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open("PUT", url)
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const progress = Math.round((e.loaded / e.total) * 100)
+        store.dispatch(updatePhotoProgress({ weddingId, uuid, progress }))
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve()
+      } else {
+        reject(new Error(`S3 upload failed: ${xhr.status}`))
+      }
+    }
+
+    xhr.onerror = () => {
+      reject(new Error("S3 upload network error"))
+    }
+
+    xhr.send(file)
+  })
+}
+
+// Enqueue files into Dexie when user clicks "Upload to Server"
+function* enqueuePhotosSaga(action: {
+  type: string
+  payload: UploadPhotosPayload
+}): Generator<any, void, any> {
+  try {
+    const { weddingId, photos } = action.payload
+    hasUploadBeenRequested = true
+
+    for (const p of photos) {
+      // Skip if this photo's metadata was previously registered
+      if (uploadedPhotoIds.has(p.uuid)) {
+        continue
+      }
+      // Skip if it's already in Dexie queue (avoid duplicates if user clicks twice quickly)
+      const existing: PendingPhoto | undefined = yield call(() => photoDB.queue.get(p.uuid))
+      if (existing) {
+        continue
+      }
+      const pending: PendingPhoto = {
+        uuid: p.uuid,
+        weddingId,
+        file: p.file, // REAL FILE, no blob URL
+        extension: p.extension,
+        status: "pending",
+        progress: 0,
+        retries: 0,
+        createdAt: Date.now(),
+      }
+
+      yield call(() => photoDB.queue.put(pending))
+      yield put(updatePhotoStatus({ weddingId, uuid: p.uuid, status: "pending" }))
+    }
+
+    yield put(uploadPhotosEnqueued())
+  } catch (err: any) {
+    console.error("enqueuePhotosSaga error:", err)
+    yield put(uploadPhotosFailure(err.message || "Failed to enqueue photos"))
+  }
+}
+
+//  Rehydrate Redux state from Dexie on startup (for resume)
+function* rehydratePhotosSaga(): Generator<any, void, any> {
+  const all: PendingPhoto[] = yield call(() => photoDB.queue.toArray())
+  for (const item of all) {
+    yield put(
+      updatePhotoStatus({
+        weddingId: item.weddingId,
+        uuid: item.uuid,
+        status: item.status,
+      })
+    )
+    yield put(
+      updatePhotoProgress({
+        weddingId: item.weddingId,
+        uuid: item.uuid,
+        progress: item.progress,
+      })
+    )
+  }
+}
+
+//  Background worker: runs forever
+function* processUploadQueue(): Generator<any, void, any> {
+  // initial rehydrate once
+  yield call(rehydratePhotosSaga)
+
+  while (true) {
+    if (!navigator.onLine) {
+      yield delay(RETRY_INTERVAL)
+      continue
+    }
+    
+    // Get all items in queue
+    const allItems: PendingPhoto[] = yield call(() => photoDB.queue.toArray())
+    
+    // Get pending photos (only those not yet uploaded)
+    const pending: PendingPhoto[] = yield call(() =>
+      photoDB.queue.where("status").equals("pending").sortBy("createdAt")
+    )
+
+    // Check if upload was requested and all uploads are complete
+    if (hasUploadBeenRequested && pending.length === 0 && allItems.length === 0) {
+      yield put(uploadPhotosCompleted())
+      hasUploadBeenRequested = false
+    }
+
+    if (!pending.length) {
+      yield delay(RETRY_INTERVAL)
+      continue
+    }
+
+    for (let i = 0; i < pending.length; i += BATCH_SIZE) {
+      const batch = pending.slice(i, i + BATCH_SIZE)
+      yield call(uploadBatchSaga, batch)
+    }
+
+    yield delay(RETRY_INTERVAL)
+  }
+}
+
+//  Upload a batch of up to 10 photos
+function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
+  if (!batch.length) return
+
+  const weddingId = batch[0].weddingId
+
+  // Filter out any photos whose metadata were somehow already registered (defensive)
+  const effectiveBatch = batch.filter((p) => !uploadedPhotoIds.has(p.uuid))
+  if (!effectiveBatch.length) return
+
+  try {
+    // Request presigned URLs
+    const presignedRes = yield call(
+      AxiosWedding.post,
+      `photos/uploads/${weddingId}/generate-photo-url`,
+      {
+        photoIds: effectiveBatch.map((p) => p.uuid),
+        extensions: effectiveBatch.map((p) => p.extension),
+      }
+    )
+
+    const presignedUrls: Array<{ key: string; url: string }> =
+      presignedRes.data.presignedUrls || []
+
+    // Track successfully uploaded photos in this batch
+    const successfullyUploadedKeys: Array<{ uuid: string; key: string }> = []
+
+    // Upload each photo
+    for (let i = 0; i < effectiveBatch.length; i++) {
+      const item = effectiveBatch[i]
+      const s3 = presignedUrls[i]
+      if (!s3) continue
+
+      try {
+        item.status = "uploading"
+        yield call(() => photoDB.queue.put(item))
+        yield put(updatePhotoStatus({ weddingId: item.weddingId, uuid: item.uuid, status: "uploading" }))
+
+        const compressed: Blob = yield call(() => {
+          const inputFile: File =
+            item.file instanceof File
+              ? item.file
+              : new File([item.file], `${item.uuid}.${item.extension}`, {
+                  type: (item.file as Blob).type || "image/jpeg",
+                })
+          return imageCompression(inputFile, {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          })
+        })
+
+        yield call(uploadToS3, s3.url, compressed, item.uuid, item.weddingId)
+
+        item.status = "completed"
+        item.progress = 100
+        item.metadataRegistered = false  // Mark as not registered yet
+        yield call(() => photoDB.queue.put(item))  // Update in queue instead of deleting
+
+        yield put(updatePhotoProgress({ weddingId: item.weddingId, uuid: item.uuid, progress: 100 }))
+        yield put(updatePhotoStatus({ weddingId: item.weddingId, uuid: item.uuid, status: "completed" }))
+
+        // Only add to successful list if upload completed without errors
+        successfullyUploadedKeys.push({ uuid: item.uuid, key: s3.key })
+      } catch (err) {
+        console.error("Error uploading", item.uuid, err)
+        item.retries += 1
+        item.status = "failed"
+        yield put(updatePhotoStatus({ weddingId: item.weddingId, uuid: item.uuid, status: "failed" }))
+
+        if (item.retries > MAX_RETRIES) {
+          yield call(() => photoDB.queue.delete(item.uuid))
+        } else {
+          yield call(() => photoDB.queue.put(item))
+        }
+      }
+    }
+
+    // Register metadata ONLY for successfully uploaded photos in this batch
+    if (successfullyUploadedKeys.length > 0) {
+      yield call(registerMetadataForPhotosSaga, weddingId, successfullyUploadedKeys)
+    }
+  } catch (err) {
+    console.error("Batch upload error:", err)
+  }
+}
+
+// Helper saga to register metadata for a list of photos
+function* registerMetadataForPhotosSaga(
+  weddingId: string,
+  photos: Array<{ uuid: string; key: string }>
+): Generator<any, void, any> {
+  try {
+    // include the current user's id as `uploadedBy` so backend validation passes
+    const state = store.getState()
+    const uploadedBy: string = (state?.auth?.user?.id as string) || ""
+
+    const payload = photos.map((p) => ({
+      originalFilename: p.key.split("/").pop() || "",
+      storageKey: p.key,
+      uploadedBy,
+    }))
+
+    // eslint-disable-next-line no-console
+    console.log(`Payload being sent to /api/weddings/${weddingId}/photos:`, payload)
+
+    const registerRes: any = yield call(
+      AxiosWedding.post,
+      `weddings/${weddingId}/photos`,
+      payload
+    )
+
+    // Log the endpoint and response for easier debugging/verification
+    try {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Registered photos endpoint: /api/weddings/${weddingId}/photos`,
+        registerRes && registerRes.data ? registerRes.data : registerRes
+      )
+    } catch (e) {
+      // ignore logging errors
+    }
+
+    // Mark all photos as having metadata registered and remove from queue
+    for (const photo of photos) {
+      const item: PendingPhoto | undefined = yield call(() =>
+        photoDB.queue.get(photo.uuid)
+      )
+      if (item) {
+        item.metadataRegistered = true
+        yield call(() => photoDB.queue.delete(item.uuid))
+      }
+      // Record globally to prevent re-enqueue attempts from generating duplicate metadata
+      uploadedPhotoIds.add(photo.uuid)
+    }
+  } catch (err) {
+    console.error("Failed to register metadata:", err)
+  }
+}
+
+export function* photoSaga(): Generator<any, void, any> {
+  yield all([
+    takeEvery(uploadPhotosRequest.type, enqueuePhotosSaga),
+    processUploadQueue(), // runs forever
+  ])
+}
