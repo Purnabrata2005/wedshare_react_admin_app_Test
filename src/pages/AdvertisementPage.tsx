@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react";
 import {
   Camera,
   Users,
@@ -10,23 +10,38 @@ import {
   Sparkles,
   Share2,
   Shield,
-} from "lucide-react"
+  Plus,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { useTheme } from "@/components/layout/theme-provider";
+import { logoutAction } from "@/redux/slices/authSlice";
+import ROUTES from "@/routePath";
 import {
   Navbar,
   NavBody,
@@ -37,11 +52,11 @@ import {
   MobileNavToggle,
   NavbarLogo,
   NavbarButton,
-} from "@/components/ui/resizable-navbar"
+} from "@/components/ui/resizable-navbar";
 
-import { FlipWords } from "@/components/ui/shadcn-io/flip-words/index"
-// import { Footer } from "@/components/Footer"
-// import ROUTES from "@/routes/routePaths"
+import { FlipWords } from "@/components/ui/shadcn-io/flip-words/index";
+import Footer from "@/components/layout/Footer";
+import AuthenticatedLandingPage from "./AuthenticatedLandingPage";
 
 /* -----------------------------
    Simple scroll animation
@@ -50,20 +65,21 @@ function AnimatedBlock({
   children,
   delay = 0,
 }: {
-  children: React.ReactNode
-  delay?: number
+  children: React.ReactNode;
+  delay?: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && setTimeout(() => setVisible(true), delay),
+      ([entry]) =>
+        entry.isIntersecting && setTimeout(() => setVisible(true), delay),
       { threshold: 0.1 }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [delay])
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [delay]);
 
   return (
     <div
@@ -74,18 +90,30 @@ function AnimatedBlock({
     >
       {children}
     </div>
-  )
+  );
 }
 
 /* -----------------------------
    Page Data
 ------------------------------ */
 const benefits = [
-  { icon: Heart, title: "Cherish Memories", description: "Preserve every moment forever." },
-  { icon: Sparkles, title: "AI Organization", description: "Automatic photo grouping." },
+  {
+    icon: Heart,
+    title: "Cherish Memories",
+    description: "Preserve every moment forever.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI Organization",
+    description: "Automatic photo grouping.",
+  },
   { icon: Share2, title: "Easy Sharing", description: "Share without apps." },
-  { icon: Shield, title: "Secure & Private", description: "Encrypted & protected." },
-]
+  {
+    icon: Shield,
+    title: "Secure & Private",
+    description: "Encrypted & protected.",
+  },
+];
 
 const features = [
   {
@@ -116,7 +144,7 @@ const features = [
     image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=900",
     reverse: true,
   },
-]
+];
 
 const faqs = [
   {
@@ -135,69 +163,248 @@ const faqs = [
     q: "Can non-users access my wedding?",
     a: "Yes. Share a link—no account required.",
   },
-]
+];
 
 const updates = [
-  { date: "Dec 2024", title: "AI Photo Enhancement", desc: "Automatic photo improvements." },
-  { date: "Nov 2024", title: "Guest Collaboration", desc: "Live guest contributions." },
+  {
+    date: "Dec 2024",
+    title: "AI Photo Enhancement",
+    desc: "Automatic photo improvements.",
+  },
+  {
+    date: "Nov 2024",
+    title: "Guest Collaboration",
+    desc: "Live guest contributions.",
+  },
   { date: "Oct 2024", title: "Mobile App", desc: "iOS & Android launch." },
-]
+];
 
 /* -----------------------------
    Page Component
 ------------------------------ */
 export default function AdvertisementPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { setTheme } = useTheme();
+  const dispatch = useAppDispatch();
+  const { token, user } = useAppSelector((state) => state.auth);
+  const isAuthenticated = !!token && !!user;
+
+  const handleLogout = () => {
+    dispatch(logoutAction());
+    navigate(ROUTES.LOGIN);
+  };
+
+  // If user is authenticated, show the authenticated landing page
+  if (isAuthenticated) {
+    return <AuthenticatedLandingPage />;
+  }
+
+  // Otherwise, show the public advertisement page
 
   const navItems = [
     { name: "Features", link: "#features" },
     { name: "FAQ", link: "#faq" },
     { name: "Updates", link: "#updates" },
-  ]
+  ];
 
   return (
     <div className="bg-background text-foreground">
       {/* NAVBAR */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navbar>
-        <NavBody>
-          <NavbarLogo />
-          <NavItems items={navItems} />
-          <div className="hidden lg:flex gap-2">
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="dark">Sign Up</NavbarButton>
-          </div>
-        </NavBody>
-
-        <MobileNav>
-          <MobileNavHeader>
+          <NavBody>
             <NavbarLogo />
-            <MobileNavToggle
-              isOpen={mobileMenuOpen}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            />
-          </MobileNavHeader>
-          <MobileNavMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
-            {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.link}
-                className="w-full text-neutral-600 dark:text-neutral-300 text-sm"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </a>
-            ))}
-            <div className="flex flex-col gap-2 w-full pt-4">
-              <NavbarButton variant="secondary" className="w-full">
-                Login
-              </NavbarButton>
-              <NavbarButton variant="dark" className="w-full">
-                Sign Up
-              </NavbarButton>
+            <NavItems items={navItems} />
+            <div className="hidden lg:flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center outline-none">
+                    <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+                      <AvatarImage
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`}
+                      />
+                      <AvatarFallback className="bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white">
+                        {user?.fullname?.[0]?.toUpperCase() || 'G'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
+                  {isAuthenticated && user ? (
+                    <>
+                      <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
+                        <p className="font-semibold text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
+                          {user.fullname} {user.lastName}
+                        </p>
+                        <p className="text-xs text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
+                          {user.email}
+                        </p>
+                      </div>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => navigate(ROUTES.DASHBOARD)}>
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => navigate(ROUTES.PROFILE)}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                        🌙 Light
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                        ☀️ Dark
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                        🖥️ System
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={handleLogout}>
+                        Logout
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem 
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                        onClick={() => navigate(ROUTES.LOGIN)}
+                      >
+                        Login
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                        onClick={() => navigate(ROUTES.SIGNUP)}
+                      >
+                        Sign Up
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                        Light
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                        Dark
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                        System
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </MobileNavMenu>
-        </MobileNav>
+          </NavBody>
+
+          <MobileNav>
+            <MobileNavHeader>
+              <NavbarLogo />
+              <MobileNavToggle
+                isOpen={mobileMenuOpen}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              />
+            </MobileNavHeader>
+            <MobileNavMenu
+              isOpen={mobileMenuOpen}
+              onClose={() => setMobileMenuOpen(false)}
+            >
+              {navItems.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.link}
+                  className="w-full text-neutral-600 dark:text-neutral-300 text-sm"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
+              <div className="flex justify-center w-full pt-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center outline-none">
+                      <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`} />
+                        <AvatarFallback className="bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white">
+                          {user?.fullname?.[0]?.toUpperCase() || 'G'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
+                    {isAuthenticated && user ? (
+                      <>
+                        <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
+                          <p className="font-semibold text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
+                            {user.fullname} {user.lastName}
+                          </p>
+                          <p className="text-xs text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
+                            {user.email}
+                          </p>
+                        </div>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => {
+                          navigate(ROUTES.DASHBOARD);
+                          setMobileMenuOpen(false);
+                        }}>
+                          Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => {
+                          navigate(ROUTES.PROFILE);
+                          setMobileMenuOpen(false);
+                        }}>
+                          Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                          🌙 Light
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                          ☀️ Dark
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                          🖥️ System
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(false);
+                        }}>
+                          Logout
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem 
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                          onClick={() => {
+                            navigate(ROUTES.LOGIN);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          Login
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                          onClick={() => {
+                            navigate(ROUTES.SIGNUP);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          Sign Up
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                          Light
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                          Dark
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                          System
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </MobileNavMenu>
+          </MobileNav>
         </Navbar>
       </div>
       <section className="min-h-screen flex items-center justify-center px-6 pt-32">
@@ -218,14 +425,22 @@ export default function AdvertisementPage() {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              Plan, organize, and celebrate your wedding with everyone who matters.
+              Plan, organize, and celebrate your wedding with everyone who
+              matters.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" onClick={() => console.log("Navigate to signup")}>
+              <Button
+                size="lg"
+                onClick={() => console.log("Navigate to signup")}
+              >
                 Start Planning
               </Button>
-              <Button size="lg" variant="outline" onClick={() => console.log("Navigate to login")}>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => console.log("Navigate to login")}
+              >
                 Explore Features
               </Button>
             </div>
@@ -244,7 +459,7 @@ export default function AdvertisementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((b, i) => {
-              const Icon = b.icon
+              const Icon = b.icon;
               return (
                 <AnimatedBlock key={b.title} delay={i * 100}>
                   <Card className="text-center">
@@ -255,7 +470,7 @@ export default function AdvertisementPage() {
                     </CardHeader>
                   </Card>
                 </AnimatedBlock>
-              )
+              );
             })}
           </div>
         </div>
@@ -265,7 +480,7 @@ export default function AdvertisementPage() {
       <section id="features" className="py-32 px-6 bg-muted/40">
         <div className="max-w-6xl mx-auto space-y-32">
           {features.map((f, i) => {
-            const Icon = f.icon
+            const Icon = f.icon;
             return (
               <AnimatedBlock key={f.title} delay={i * 150}>
                 <div
@@ -276,8 +491,12 @@ export default function AdvertisementPage() {
                   <div className="flex-1 space-y-6">
                     <Icon className="h-10 w-10 text-primary" />
                     <h3 className="text-4xl font-bold">{f.title}</h3>
-                    <p className="text-muted-foreground text-lg">{f.description}</p>
-                    <Button onClick={() => console.log("Learn more clicked")}>Learn More</Button>
+                    <p className="text-muted-foreground text-lg">
+                      {f.description}
+                    </p>
+                    <Button onClick={() => console.log("Learn more clicked")}>
+                      Learn More
+                    </Button>
                   </div>
 
                   <div className="flex-1">
@@ -289,7 +508,7 @@ export default function AdvertisementPage() {
                   </div>
                 </div>
               </AnimatedBlock>
-            )
+            );
           })}
         </div>
       </section>
@@ -346,7 +565,19 @@ export default function AdvertisementPage() {
         </div>
       </section>
 
-      {/* <Footer /> */}
+      <Footer />
+
+      <FloatingActionButton 
+        position="bottom-right" 
+        size="md"
+        onClick={() => console.log("Create wedding clicked")}
+        title="Create a new wedding"
+        className="!rounded-full !w-auto !h-auto px-6 py-3"
+      >
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs font-semibold">Get the App</span>
+        </div>
+      </FloatingActionButton>
     </div>
-  )
+  );
 }
