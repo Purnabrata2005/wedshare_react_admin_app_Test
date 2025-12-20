@@ -15,7 +15,7 @@ function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Gene
   try {
     yield put(setInviteLoading());
 
-    const { emails, data, onSuccess } = action.payload;
+    const { emails, data } = action.payload;
 
     // Make API call to send invitations
     const response = yield call(() =>
@@ -28,11 +28,6 @@ function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Gene
     // Check if response is successful
     if (response.status === 200 || response.status === 201) {
       yield put(sendInvitationSuccess());
-
-      // Call success callback if provided
-      if (onSuccess) {
-        onSuccess();
-      }
     } else {
       throw new Error("Failed to send invitations");
     }
@@ -44,11 +39,6 @@ function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Gene
       "Failed to send invitations";
 
     yield put(sendInvitationFailure(message));
-
-    // Call error callback if provided
-    if (action.payload.onError) {
-      action.payload.onError(message);
-    }
   }
 }
 

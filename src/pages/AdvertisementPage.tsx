@@ -261,19 +261,19 @@ export default function AdvertisementPage() {
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
                         onClick={() => setTheme("light")}
                       >
-                        🌙 Light
+                         Light
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
                         onClick={() => setTheme("dark")}
                       >
-                        ☀️ Dark
+                         Dark
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
                         onClick={() => setTheme("system")}
                       >
-                        🖥️ System
+                         System
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -471,7 +471,7 @@ export default function AdvertisementPage() {
           </MobileNav>
         </Navbar>
       </div>
-      <section className="min-h-screen flex items-center justify-center px-6 pt-32">
+      <section className="min-h-min flex items-center justify-center px-6 pt-24">
         <AnimatedBlock>
           <div className="max-w-5xl text-center space-y-10">
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
@@ -481,10 +481,10 @@ export default function AdvertisementPage() {
                 words={[
                   "Perfectly Captured",
                   "Forever Cherished",
-                  "Beautifully Shared",
-                  "Eternally Remembered",
+                  "Beautifully Shared"
+                  ,
                 ]}
-                className="text-primary"
+                className="text-3xl sm:text-3xl md:text-6xl lg:text-7xl font-bold text-primary"
               />
             </h1>
 
@@ -497,7 +497,7 @@ export default function AdvertisementPage() {
               <Button
                 size="custom"
                 className="text-lg font-bold"
-                onClick={() => console.log("Navigate to signup")}
+                onClick={() => navigate(ROUTES.SIGNUP)}
               >
                 Start Planning
               </Button>
@@ -505,7 +505,7 @@ export default function AdvertisementPage() {
                 size="custom"
                 className="text-lg font-bold"
                 variant="outline"
-                onClick={() => console.log("Navigate to login")}
+                onClick={() => navigate(ROUTES.LOGIN)}
               >
                 Explore Features
               </Button>
@@ -563,7 +563,7 @@ export default function AdvertisementPage() {
                     <Button
                       size="xl"
                       className="text-lg font-bold"
-                      onClick={() => console.log("Learn more clicked")}
+                      onClick={() => navigate(ROUTES.SIGNUP)}
                     >
                       Learn More
                     </Button>
@@ -629,7 +629,7 @@ export default function AdvertisementPage() {
           <p className="text-muted-foreground text-xl">
             Join thousands of couples creating their perfect story.
           </p>
-          <Button size="lg" onClick={() => console.log("Get started clicked")}>
+          <Button size="lg" onClick={() => navigate(ROUTES.SIGNUP)}>
             Get Started for Free
           </Button>
         </div>
@@ -640,7 +640,7 @@ export default function AdvertisementPage() {
       <FloatingActionButton
         position="bottom-right"
         size="md"
-        onClick={() => console.log("Create wedding clicked")}
+        onClick={() => navigate(ROUTES.SIGNUP)}
         className="!rounded-full !w-auto !h-auto px-6 py-3"
       >
         <div className="flex flex-col items-center gap-1">

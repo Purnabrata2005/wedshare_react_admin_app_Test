@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Mail, Trash2, Users, Send, Plus } from "lucide-react"
 
@@ -13,6 +13,7 @@ import {
   addGuests,
   removeGuest,
   sendInvitationAction,
+  resetInviteState,
   EmailType,
   type EmailTypeValue,
   type GuestItem,
@@ -30,8 +31,23 @@ export default function InviteGuestsPage() {
   const dispatch = useAppDispatch()
 
   // Get state from Redux
-  const { guests, loading: isSending } = useAppSelector((state) => state.invite)
+  const { guests, loading: isSending, success, error } = useAppSelector((state) => state.invite)
   const { weddings, selectedWedding } = useAppSelector((state) => state.weddings)
+
+  // Handle success and error states
+  useEffect(() => {
+    if (success) {
+      alert("Invitations sent successfully!")
+      dispatch(resetInviteState())
+    }
+  }, [success, dispatch])
+
+  useEffect(() => {
+    if (error) {
+      alert(`Failed to send invitations: ${error}`)
+      dispatch(resetInviteState())
+    }
+  }, [error, dispatch])
 
   // Get weddingId from location state
   const state = location.state as LocationState | null
@@ -136,12 +152,6 @@ export default function InviteGuestsPage() {
       sendInvitationAction({
         emails,
         data: weddingData,
-        onSuccess: () => {
-          alert("Invitations sent successfully!")
-        },
-        onError: (msg) => {
-          alert(`Failed to send invitations: ${msg}`)
-        },
       })
     )
   }

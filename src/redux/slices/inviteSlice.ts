@@ -37,8 +37,6 @@ export interface InviteWeddingData {
 export interface SendInvitationPayload {
   emails: EmailObject[];
   data: InviteWeddingData;
-  onSuccess?: () => void;
-  onError?: (msg: string) => void;
 }
 
 // Guest item for UI
