@@ -8,6 +8,7 @@ export interface PendingPhoto {
   weddingId: string
   file: Blob            // File is also a Blob, so this works
   extension: string
+  originalFilename: string  // Original filename for metadata registration
   status: UploadStatus
   progress: number
   retries: number
@@ -21,9 +22,21 @@ class PhotoDB extends Dexie {
   constructor() {
     super("PhotoUploadDB")
 
-    this.version(1).stores({
+    // Version 2: Added originalFilename field
+    this.version(2).stores({
       // primary key: uuid
       // indexes: weddingId, status, createdAt
+      queue: "uuid,weddingId,status,createdAt",
+    }).upgrade(tx => {
+      // Migrate existing records to include originalFilename
+      return tx.table("queue").toCollection().modify(photo => {
+        if (!photo.originalFilename) {
+          photo.originalFilename = `${photo.uuid}.${photo.extension}`
+        }
+      })
+    })
+
+    this.version(1).stores({
       queue: "uuid,weddingId,status,createdAt",
     })
 

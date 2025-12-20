@@ -5,7 +5,7 @@ import { Calendar, Plus, Moon, Sun } from "lucide-react"
 import { Navbar } from "@/components/ui/navbar"
 import { WeddingCard } from "@/components/WeddingCard"
 import { EmptyWeddingsState } from "@/components/EmptyWeddingsState"
-import { FloatingActionButton } from "@/components/ui/floating-action-button"
+import { FloatingActionButton } from "@/components/ui/floatingActionButton"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,

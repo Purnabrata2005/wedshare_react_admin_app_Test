@@ -8,23 +8,37 @@ export interface UploadPhotosPayload {
     uuid: string
     file: File
     extension: string
+    originalFilename: string
   }[]
+}
+
+// Response from API after successful upload
+export interface UploadedPhotoResponse {
+  originalFilename: string
+  storageKey: string
+  uploadedBy: string
+  uploadSource: "ADMIN" | "USER"
 }
 
 interface PhotoItemState {
   progress: number
   status: UploadStatus
+  originalFilename?: string
+  storageKey?: string
 }
 
 interface PhotoState {
   // Organized by weddingId, then by uuid
   byWeddingId: Record<string, Record<string, PhotoItemState>>
+  // Uploaded photos response from server
+  uploadedPhotos: Record<string, UploadedPhotoResponse[]>
   uploading: boolean
   error: string | null
 }
 
 const initialState: PhotoState = {
   byWeddingId: {},
+  uploadedPhotos: {},
   uploading: false,
   error: null,
 }
@@ -89,6 +103,7 @@ const photoSlice = createSlice({
 
     clearPhotos: (state) => {
       state.byWeddingId = {}
+      state.uploadedPhotos = {}
       state.uploading = false
       state.error = null
     },
@@ -96,6 +111,24 @@ const photoSlice = createSlice({
     cancelUpload: (state) => {
       state.uploading = false
       state.error = null
+    },
+
+    // Add uploaded photos from server response
+    addUploadedPhotos: (
+      state,
+      action: PayloadAction<{ weddingId: string; photos: UploadedPhotoResponse[] }>
+    ) => {
+      const { weddingId, photos } = action.payload
+      if (!state.uploadedPhotos[weddingId]) {
+        state.uploadedPhotos[weddingId] = []
+      }
+      state.uploadedPhotos[weddingId].push(...photos)
+    },
+
+    // Clear uploaded photos for a wedding
+    clearUploadedPhotos: (state, action: PayloadAction<string>) => {
+      const weddingId = action.payload
+      delete state.uploadedPhotos[weddingId]
     },
   },
 })
@@ -110,6 +143,8 @@ export const {
   clearPhotosForWedding,
   clearPhotos,
   cancelUpload,
+  addUploadedPhotos,
+  clearUploadedPhotos,
 } = photoSlice.actions
 
 export default photoSlice.reducer

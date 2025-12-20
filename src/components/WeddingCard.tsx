@@ -1,5 +1,6 @@
 import { Calendar, MapPin, MoreVertical, Trash2 } from "lucide-react"
 import { useDispatch } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import {
   Card,
   CardHeader,
@@ -18,16 +19,21 @@ import type { Wedding } from "@/redux/slices/weddingSlice"
 
 interface WeddingCardProps {
   wedding: Wedding
-  onClick: (wedding: Wedding) => void
+  onClick?: (wedding: Wedding) => void
   onEdit?: (wedding: Wedding) => void
 }
 
 export function WeddingCard({ wedding, onClick, onEdit }: WeddingCardProps) {
   const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
 
   const handleCardClick = () => {
     dispatch(selectWedding(wedding))
-    onClick(wedding)
+    if (onClick) {
+      onClick(wedding)
+    }
+    // Navigate to wedding details page
+    navigate('/wedding-details')
   }
 
   const handleEdit = (e: React.MouseEvent) => {

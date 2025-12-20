@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { FloatingActionButton } from "@/components/ui/floatingActionButton";
 import {
   Card,
   CardContent,

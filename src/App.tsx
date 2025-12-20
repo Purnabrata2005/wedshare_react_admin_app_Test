@@ -4,7 +4,9 @@ import LoginPage from "@/pages/LoginPage"
 import RegisterPage from "@/pages/RegisterPage"
 import ProfilePage from "@/pages/ProfilePage"
 import DashboardPage from "@/pages/DashboardPage"
-import NotFound from "@/components/ui/not-found-error"
+import WeddingDetailsPage from "@/pages/WeddingDetailsPage"
+import PhotoUploadPage from "@/pages/PhotoUploadPage"
+import NotFound from "@/components/ui/notFoundError"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import AuthLayout from "@/components/layout/AuthLayout"
 import ProtectedRoute from "@/components/ProtectedRoute"
@@ -49,6 +51,12 @@ export default function App() {
 
           {/* Add Wedding Form Route */}
           <Route path={ROUTES.ADD_WEDDING} element={<ProtectedRoute><AddWeddingPage /></ProtectedRoute>} />
+
+          {/* Wedding Details Route */}
+          <Route path={ROUTES.WEDDING_DETAILS} element={<ProtectedRoute><WeddingDetailsPage /></ProtectedRoute>} />
+
+          {/* Photo Upload Route */}
+          <Route path={ROUTES.PHOTO_UPLOAD} element={<ProtectedRoute><PhotoUploadPage /></ProtectedRoute>} />
 
           {/* 404 Not Found Route */}
           <Route path="*" element={<NotFound />} />

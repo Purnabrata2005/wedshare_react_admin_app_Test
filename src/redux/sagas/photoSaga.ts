@@ -10,8 +10,9 @@ import {
   uploadPhotosFailure,
   updatePhotoProgress,
   updatePhotoStatus,
+  addUploadedPhotos,
 } from "@/redux/slices/photoSlice"
-import type { UploadPhotosPayload } from "@/redux/slices/photoSlice"
+import type { UploadPhotosPayload, UploadedPhotoResponse } from "@/redux/slices/photoSlice"
 import { store } from "@/redux/store" // ensure your store exports this
 
 const RETRY_INTERVAL = 5000
@@ -74,6 +75,7 @@ function* enqueuePhotosSaga(action: {
         weddingId,
         file: p.file, // REAL FILE, no blob URL
         extension: p.extension,
+        originalFilename: p.originalFilename,
         status: "pending",
         progress: 0,
         retries: 0,
@@ -176,7 +178,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
       presignedRes.data.presignedUrls || []
 
     // Track successfully uploaded photos in this batch
-    const successfullyUploadedKeys: Array<{ uuid: string; key: string }> = []
+    const successfullyUploadedKeys: Array<{ uuid: string; key: string; originalFilename: string }> = []
 
     // Upload each photo
     for (let i = 0; i < effectiveBatch.length; i++) {
@@ -207,14 +209,13 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
 
         item.status = "completed"
         item.progress = 100
-        item.metadataRegistered = false  // Mark as not registered yet
-        yield call(() => photoDB.queue.put(item))  // Update in queue instead of deleting
+        yield call(() => photoDB.queue.put(item))  // Update status to completed
 
         yield put(updatePhotoProgress({ weddingId: item.weddingId, uuid: item.uuid, progress: 100 }))
         yield put(updatePhotoStatus({ weddingId: item.weddingId, uuid: item.uuid, status: "completed" }))
 
         // Only add to successful list if upload completed without errors
-        successfullyUploadedKeys.push({ uuid: item.uuid, key: s3.key })
+        successfullyUploadedKeys.push({ uuid: item.uuid, key: s3.key, originalFilename: item.originalFilename || item.uuid })
       } catch (err) {
         console.error("Error uploading", item.uuid, err)
         item.retries += 1
@@ -241,7 +242,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
 // Helper saga to register metadata for a list of photos
 function* registerMetadataForPhotosSaga(
   weddingId: string,
-  photos: Array<{ uuid: string; key: string }>
+  photos: Array<{ uuid: string; key: string; originalFilename: string }>
 ): Generator<any, void, any> {
   try {
     // include the current user's id as `uploadedBy` so backend validation passes
@@ -249,9 +250,10 @@ function* registerMetadataForPhotosSaga(
     const uploadedBy: string = (state?.auth?.user?.id as string) || ""
 
     const payload = photos.map((p) => ({
-      originalFilename: p.key.split("/").pop() || "",
+      originalFilename: p.originalFilename,
       storageKey: p.key,
       uploadedBy,
+      uploadSource: "ADMIN" as const,
     }))
 
     // eslint-disable-next-line no-console
@@ -274,20 +276,65 @@ function* registerMetadataForPhotosSaga(
       // ignore logging errors
     }
 
+    // Store the uploaded photos response in Redux
+    const uploadedPhotosResponse: UploadedPhotoResponse[] = payload.map((p) => ({
+      originalFilename: p.originalFilename,
+      storageKey: p.storageKey,
+      uploadedBy: p.uploadedBy,
+      uploadSource: p.uploadSource,
+    }))
+    yield put(addUploadedPhotos({ weddingId, photos: uploadedPhotosResponse }))
+
     // Mark all photos as having metadata registered and remove from queue
+    console.log("Photos to delete from queue:", photos.map(p => p.uuid))
+    
     for (const photo of photos) {
-      const item: PendingPhoto | undefined = yield call(() =>
-        photoDB.queue.get(photo.uuid)
-      )
-      if (item) {
-        item.metadataRegistered = true
-        yield call(() => photoDB.queue.delete(item.uuid))
+      try {
+        yield call(() => photoDB.queue.delete(photo.uuid))
+        console.log("Deleted photo from queue:", photo.uuid)
+      } catch (deleteErr) {
+        console.error("Failed to delete photo from queue:", photo.uuid, deleteErr)
       }
       // Record globally to prevent re-enqueue attempts from generating duplicate metadata
       uploadedPhotoIds.add(photo.uuid)
     }
+
+    // Also delete any completed items that might be stuck in the queue
+    const completedItems: PendingPhoto[] = yield call(() =>
+      photoDB.queue.where("status").equals("completed").toArray()
+    )
+    console.log("Completed items still in queue:", completedItems.length)
+    for (const item of completedItems) {
+      yield call(() => photoDB.queue.delete(item.uuid))
+      uploadedPhotoIds.add(item.uuid)
+    }
+
+    // Check if all uploads are complete after removing from queue
+    const remainingItems: PendingPhoto[] = yield call(() => photoDB.queue.toArray())
+    console.log("Remaining items in queue after cleanup:", remainingItems.length, remainingItems.map(i => ({ uuid: i.uuid, status: i.status })))
+    
+    // Close the modal - queue should be empty now
+    if (remainingItems.length === 0) {
+      console.log("All uploads complete, dispatching uploadPhotosCompleted")
+      yield put(uploadPhotosCompleted())
+      hasUploadBeenRequested = false
+    } else {
+      // Force complete if all remaining are completed status
+      const allCompleted = remainingItems.every(item => item.status === "completed")
+      if (allCompleted) {
+        // Delete all completed and close
+        for (const item of remainingItems) {
+          yield call(() => photoDB.queue.delete(item.uuid))
+        }
+        yield put(uploadPhotosCompleted())
+        hasUploadBeenRequested = false
+      }
+    }
   } catch (err) {
     console.error("Failed to register metadata:", err)
+    // Even on error, close the modal
+    yield put(uploadPhotosCompleted())
+    hasUploadBeenRequested = false
   }
 }
 
