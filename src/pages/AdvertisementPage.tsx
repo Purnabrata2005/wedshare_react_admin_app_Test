@@ -10,7 +10,6 @@ import {
   Sparkles,
   Share2,
   Shield,
-  Plus,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -51,7 +50,6 @@ import {
   MobileNavMenu,
   MobileNavToggle,
   NavbarLogo,
-  NavbarButton,
 } from "@/components/ui/resizable-navbar";
 
 import { FlipWords } from "@/components/ui/shadcn-io/flip-words/index";

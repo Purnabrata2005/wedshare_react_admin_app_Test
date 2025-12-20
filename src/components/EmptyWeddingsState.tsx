@@ -1,13 +1,12 @@
-import React from "react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Heart, Calendar } from "lucide-react";
 
 interface EmptyWeddingsStateProps {
   onAddWedding: () => void;
 }
 
-export function EmptyWeddingsState({ onAddWedding }: EmptyWeddingsStateProps) {
+export function EmptyWeddingsState({ }: EmptyWeddingsStateProps) {
   return (
     <div className="flex items-center justify-center min-h-[600px] px-4 py-12">
       <Card className="w-full max-w-md border-2 border-dashed">
