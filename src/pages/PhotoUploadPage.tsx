@@ -1,7 +1,7 @@
 import { useState, type DragEvent, useCallback } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
-import { Upload, ArrowLeft, ImageIcon } from "lucide-react"
+import { Upload,  ImageIcon } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 
 import { Button } from "@/components/ui/button"
@@ -29,13 +29,23 @@ interface PhotoProgressInfo {
   status: UploadStatus
 }
 
+interface LocationState {
+  weddingId?: string
+}
+
 export default function PhotoUploadPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const [searchParams] = useSearchParams()
+  const location = useLocation()
 
-  // Get weddingId from URL params or use a default
-  const weddingId = searchParams.get("weddingId") || "default"
+  // Get weddingId from location state
+  const state = location.state as LocationState | null
+  const weddingId = state?.weddingId || ""
+
+  // Redirect if no weddingId provided
+  if (!weddingId) {
+    navigate("/dashboard", { replace: true })
+  }
 
   const [photos, setPhotos] = useState<LocalPhoto[]>([])
   const [isDragging, setIsDragging] = useState(false)

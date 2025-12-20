@@ -7,6 +7,7 @@ export const ROUTES = {
   ADD_WEDDING: "/add-wedding",
   WEDDING_DETAILS: "/wedding-details",
   PHOTO_UPLOAD: "/photo-upload",
+  INVITE_GUESTS: "/invite-guests",
 }
 
 export type RouteKey = keyof typeof ROUTES

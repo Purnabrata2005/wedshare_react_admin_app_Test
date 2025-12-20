@@ -3,20 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
-  Clock,
-  MapPin,
   Edit,
   Share2,
-  Image,
-  FileText,
   Users,
   Camera,
-  Mail,
-  Music,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { WeddingHeader } from "@/components/ui/wedding-header";
 import { EventScheduleCard } from "@/components/ui/eventScheduleCard";
 import { SectionTitle } from "@/components/ui/sectionTitle";
@@ -225,13 +218,13 @@ export default function WeddingDetailsPage() {
               icon={<Users className="w-6 h-6" />}
               title="Invite Guests"
               description="Send invitations to your guests"
-              onClick={() => console.log("Invite Guests clicked")}
+              onClick={() => navigate("/invite-guests", { state: { weddingId: wedding.weddingId } })}
             />
             <ServiceCard
               icon={<Camera className="w-6 h-6" />}
               title="Upload Photos"
               description="Share your wedding moments"
-              onClick={() => navigate(`/photo-upload?weddingId=${wedding.weddingId}`)}
+              onClick={() => navigate("/photo-upload", { state: { weddingId: wedding.weddingId } })}
             />
           </div>
         </div>

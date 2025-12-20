@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { Calendar, Plus, Moon, Sun } from "lucide-react"
 import { Navbar } from "@/components/ui/navbar"
 import { WeddingCard } from "@/components/WeddingCard"
+import {  WeddingCardsSkeletonGrid } from "@/components/ui/wedding-card-skeleton"
 import { EmptyWeddingsState } from "@/components/EmptyWeddingsState"
 import { FloatingActionButton } from "@/components/ui/floatingActionButton"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -113,13 +114,12 @@ export default function DashboardPage() {
           <AvatarDropdown />
         </Navbar>
         <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
-          <div className="space-y-4 w-full max-w-2xl">
-            {[...Array(3)].map((_, i) => (
-              <div 
-                key={i} 
-                className="h-32 sm:h-40 bg-wedshare-light-surface dark:bg-wedshare-dark-surface rounded-2xl animate-pulse opacity-50"
-              />
-            ))}
+          <div className="space-y-6">
+            <div>
+              <div className="h-8 bg-muted/20 rounded-lg w-48 animate-pulse" />
+              <div className="h-5 bg-muted/20 rounded w-64 mt-2 animate-pulse" />
+            </div>
+            <WeddingCardsSkeletonGrid />
           </div>
         </main>
         <Outlet />

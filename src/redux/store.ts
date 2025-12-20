@@ -2,7 +2,8 @@ import { configureStore } from "@reduxjs/toolkit"
 import createSagaMiddleware from "redux-saga"
 import weddingReducer from "./slices/weddingSlice"
 import authReducer from "./slices/authSlice"
-import  photoReducer from "./slices/photoSlice"
+import photoReducer from "./slices/photoSlice"
+import inviteReducer from "./slices/inviteSlice"
 import rootSaga from "./sagas/rootSaga"
 
 const sagaMiddleware = createSagaMiddleware()
@@ -12,6 +13,7 @@ export const store = configureStore({
     weddings: weddingReducer,
     auth: authReducer,
     photos: photoReducer,
+    invite: inviteReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware),
 })

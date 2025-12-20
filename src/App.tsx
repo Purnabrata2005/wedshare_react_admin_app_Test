@@ -6,6 +6,7 @@ import ProfilePage from "@/pages/ProfilePage"
 import DashboardPage from "@/pages/DashboardPage"
 import WeddingDetailsPage from "@/pages/WeddingDetailsPage"
 import PhotoUploadPage from "@/pages/PhotoUploadPage"
+import InviteGuestsPage from "@/pages/InviteGuestsPage"
 import NotFound from "@/components/ui/notFoundError"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import AuthLayout from "@/components/layout/AuthLayout"
@@ -57,6 +58,9 @@ export default function App() {
 
           {/* Photo Upload Route */}
           <Route path={ROUTES.PHOTO_UPLOAD} element={<ProtectedRoute><PhotoUploadPage /></ProtectedRoute>} />
+
+          {/* Invite Guests Route */}
+          <Route path={ROUTES.INVITE_GUESTS} element={<ProtectedRoute><InviteGuestsPage /></ProtectedRoute>} />
 
           {/* 404 Not Found Route */}
           <Route path="*" element={<NotFound />} />
