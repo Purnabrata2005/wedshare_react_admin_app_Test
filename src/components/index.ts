@@ -9,7 +9,7 @@ export * from "./ui/dropdown-menu";
 export * from "./ui/resizable-navbar";
 
 // Export auth components
-export { default as GoogleSignInButton } from "./GoogleSignInButton";
+export { default as GoogleSignInButton } from "./layout/GoogleSignInButton";
 export { default as LoginForm } from "./layout/LoginForm";
 export { default as SignUpForm } from "./layout/SignUpForm";
 export { PasswordInput } from "./layout/PasswordInput";
@@ -21,3 +21,4 @@ export { default as Footer } from "./layout/Footer";
 // Export other components
 export { ModeToggle } from "./layout/mode-toggle";
 export { ThemeProvider } from "./layout/theme-provider";
+export { EmptyWeddingsState } from "./EmptyWeddingsState";

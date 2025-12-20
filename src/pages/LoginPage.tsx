@@ -1,4 +1,4 @@
-import GoogleSignInButton  from "@/components/GoogleSignInButton";
+import GoogleSignInButton  from "@/components/layout/GoogleSignInButton";
 import LoginForm  from "@/components/layout/LoginForm";
 import { Link } from "react-router-dom";
 import ROUTES from "@/routePath";

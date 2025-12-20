@@ -47,6 +47,7 @@ function* loginSaga(action: PayloadAction<LoginPayload>): any {
       phoneNumber: api.phoneNumber,
       email: api.email,
       roles: api.roles,
+      profile: null,
     };
 
     // Save token & user locally
@@ -106,6 +107,7 @@ function* registerSaga(action: PayloadAction<RegisterPayload>): any {
         phoneNumber: action.payload.phoneNumber,
         email: action.payload.email,
         roles: apiData?.roles || [action.payload.role],
+        profile: null,
       };
 
       // Save token & user locally
@@ -141,6 +143,7 @@ function* registerSaga(action: PayloadAction<RegisterPayload>): any {
           phoneNumber: loginData.phoneNumber || action.payload.phoneNumber,
           email: loginData.email || action.payload.email,
           roles: loginData.roles,
+          profile: null,
         };
 
         // Save token & user locally

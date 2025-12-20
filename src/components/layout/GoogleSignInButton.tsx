@@ -10,7 +10,7 @@ export default function GoogleSignInButton() {
     <div className="w-full">
       <Button
         variant="outline"
-        className="w-full bg-white dark:bg-wedshare-dark-surface dark:border-slate-700 border-gray-300 text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
+        className="w-full bg-white dark:bg-slate-800 dark:border-slate-600 border-gray-300 text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
         onClick={handleGoogleSignIn}
       >
         <span className="flex w-full items-center justify-center gap-2 sm:gap-3">

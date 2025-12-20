@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { Heart, Camera, Users, Plus } from "lucide-react";
 import { useTheme } from "@/components/layout/theme-provider";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -173,13 +174,13 @@ export default function AuthenticatedLandingPage() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
-                    🌙 Light
+                     Light
                   </DropdownMenuItem>
                   <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
-                    ☀️ Dark
+                     Dark
                   </DropdownMenuItem>
                   <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
-                    🖥️ System
+                    System
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={handleLogout}>
@@ -247,13 +248,13 @@ export default function AuthenticatedLandingPage() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
-                      🌙 Light
+                     Light
                     </DropdownMenuItem>
                     <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
-                      ☀️ Dark
+                     Dark
                     </DropdownMenuItem>
                     <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
-                      🖥️ System
+                     System
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={() => {
@@ -290,25 +291,28 @@ export default function AuthenticatedLandingPage() {
 
           <AnimatedText delay={400}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <button
+              <Button
                 onClick={() => navigate(ROUTES.DASHBOARD)}
-                className="px-10 py-4 bg-rose-600 dark:bg-rose-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg"
+                size="custom"
+                className="text-lg font-bold"
               >
                 Go to Dashboard
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => navigate(ROUTES.PROFILE)}
-                className="px-10 py-4 border-2 border-wedshare-light-primary dark:border-wedshare-dark-primary text-wedshare-light-primary dark:text-wedshare-dark-primary font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 text-lg"
+                variant="outline"
+                size="custom"
+                className="text-lg font-bold"
               >
                 View Profile
-              </button>
+              </Button>
             </div>
           </AnimatedText>
         </div>
       </section>
 
       {/* Quick Actions Section */}
-      <section id="features" className="py-32 px-4 bg-slate-50 dark:bg-slate-900">
+      <section id="features" className="py-32 px-4 bg-gray-100 dark:bg-slate-800">
         <div className="max-w-6xl mx-auto">
           <AnimatedText delay={0}>
             <div className="text-center mb-24">
@@ -381,12 +385,13 @@ export default function AuthenticatedLandingPage() {
             <p className="text-xl text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary mb-12">
               Explore your dashboard and start planning your perfect wedding
             </p>
-            <button
+            <Button
               onClick={() => navigate(ROUTES.DASHBOARD)}
-              className="px-10 py-4 text-lg bg-rose-600 dark:bg-rose-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              size="lg"
+              className="text-lg font-bold"
             >
               Open Dashboard
-            </button>
+            </Button>
           </div>
         </AnimatedText>
       </section>

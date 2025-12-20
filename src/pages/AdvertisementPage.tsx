@@ -222,15 +222,20 @@ export default function AdvertisementPage() {
                   <button className="flex items-center outline-none">
                     <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
                       <AvatarImage
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`}
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${
+                          user?.email || "guest"
+                        }`}
                       />
                       <AvatarFallback className="bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white">
-                        {user?.fullname?.[0]?.toUpperCase() || 'G'}
+                        {user?.fullname?.[0]?.toUpperCase() || "G"}
                       </AvatarFallback>
                     </Avatar>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700"
+                >
                   {isAuthenticated && user ? (
                     <>
                       <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
@@ -241,49 +246,76 @@ export default function AdvertisementPage() {
                           {user.email}
                         </p>
                       </div>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => navigate(ROUTES.DASHBOARD)}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                        onClick={() => navigate(ROUTES.DASHBOARD)}
+                      >
                         Dashboard
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => navigate(ROUTES.PROFILE)}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                        onClick={() => navigate(ROUTES.PROFILE)}
+                      >
                         Profile
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("light")}
+                      >
                         🌙 Light
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("dark")}
+                      >
                         ☀️ Dark
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("system")}
+                      >
                         🖥️ System
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={handleLogout}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400"
+                        onClick={handleLogout}
+                      >
                         Logout
                       </DropdownMenuItem>
                     </>
                   ) : (
                     <>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
                         onClick={() => navigate(ROUTES.LOGIN)}
                       >
                         Login
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
                         onClick={() => navigate(ROUTES.SIGNUP)}
                       >
                         Sign Up
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("light")}
+                      >
                         Light
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("dark")}
+                      >
                         Dark
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                      <DropdownMenuItem
+                        className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                        onClick={() => setTheme("system")}
+                      >
                         System
                       </DropdownMenuItem>
                     </>
@@ -320,14 +352,21 @@ export default function AdvertisementPage() {
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center outline-none">
                       <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`} />
+                        <AvatarImage
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${
+                            user?.email || "guest"
+                          }`}
+                        />
                         <AvatarFallback className="bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white">
-                          {user?.fullname?.[0]?.toUpperCase() || 'G'}
+                          {user?.fullname?.[0]?.toUpperCase() || "G"}
                         </AvatarFallback>
                       </Avatar>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
+                  <DropdownMenuContent
+                    align="center"
+                    className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700"
+                  >
                     {isAuthenticated && user ? (
                       <>
                         <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
@@ -338,39 +377,57 @@ export default function AdvertisementPage() {
                             {user.email}
                           </p>
                         </div>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => {
-                          navigate(ROUTES.DASHBOARD);
-                          setMobileMenuOpen(false);
-                        }}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                          onClick={() => {
+                            navigate(ROUTES.DASHBOARD);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
                           Dashboard
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer" onClick={() => {
-                          navigate(ROUTES.PROFILE);
-                          setMobileMenuOpen(false);
-                        }}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer"
+                          onClick={() => {
+                            navigate(ROUTES.PROFILE);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
                           Profile
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
-                          🌙 Light
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("light")}
+                        >
+                          Light
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
-                          ☀️ Dark
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("dark")}
+                        >
+                          Dark
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
-                          🖥️ System
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("system")}
+                        >
+                          System
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400" onClick={() => {
-                          handleLogout();
-                          setMobileMenuOpen(false);
-                        }}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400"
+                          onClick={() => {
+                            handleLogout();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
                           Logout
                         </DropdownMenuItem>
                       </>
                     ) : (
                       <>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer"
                           onClick={() => {
                             navigate(ROUTES.LOGIN);
@@ -379,7 +436,7 @@ export default function AdvertisementPage() {
                         >
                           Login
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer"
                           onClick={() => {
                             navigate(ROUTES.SIGNUP);
@@ -389,13 +446,22 @@ export default function AdvertisementPage() {
                           Sign Up
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("light")}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("light")}
+                        >
                           Light
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("dark")}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("dark")}
+                        >
                           Dark
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs" onClick={() => setTheme("system")}>
+                        <DropdownMenuItem
+                          className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
+                          onClick={() => setTheme("system")}
+                        >
                           System
                         </DropdownMenuItem>
                       </>
@@ -431,13 +497,15 @@ export default function AdvertisementPage() {
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
-                size="lg"
+                size="custom"
+                className="text-lg font-bold"
                 onClick={() => console.log("Navigate to signup")}
               >
                 Start Planning
               </Button>
               <Button
-                size="lg"
+                size="custom"
+                className="text-lg font-bold"
                 variant="outline"
                 onClick={() => console.log("Navigate to login")}
               >
@@ -494,7 +562,11 @@ export default function AdvertisementPage() {
                     <p className="text-muted-foreground text-lg">
                       {f.description}
                     </p>
-                    <Button onClick={() => console.log("Learn more clicked")}>
+                    <Button
+                      size="xl"
+                      className="text-lg font-bold"
+                      onClick={() => console.log("Learn more clicked")}
+                    >
                       Learn More
                     </Button>
                   </div>
@@ -567,11 +639,10 @@ export default function AdvertisementPage() {
 
       <Footer />
 
-      <FloatingActionButton 
-        position="bottom-right" 
+      <FloatingActionButton
+        position="bottom-right"
         size="md"
         onClick={() => console.log("Create wedding clicked")}
-        title="Create a new wedding"
         className="!rounded-full !w-auto !h-auto px-6 py-3"
       >
         <div className="flex flex-col items-center gap-1">
