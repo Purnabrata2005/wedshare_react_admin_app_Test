@@ -8,14 +8,16 @@ export interface Wedding {
   groomName: string
   brideName: string
   weddingDate: string
-  venue: string
+  weddingVenue: string
+  weddingTime: string
   receptionDate: string
   receptionVenue: string
+  receptionTime: string
   invitationTemplate: number | null
   invitationText: string | null
   coverImageKey: string | null
   createdBy: string
-  createdAt: string
+  createdAt?: string
 }
 
 interface WeddingState {

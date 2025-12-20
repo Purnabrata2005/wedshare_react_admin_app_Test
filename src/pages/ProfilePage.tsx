@@ -173,7 +173,6 @@ export default function ProfilePage() {
           subtitle="Manage your profile "
           showBackButton={true}
           onBackClick={() => navigate(-1)}
-          // className="bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white sticky top-0 z-40"
         />
       </div>
       {/* Toast Notifications */}

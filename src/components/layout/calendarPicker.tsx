@@ -1,7 +1,9 @@
 "use client"
 
-import { ChevronDown, ChevronUp } from "lucide-react"
-import { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface CalendarPickerProps {
   value: string
@@ -33,6 +35,14 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
     return new Date(today.getFullYear(), today.getMonth(), today.getDate())
   })
 
+  // Update currentDate when value prop changes
+  useEffect(() => {
+    const parsed = parseDateString(value)
+    if (parsed) {
+      setCurrentDate(parsed)
+    }
+  }, [value])
+
   const months = [
     "January",
     "February",
@@ -57,10 +67,7 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
   }
 
   const handlePrevMonth = () => {
-    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-    if (prevMonth >= today) {
-      setCurrentDate(prevMonth)
-    }
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))
   }
 
   const handleNextMonth = () => {
@@ -109,45 +116,48 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
   }
 
   return (
-    <div className="bg-wedshare-light-surface dark:bg-wedshare-dark-surface rounded-lg shadow-lg p-3 w-64">
+    <div className="bg-card border border-border rounded-lg shadow-lg p-4 w-72">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1">
-          <span className="font-semibold text-base text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
-            {months[currentDate.getMonth()]}, {currentDate.getFullYear()}
-          </span>
-          <ChevronDown className="w-4 h-4 text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary" />
+      <div className="mb-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-foreground">
+            {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h2>
+          <div className="flex gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevMonth}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleNextMonth}
+              className="h-8 w-8"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between mb-3">
-        <button onClick={handlePrevMonth} className="p-1 hover:bg-wedshare-light-bg dark:hover:bg-wedshare-dark-bg rounded" aria-label="Previous month">
-          <ChevronUp className="w-4 h-4 text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary" />
-        </button>
-        <button onClick={handleNextMonth} className="p-1 hover:bg-wedshare-light-bg dark:hover:bg-wedshare-dark-bg rounded" aria-label="Next month">
-          <ChevronDown className="w-4 h-4 text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary" />
-        </button>
-      </div>
-
       {/* Day labels */}
-      <div className="grid grid-cols-7 gap-0.5 mb-2">
-        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-          <div key={day} className="text-center text-xs font-semibold text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary py-1">
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div key={day} className="text-center text-xs font-semibold text-muted-foreground h-8 flex items-center justify-center">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-0.5 mb-3">
+      <div className="grid grid-cols-7 gap-1 mb-4">
         {days.map((item, index) => {
-          const isToday =
-            item.isCurrentMonth &&
-            item.day === today.getDate() &&
-            currentDate.getMonth() === today.getMonth() &&
-            currentDate.getFullYear() === today.getFullYear()
-
           const parsedValue = value ? parseDateString(value) : null
           const isSelected =
             item.isCurrentMonth &&
@@ -155,6 +165,13 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
             parsedValue.getDate() === item.day &&
             parsedValue.getMonth() === currentDate.getMonth() &&
             parsedValue.getFullYear() === currentDate.getFullYear()
+
+          const isToday =
+            !parsedValue && // Only show today highlight if no date is selected
+            item.isCurrentMonth &&
+            item.day === today.getDate() &&
+            currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()
 
           const isPast =
             item.isCurrentMonth && new Date(currentDate.getFullYear(), currentDate.getMonth(), item.day) < today
@@ -164,13 +181,15 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
               key={index}
               onClick={() => item.isCurrentMonth && !isPast && handleDateClick(item.day)}
               disabled={!item.isCurrentMonth || isPast}
-              className={`
-                w-full aspect-square rounded text-xs font-medium transition-colors
-                ${!item.isCurrentMonth || isPast ? "text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary cursor-default" : ""}
-                ${isToday ? "bg-wedshare-light-primary dark:bg-wedshare-dark-primary text-white" : ""}
-                ${isSelected && !isToday ? "bg-wedshare-light-secondary dark:bg-wedshare-dark-secondary text-white" : ""}
-                ${item.isCurrentMonth && !isToday && !isSelected && !isPast ? "text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary hover:bg-wedshare-light-bg dark:hover:bg-wedshare-dark-bg" : ""}
-              `}
+              className={cn(
+                "h-8 text-xs font-medium rounded transition-colors",
+                !item.isCurrentMonth && "text-muted-foreground",
+                item.isCurrentMonth && !isPast && !isToday && !isSelected && "text-foreground cursor-pointer hover:bg-accent",
+                isPast && !item.isCurrentMonth && "text-muted-foreground cursor-default",
+                isPast && item.isCurrentMonth && "text-muted-foreground cursor-default",
+                isToday && "bg-primary text-primary-foreground font-bold hover:bg-primary/90",
+                isSelected && "bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90"
+              )}
             >
               {item.day}
             </button>
@@ -179,13 +198,25 @@ export function CalendarPicker({ value, onChange, onClose }: CalendarPickerProps
       </div>
 
       {/* Footer buttons */}
-      <div className="flex justify-between pt-2 border-t border-wedshare-light-bg dark:border-wedshare-dark-bg text-sm">
-        <button onClick={handleClear} className="text-wedshare-light-primary dark:text-wedshare-dark-primary hover:opacity-80 font-medium">
+      <div className="flex gap-2 pt-3 border-t border-border">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleClear}
+          className="flex-1"
+        >
           Clear
-        </button>
-        <button onClick={handleToday} className="text-wedshare-light-primary dark:text-wedshare-dark-primary hover:opacity-80 font-medium">
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleToday}
+          className="flex-1"
+        >
           Today
-        </button>
+        </Button>
       </div>
     </div>
   )

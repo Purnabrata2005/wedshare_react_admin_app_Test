@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "@/components/layout/theme-provider"
 import { useAppSelector, useAppDispatch } from "@/redux/hooks"
-import { loadWeddingsRequest } from "@/redux/slices/weddingSlice"
+import { loadWeddingsRequest, selectWedding } from "@/redux/slices/weddingSlice"
 import type { Wedding } from "@/redux/slices/weddingSlice"
 
 export default function DashboardPage() {
@@ -45,13 +45,12 @@ export default function DashboardPage() {
   }
 
   const handleEditWedding = (wedding: Wedding) => {
-    console.log("Edit wedding:", wedding)
-    // Navigate to edit page or open edit modal
+    dispatch(selectWedding(wedding))
+    navigate('/add-wedding')
   }
 
   const handleAddWedding = () => {
-    console.log("Add wedding clicked")
-    // Navigate to add wedding page or open modal
+    navigate('/add-wedding');
   }
 
   const AvatarDropdown = () => (

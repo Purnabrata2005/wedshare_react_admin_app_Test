@@ -18,6 +18,9 @@ export { PasswordInput } from "./layout/PasswordInput";
 export { default as AuthLayout } from "./layout/AuthLayout";
 export { default as Footer } from "./layout/Footer";
 
+// Export form components
+export * from "./forms";
+
 // Export other components
 export { ModeToggle } from "./layout/mode-toggle";
 export { ThemeProvider } from "./layout/theme-provider";
