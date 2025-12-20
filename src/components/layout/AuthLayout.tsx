@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
+import TextAnimationHeading from "./textAnimation";
 
 export default function AuthLayout() {
   const { token, user } = useAppSelector((state) => state.auth);
@@ -17,6 +18,9 @@ export default function AuthLayout() {
       <div className="bg-primary/10 hidden flex-col p-10 lg:flex">
         <div className="flex items-center">
           {/* <Logo /> */}
+        </div>
+        <div className="flex h-full flex-col justify-center">
+            <TextAnimationHeading className="mx-0 flex-row lg:gap-1" />
         </div>
       </div>
       <Suspense fallback={<p>Loading...</p>}>

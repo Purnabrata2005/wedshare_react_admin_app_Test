@@ -1,4 +1,23 @@
 /**
+ * Formats a date string to dd-mm-yyyy format.
+ * @param dateString - The date string to format (ISO format or parseable date)
+ * @returns Formatted date string in dd-mm-yyyy format or empty string
+ */
+export function formatDateDDMMYYYY(dateString?: string | null): string {
+  if (!dateString) return ""
+  
+  const date = new Date(dateString)
+  
+  if (isNaN(date.getTime())) return ""
+  
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  
+  return `${day}-${month}-${year}`
+}
+
+/**
  * Formats a date string safely, returning a fallback for invalid/missing dates.
  * @param dateString - The date string to format (ISO format or parseable date)
  * @param fallback - Fallback text for invalid/missing dates (default: "TBD")

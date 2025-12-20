@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navbar } from "@/components/ui/navbar"
 import { cn } from "@/lib/utils"
+import { formatDateDDMMYYYY } from "@/lib/dateUtils"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
   addGuests,
@@ -48,10 +49,10 @@ export default function InviteGuestsPage() {
   const weddingData: InviteWeddingData = useMemo(() => ({
     bride_name: wedding?.brideName || "",
     groom_name: wedding?.groomName || "",
-    wedding_date: wedding?.weddingDate || "",
+    wedding_date: formatDateDDMMYYYY(wedding?.weddingDate),
     wedding_time: wedding?.weddingTime || "",
     wedding_venue: wedding?.weddingVenue || "",
-    reception_date: wedding?.receptionDate || "",
+    reception_date: formatDateDDMMYYYY(wedding?.receptionDate),
     reception_time: wedding?.receptionTime || "",
     reception_venue: wedding?.receptionVenue || "",
   }), [wedding])
