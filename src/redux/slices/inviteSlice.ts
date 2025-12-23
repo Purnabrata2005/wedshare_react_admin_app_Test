@@ -23,6 +23,7 @@ export interface EmailObject {
 
 // Wedding data for invitation
 export interface InviteWeddingData {
+  weddingId: string;
   bride_name: string;
   groom_name: string;
   wedding_date: string;

@@ -63,6 +63,7 @@ export default function InviteGuestsPage() {
 
   // Wedding data for invitation from Redux store
   const weddingData: InviteWeddingData = useMemo(() => ({
+    weddingId: wedding?.weddingId || wedding?.id || "",
     bride_name: wedding?.brideName || "",
     groom_name: wedding?.groomName || "",
     wedding_date: formatDateDDMMYYYY(wedding?.weddingDate),
