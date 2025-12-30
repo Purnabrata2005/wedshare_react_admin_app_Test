@@ -8,113 +8,174 @@
 /* Enable class-based dark mode */
 @custom-variant dark (&:is(.dark *));
 
-/* ================================
-   Tailwind theme tokens
-   ================================ */
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+:root {
+  --background: oklch(0.9824 0.0013 286.3757);
+  --foreground: oklch(0.3211 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.3211 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.3211 0 0);
+  --primary: oklch(0.5893 0.2195 1.1129);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.6746 0.1414 261.338);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.8828 0.0285 98.1033);
+  --muted-foreground: oklch(0.5382 0 0);
+  --accent: oklch(0.8269 0.108 211.9627);
+  --accent-foreground: oklch(0.3211 0 0);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.8699 0 0);
+  --input: oklch(0.8699 0 0);
+  --ring: oklch(0.6487 0.1538 150.3071);
+  --chart-1: oklch(0.6487 0.1538 150.3071);
+  --chart-2: oklch(0.6746 0.1414 261.338);
+  --chart-3: oklch(0.8269 0.108 211.9627);
+  --chart-4: oklch(0.588 0.0993 245.7394);
+  --chart-5: oklch(0.5905 0.1608 148.2409);
+  --sidebar: oklch(0.9824 0.0013 286.3757);
+  --sidebar-foreground: oklch(0.3211 0 0);
+  --sidebar-primary: oklch(0.6487 0.1538 150.3071);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.8269 0.108 211.9627);
+  --sidebar-accent-foreground: oklch(0.3211 0 0);
+  --sidebar-border: oklch(0.8699 0 0);
+  --sidebar-ring: oklch(0.6487 0.1538 150.3071);
+  --font-sans: Plus Jakarta Sans, sans-serif;
+  --font-serif: Source Serif 4, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.5rem;
+  --shadow-x: 0;
+  --shadow-y: 1px;
+  --shadow-blur: 3px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.1;
+  --shadow-color: oklch(0 0 0);
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
 
+.dark {
+  --background: oklch(0.2303 0.0125 264.2926);
+  --foreground: oklch(0.9219 0 0);
+  --card: oklch(0.321 0.0078 223.6661);
+  --card-foreground: oklch(0.9219 0 0);
+  --popover: oklch(0.321 0.0078 223.6661);
+  --popover-foreground: oklch(0.9219 0 0);
+  --primary: oklch(0.6487 0.1538 150.3071);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.588 0.0993 245.7394);
+  --secondary-foreground: oklch(0.9219 0 0);
+  --muted: oklch(0.3867 0 0);
+  --muted-foreground: oklch(0.7155 0 0);
+  --accent: oklch(0.6746 0.1414 261.338);
+  --accent-foreground: oklch(0.9219 0 0);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.3867 0 0);
+  --input: oklch(0.3867 0 0);
+  --ring: oklch(0.6487 0.1538 150.3071);
+  --chart-1: oklch(0.6487 0.1538 150.3071);
+  --chart-2: oklch(0.588 0.0993 245.7394);
+  --chart-3: oklch(0.6746 0.1414 261.338);
+  --chart-4: oklch(0.8269 0.108 211.9627);
+  --chart-5: oklch(0.5905 0.1608 148.2409);
+  --sidebar: oklch(0.2303 0.0125 264.2926);
+  --sidebar-foreground: oklch(0.9219 0 0);
+  --sidebar-primary: oklch(0.6487 0.1538 150.3071);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.6746 0.1414 261.338);
+  --sidebar-accent-foreground: oklch(0.9219 0 0);
+  --sidebar-border: oklch(0.3867 0 0);
+  --sidebar-ring: oklch(0.6487 0.1538 150.3071);
+  --font-sans: Plus Jakarta Sans, sans-serif;
+  --font-serif: Source Serif 4, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.5rem;
+  --shadow-x: 0;
+  --shadow-y: 1px;
+  --shadow-blur: 3px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.1;
+  --shadow-color: oklch(0 0 0);
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+}
+
+@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
 }
-
-/* ================================
-   WedShare – Light Theme
-   ================================ */
-:root {
-  --radius: 0.625rem;
-
-  /* Background & text */
-  --background: oklch(0.98 0.01 260);      /* #F8FAFC */
-  --foreground: oklch(0.18 0.02 260);      /* #111827 */
-
-  /* Surfaces */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 260);
-
-  /* 🌹 Brand colors */
-  --primary: oklch(0.58 0.22 12);           /* #E11D48 */
-  --primary-foreground: oklch(0.98 0 0);
-
-  --secondary: oklch(0.64 0.20 15);         /* #F43F5E */
-  --secondary-foreground: oklch(0.98 0 0);
-
-  /* Supporting */
-  --muted: oklch(0.96 0.01 260);
-  --muted-foreground: oklch(0.45 0.02 260);
-  --accent: oklch(0.96 0.01 260);
-  --accent-foreground: oklch(0.18 0.02 260);
-
-  /* Status */
-  --destructive: oklch(0.62 0.23 27);       /* error */
-
-  /* Borders & focus */
-  --border: oklch(0.90 0.01 260);
-  --input: oklch(0.90 0.01 260);
-  --ring: oklch(0.58 0.22 12);
-}
-
-/* ================================
-   WedShare – Dark Theme
-   ================================ */
-.dark {
-  --background: oklch(0.17 0.02 260);       /* #0F172A */
-  --foreground: oklch(0.98 0 0);
-
-  --card: oklch(0.20 0.02 260);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.20 0.02 260);
-  --popover-foreground: oklch(0.98 0 0);
-
-  /* 🌹 Brand colors (brighter in dark) */
-  --primary: oklch(0.65 0.22 15);            /* #F43F5E */
-  --primary-foreground: oklch(0.17 0.02 260);
-
-  --secondary: oklch(0.72 0.20 18);          /* #FB7185 */
-  --secondary-foreground: oklch(0.17 0.02 260);
-
-  --muted: oklch(0.28 0.02 260);
-  --muted-foreground: oklch(0.75 0.01 260);
-  --accent: oklch(0.28 0.02 260);
-  --accent-foreground: oklch(0.98 0 0);
-
-  --destructive: oklch(0.70 0.19 22);
-
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.22 15);
-}
-
-/* ================================
-   Base styles
-   ================================ */
 @layer base {
   * {
     border-color: var(--color-border);
@@ -163,7 +224,12 @@
     cursor: pointer;
     transition: all 300ms;
     overflow: hidden;
-    background: linear-gradient(to bottom right, var(--color-card), color-mix(in oklch, var(--color-card) 95%, transparent), color-mix(in oklch, var(--color-background) 50%, transparent));
+    background: linear-gradient(
+      to bottom right,
+      var(--color-card),
+      color-mix(in oklch, var(--color-card) 95%, transparent),
+      color-mix(in oklch, var(--color-background) 50%, transparent)
+    );
     border: 2px solid color-mix(in oklch, var(--color-border) 50%, transparent);
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     backdrop-filter: blur(4px);
@@ -184,12 +250,17 @@
   }
 
   .wedding-card::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     opacity: 0;
     transition: opacity 500ms;
-    background: linear-gradient(to bottom right, color-mix(in oklch, var(--color-primary) 5%, transparent), transparent, color-mix(in oklch, var(--color-secondary) 5%, transparent));
+    background: linear-gradient(
+      to bottom right,
+      color-mix(in oklch, var(--color-primary) 5%, transparent),
+      transparent,
+      color-mix(in oklch, var(--color-secondary) 5%, transparent)
+    );
     pointer-events: none;
   }
 
@@ -247,7 +318,11 @@
     top: 1rem;
     left: 1rem;
     z-index: 20;
-    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    background-color: color-mix(
+      in oklch,
+      var(--color-primary) 10%,
+      transparent
+    );
     color: var(--color-primary);
     border: 1px solid color-mix(in oklch, var(--color-primary) 20%, transparent);
     backdrop-filter: blur(4px);
@@ -299,13 +374,21 @@
 
   .wedding-card-delete-item {
     cursor: pointer;
-    background-color: color-mix(in oklch, var(--color-destructive) 10%, transparent);
+    background-color: color-mix(
+      in oklch,
+      var(--color-destructive) 10%,
+      transparent
+    );
     transition: background-color 200ms;
   }
 
   .wedding-card-delete-item:hover,
   .wedding-card-delete-item:focus {
-    background-color: color-mix(in oklch, var(--color-destructive) 20%, transparent);
+    background-color: color-mix(
+      in oklch,
+      var(--color-destructive) 20%,
+      transparent
+    );
   }
 
   .wedding-card-delete-text {

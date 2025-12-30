@@ -1,26 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  Camera,
-  Users,
-  MapPin,
-  Gift,
-  Heart,
-  Sparkles,
-  Share2,
-  Shield,
-} from "lucide-react";
+import { Camera, Users, MapPin, Gift, Bell, Calendar } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floatingActionButton";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
@@ -41,6 +26,7 @@ import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useTheme } from "@/components/layout/theme-provider";
 import { logoutAction } from "@/redux/slices/authSlice";
 import ROUTES from "@/routePath";
+import { motion, useReducedMotion } from "motion/react";
 import {
   Navbar,
   NavBody,
@@ -53,12 +39,11 @@ import {
 } from "@/components/ui/resizable-navbar";
 
 import { FlipWords } from "@/components/ui/shadcn-io/flip-words/index";
-import Footer from "@/components/layout/Footer";
 import AuthenticatedLandingPage from "./AuthenticatedLandingPage";
+import { FeatureCard } from "@/components/GridFeatureCards";
+import { Footer } from "@/components/layout/Footer";
+import { ShuffleHero } from "@/components/shuffle-grid";
 
-/* -----------------------------
-   Simple scroll animation
------------------------------- */
 function AnimatedBlock({
   children,
   delay = 0,
@@ -84,34 +69,11 @@ function AnimatedBlock({
       ref={ref}
       className={`transition-all duration-700 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
-    >
+      }`}>
       {children}
     </div>
   );
 }
-
-/* -----------------------------
-   Page Data
------------------------------- */
-const benefits = [
-  {
-    icon: Heart,
-    title: "Cherish Memories",
-    description: "Preserve every moment forever.",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Organization",
-    description: "Automatic photo grouping.",
-  },
-  { icon: Share2, title: "Easy Sharing", description: "Share without apps." },
-  {
-    icon: Shield,
-    title: "Secure & Private",
-    description: "Encrypted & protected.",
-  },
-];
 
 const features = [
   {
@@ -140,6 +102,20 @@ const features = [
     title: "Wedding Registry",
     description: "Create and manage your wishlist.",
     image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=900",
+    reverse: true,
+  },
+  {
+    icon: Calendar,
+    title: "Event Schedule",
+    description: "Keep guests updated with ceremonies and event timings.",
+    image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=900",
+    reverse: false,
+  },
+  {
+    icon: Bell,
+    title: "Guest Notifications",
+    description: "Send instant updates and reminders to all guests.",
+    image: "https://images.unsplash.com/photo-1515169067865-5387ec356754?w=900",
     reverse: true,
   },
 ];
@@ -177,9 +153,6 @@ const updates = [
   { date: "Oct 2024", title: "Mobile App", desc: "iOS & Android launch." },
 ];
 
-/* -----------------------------
-   Page Component
------------------------------- */
 export default function AdvertisementPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -193,12 +166,9 @@ export default function AdvertisementPage() {
     navigate(ROUTES.LOGIN);
   };
 
-  // If user is authenticated, show the authenticated landing page
   if (isAuthenticated) {
     return <AuthenticatedLandingPage />;
   }
-
-  // Otherwise, show the public advertisement page
 
   const navItems = [
     { name: "Features", link: "#features" },
@@ -208,7 +178,6 @@ export default function AdvertisementPage() {
 
   return (
     <div className="bg-background text-foreground">
-      {/* NAVBAR */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navbar>
           <NavBody>
@@ -232,8 +201,7 @@ export default function AdvertisementPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700"
-                >
+                  className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
                   {isAuthenticated && user ? (
                     <>
                       <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
@@ -246,40 +214,34 @@ export default function AdvertisementPage() {
                       </div>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
-                        onClick={() => navigate(ROUTES.DASHBOARD)}
-                      >
+                        onClick={() => navigate(ROUTES.DASHBOARD)}>
                         Dashboard
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
-                        onClick={() => navigate(ROUTES.PROFILE)}
-                      >
+                        onClick={() => navigate(ROUTES.PROFILE)}>
                         Profile
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("light")}
-                      >
-                         Light
+                        onClick={() => setTheme("light")}>
+                        Light
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("dark")}
-                      >
-                         Dark
+                        onClick={() => setTheme("dark")}>
+                        Dark
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("system")}
-                      >
-                         System
+                        onClick={() => setTheme("system")}>
+                        System
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-red-600 dark:text-red-400"
-                        onClick={handleLogout}
-                      >
+                        onClick={handleLogout}>
                         Logout
                       </DropdownMenuItem>
                     </>
@@ -287,33 +249,28 @@ export default function AdvertisementPage() {
                     <>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
-                        onClick={() => navigate(ROUTES.LOGIN)}
-                      >
+                        onClick={() => navigate(ROUTES.LOGIN)}>
                         Login
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
-                        onClick={() => navigate(ROUTES.SIGNUP)}
-                      >
+                        onClick={() => navigate(ROUTES.SIGNUP)}>
                         Sign Up
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("light")}
-                      >
+                        onClick={() => setTheme("light")}>
                         Light
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("dark")}
-                      >
+                        onClick={() => setTheme("dark")}>
                         Dark
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                        onClick={() => setTheme("system")}
-                      >
+                        onClick={() => setTheme("system")}>
                         System
                       </DropdownMenuItem>
                     </>
@@ -333,15 +290,13 @@ export default function AdvertisementPage() {
             </MobileNavHeader>
             <MobileNavMenu
               isOpen={mobileMenuOpen}
-              onClose={() => setMobileMenuOpen(false)}
-            >
+              onClose={() => setMobileMenuOpen(false)}>
               {navItems.map((item) => (
                 <a
                   key={item.name}
                   href={item.link}
                   className="w-full text-neutral-600 dark:text-neutral-300 text-sm"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                  onClick={() => setMobileMenuOpen(false)}>
                   {item.name}
                 </a>
               ))}
@@ -363,8 +318,7 @@ export default function AdvertisementPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="center"
-                    className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700"
-                  >
+                    className="w-56 dark:bg-wedshare-dark-surface dark:border-slate-700">
                     {isAuthenticated && user ? (
                       <>
                         <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
@@ -380,8 +334,7 @@ export default function AdvertisementPage() {
                           onClick={() => {
                             navigate(ROUTES.DASHBOARD);
                             setMobileMenuOpen(false);
-                          }}
-                        >
+                          }}>
                           Dashboard
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -389,27 +342,23 @@ export default function AdvertisementPage() {
                           onClick={() => {
                             navigate(ROUTES.PROFILE);
                             setMobileMenuOpen(false);
-                          }}
-                        >
+                          }}>
                           Profile
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("light")}
-                        >
+                          onClick={() => setTheme("light")}>
                           Light
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("dark")}
-                        >
+                          onClick={() => setTheme("dark")}>
                           Dark
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("system")}
-                        >
+                          onClick={() => setTheme("system")}>
                           System
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -418,8 +367,7 @@ export default function AdvertisementPage() {
                           onClick={() => {
                             handleLogout();
                             setMobileMenuOpen(false);
-                          }}
-                        >
+                          }}>
                           Logout
                         </DropdownMenuItem>
                       </>
@@ -430,8 +378,7 @@ export default function AdvertisementPage() {
                           onClick={() => {
                             navigate(ROUTES.LOGIN);
                             setMobileMenuOpen(false);
-                          }}
-                        >
+                          }}>
                           Login
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -439,27 +386,23 @@ export default function AdvertisementPage() {
                           onClick={() => {
                             navigate(ROUTES.SIGNUP);
                             setMobileMenuOpen(false);
-                          }}
-                        >
+                          }}>
                           Sign Up
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("light")}
-                        >
+                          onClick={() => setTheme("light")}>
                           Light
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("dark")}
-                        >
+                          onClick={() => setTheme("dark")}>
                           Dark
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="dark:text-wedshare-dark-text-primary cursor-pointer text-xs"
-                          onClick={() => setTheme("system")}
-                        >
+                          onClick={() => setTheme("system")}>
                           System
                         </DropdownMenuItem>
                       </>
@@ -471,7 +414,7 @@ export default function AdvertisementPage() {
           </MobileNav>
         </Navbar>
       </div>
-      <section className="min-h-min flex items-center justify-center px-6 pt-24">
+      <section className="min-h-min flex items-center justify-center px-4 md:px-6 pt-24 pb-12 md:pb-16">
         <AnimatedBlock>
           <div className="max-w-5xl text-center space-y-10">
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
@@ -481,8 +424,7 @@ export default function AdvertisementPage() {
                 words={[
                   "Perfectly Captured",
                   "Forever Cherished",
-                  "Beautifully Shared"
-                  ,
+                  "Beautifully Shared",
                 ]}
                 className="text-3xl sm:text-3xl md:text-6xl lg:text-7xl font-bold text-primary"
               />
@@ -497,16 +439,14 @@ export default function AdvertisementPage() {
               <Button
                 size="custom"
                 className="text-lg font-bold"
-                onClick={() => navigate(ROUTES.SIGNUP)}
-              >
+                onClick={() => navigate(ROUTES.SIGNUP)}>
                 Start Planning
               </Button>
               <Button
                 size="custom"
                 className="text-lg font-bold"
                 variant="outline"
-                onClick={() => navigate(ROUTES.LOGIN)}
-              >
+                onClick={() => navigate(ROUTES.LOGIN)}>
                 Explore Features
               </Button>
             </div>
@@ -514,102 +454,74 @@ export default function AdvertisementPage() {
         </AnimatedBlock>
       </section>
 
-      {/* BENEFITS */}
-      <section className="py-32 px-6">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedBlock>
-            <h2 className="text-5xl font-bold text-center mb-20">
-              Get more from every memory
+      <section className="py-12 md:py-16 px-4 md:px-6">
+        <div className="flex w-full h-screen justify-center items-center">
+          <ShuffleHero />
+        </div>
+      </section>
+
+      <section id="features" className="py-12 md:py-16 px-4 md:px-6">
+        <div className="mx-auto w-full max-w-5xl space-y-8">
+          <AnimatedContainer className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-wide md:text-4xl lg:text-5xl">
+              Everything for Your Wedding
             </h2>
-          </AnimatedBlock>
+            <p className="text-muted-foreground mt-4 text-sm md:text-base">
+              Simple, beautiful, and powerful tools to manage your big day.
+            </p>
+          </AnimatedContainer>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((b, i) => {
-              const Icon = b.icon;
-              return (
-                <AnimatedBlock key={b.title} delay={i * 100}>
-                  <Card className="text-center">
-                    <CardHeader>
-                      <Icon className="mx-auto h-10 w-10 text-primary" />
-                      <CardTitle>{b.title}</CardTitle>
-                      <CardDescription>{b.description}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                </AnimatedBlock>
-              );
-            })}
-          </div>
+          <AnimatedContainer
+            delay={0.4}
+            className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3">
+            {features.map((feature, i) => (
+              <FeatureCard key={i} feature={feature} />
+            ))}
+          </AnimatedContainer>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" className="py-32 px-6 bg-muted/40">
-        <div className="max-w-6xl mx-auto space-y-32">
-          {features.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <AnimatedBlock key={f.title} delay={i * 150}>
-                <div
-                  className={`flex flex-col ${
-                    f.reverse ? "md:flex-row-reverse" : "md:flex-row"
-                  } gap-16 items-center`}
-                >
-                  <div className="flex-1 space-y-6">
-                    <Icon className="h-10 w-10 text-primary" />
-                    <h3 className="text-4xl font-bold">{f.title}</h3>
-                    <p className="text-muted-foreground text-lg">
-                      {f.description}
-                    </p>
-                    <Button
-                      size="xl"
-                      className="text-lg font-bold"
-                      onClick={() => navigate(ROUTES.SIGNUP)}
-                    >
-                      Learn More
-                    </Button>
-                  </div>
-
-                  <div className="flex-1">
-                    <img
-                      src={f.image}
-                      alt={f.title}
-                      className="rounded-3xl shadow-2xl h-96 w-full object-cover"
-                    />
-                  </div>
-                </div>
-              </AnimatedBlock>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* UPDATES */}
-      <section id="updates" className="py-32 px-6">
+      <section id="updates" className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-bold text-center mb-20">
-            The latest from WedShare
-          </h2>
+          <AnimatedContainer className="mb-8 md:mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-center">
+              The latest from WedShare
+            </h2>
+          </AnimatedContainer>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {updates.map((u) => (
-              <Card key={u.title}>
-                <CardContent className="space-y-4 pt-6">
-                  <Badge>{u.date}</Badge>
-                  <h3 className="text-xl font-bold">{u.title}</h3>
-                  <p className="text-muted-foreground">{u.desc}</p>
-                </CardContent>
-              </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {updates.map((u, index) => (
+              <AnimatedContainer key={u.title} delay={index * 0.1}>
+                <Card className="group relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 dark:hover:shadow-primary/20">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <CardContent className="relative p-5 md:p-6 space-y-3">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 dark:bg-primary/20 dark:text-primary dark:border-primary/30">
+                      {u.date}
+                    </Badge>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                      {u.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                      {u.desc}
+                    </p>
+                    <div className="pt-2">
+                      <div className="w-0 group-hover:w-12 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </AnimatedContainer>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="py-32 px-6 bg-muted/40">
+      <section id="faq" className="py-12 md:py-16 px-4 md:px-6 bg-muted/40">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl font-bold text-center mb-20">
-            Frequently Asked Questions
-          </h2>
+          <AnimatedContainer className="mb-8 md:mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-center">
+              Frequently Asked Questions
+            </h2>
+          </AnimatedContainer>
 
           <Accordion type="single" collapsible>
             {faqs.map((f, i) => (
@@ -622,16 +534,23 @@ export default function AdvertisementPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-32 px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h2 className="text-5xl font-bold">Ready to plan your wedding?</h2>
-          <p className="text-muted-foreground text-xl">
-            Join thousands of couples creating their perfect story.
-          </p>
-          <Button size="lg" onClick={() => navigate(ROUTES.SIGNUP)}>
-            Get Started for Free
-          </Button>
+      <section className="py-12 md:py-16 px-4 md:px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">
+          <AnimatedContainer>
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Ready to plan your wedding?
+            </h2>
+          </AnimatedContainer>
+          <AnimatedContainer delay={0.2}>
+            <p className="text-muted-foreground text-lg md:text-xl">
+              Join thousands of couples creating their perfect story.
+            </p>
+          </AnimatedContainer>
+          <AnimatedContainer delay={0.4}>
+            <Button size="lg" onClick={() => navigate(ROUTES.SIGNUP)}>
+              Get Started for Free
+            </Button>
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -641,12 +560,40 @@ export default function AdvertisementPage() {
         position="bottom-right"
         size="md"
         onClick={() => navigate(ROUTES.SIGNUP)}
-        className="!rounded-full !w-auto !h-auto px-6 py-3"
-      >
+        className="!rounded-full !w-auto !h-auto px-6 py-3">
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-semibold">Get the App</span>
         </div>
       </FloatingActionButton>
     </div>
+  );
+}
+
+type ViewAnimationProps = {
+  delay?: number;
+  className?: React.ComponentProps<typeof motion.div>["className"];
+  children: React.ReactNode;
+};
+
+function AnimatedContainer({
+  className,
+  delay = 0.1,
+  children,
+}: ViewAnimationProps) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return children;
+  }
+
+  return (
+    <motion.div
+      initial={{ filter: "blur(4px)", translateY: -8, opacity: 0 }}
+      whileInView={{ filter: "blur(0px)", translateY: 0, opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8 }}
+      className={className}>
+      {children}
+    </motion.div>
   );
 }
