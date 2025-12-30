@@ -27,30 +27,30 @@ interface FooterProps {
 
 const defaultSections = [
   {
-    title: "Product",
+    title: "WedShare",
     links: [
-      { name: "Overview", href: "#" },
-      { name: "Pricing", href: "#" },
-      { name: "Marketplace", href: "#" },
-      { name: "Features", href: "#" },
+      { name: "Features", href: "#features" },
+      { name: "Photo Gallery", href: "#" },
+      { name: "Guest List", href: "#" },
+      { name: "RSVP", href: "#" },
     ],
   },
   {
-    title: "Company",
+    title: "Support",
     links: [
-      { name: "About", href: "#" },
-      { name: "Team", href: "#" },
+      { name: "Help Center", href: "#" },
+      { name: "Contact Us", href: "#" },
+      { name: "FAQ", href: "#faq" },
+      { name: "Feedback", href: "#" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
       { name: "Blog", href: "#" },
-      { name: "Careers", href: "#" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { name: "Help", href: "#" },
-      { name: "Sales", href: "#" },
-      { name: "Advertise", href: "#" },
-      { name: "Privacy", href: "#" },
+      { name: "Stories", href: "#" },
+      { name: "Events", href: "#" },
+      { name: "Instagram", href: "#" },
     ],
   },
 ];
@@ -63,44 +63,43 @@ const defaultSocialLinks = [
 ];
 
 const defaultLegalLinks = [
-  { name: "Terms and Conditions", href: "#" },
+  { name: "Terms & Conditions", href: "#" },
   { name: "Privacy Policy", href: "#" },
 ];
 
 export const Footer = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://www.shadcnblocks.com/images/block/logos/shadcnblockscom-icon.svg",
-    alt: "logo",
-    title: "Shadcnblocks.com",
+    url: "#",
+    src: "https://cdn-icons-png.flaticon.com/512/3176/3176367.png",
+    alt: "WedShare logo",
+    title: "WedShare",
   },
   sections = defaultSections,
-  description = "A collection of components for your startup business or side project.",
+  description = "WedShare helps you plan, organize, and celebrate your wedding with ease. Capture every moment, manage your guests, and create memories that last a lifetime.",
   socialLinks = defaultSocialLinks,
-  copyright = "© 2024 Shadcnblocks.com. All rights reserved.",
+  copyright = "© 2025 WedShare. All rights reserved.",
   legalLinks = defaultLegalLinks,
 }: FooterProps) => {
   return (
-    <section className="py-32">
-      <div className="container mx-auto">
-        <div className="flex w-full flex-col justify-between gap-10 lg:flex-row lg:items-start lg:text-left">
-          <div className="flex w-full flex-col justify-between gap-6 lg:items-start">
-            {/* Logo */}
-            <div className="flex items-center gap-2 lg:justify-start">
+    <section className="py-16 bg-muted/40">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left w-full lg:w-1/3">
+            <div className="flex items-center gap-2 justify-center lg:justify-start">
               <a href={logo.url}>
                 <img
                   src={logo.src}
                   alt={logo.alt}
                   title={logo.title}
-                  className="h-8"
+                  className="h-10 w-10 rounded-full shadow"
                 />
               </a>
-              <h2 className="text-xl font-semibold">{logo.title}</h2>
+              <h2 className="text-xl font-semibold text-primary">{logo.title}</h2>
             </div>
-            <p className="max-w-[70%] text-sm text-muted-foreground">
+            <p className="max-w-xs text-sm text-muted-foreground mx-auto lg:mx-0">
               {description}
             </p>
-            <ul className="flex items-center space-x-6 text-muted-foreground">
+            <ul className="flex items-center justify-center lg:justify-start space-x-6 text-muted-foreground">
               {socialLinks.map((social, idx) => (
                 <li key={idx} className="font-medium hover:text-primary">
                   <a href={social.href} aria-label={social.label}>
@@ -110,10 +109,10 @@ export const Footer = ({
               ))}
             </ul>
           </div>
-          <div className="grid w-full gap-6 md:grid-cols-3 lg:gap-20">
+          <div className="grid w-full gap-8 md:grid-cols-3 lg:gap-16 mt-8 lg:mt-0">
             {sections.map((section, sectionIdx) => (
               <div key={sectionIdx}>
-                <h3 className="mb-4 font-bold">{section.title}</h3>
+                <h3 className="mb-4 font-bold text-primary/90">{section.title}</h3>
                 <ul className="space-y-3 text-sm text-muted-foreground">
                   {section.links.map((link, linkIdx) => (
                     <li
@@ -127,9 +126,9 @@ export const Footer = ({
             ))}
           </div>
         </div>
-        <div className="mt-8 flex flex-col justify-between gap-4 border-t py-8 text-xs font-medium text-muted-foreground md:flex-row md:items-center md:text-left">
-          <p className="order-2 lg:order-1">{copyright}</p>
-          <ul className="order-1 flex flex-col gap-2 md:order-2 md:flex-row">
+        <div className="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t py-8 text-xs font-medium text-muted-foreground text-center md:text-left">
+          <p className="order-2 md:order-1 w-full md:w-auto">{copyright}</p>
+          <ul className="order-1 md:order-2 flex flex-col md:flex-row gap-2 md:gap-6 w-full md:w-auto justify-center md:justify-end">
             {legalLinks.map((link, idx) => (
               <li key={idx} className="hover:text-primary">
                 <a href={link.href}> {link.name}</a>

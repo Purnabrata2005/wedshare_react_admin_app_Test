@@ -1,8 +1,6 @@
-"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Users, MapPin, Gift, Bell, Calendar } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floatingActionButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,9 +38,14 @@ import {
 
 import { FlipWords } from "@/components/ui/shadcn-io/flip-words/index";
 import AuthenticatedLandingPage from "./AuthenticatedLandingPage";
-import { FeatureCard } from "@/components/GridFeatureCards";
 import { Footer } from "@/components/layout/Footer";
 import { ShuffleHero } from "@/components/shuffle-grid";
+import { CardStack } from "@/components/ui/card-stack";
+import { image1, image10 } from "@/assets";
+import { image2 } from "@/assets";
+
+import { FeatureCard } from "@/components/GridFeatureCards";
+
 
 function AnimatedBlock({
   children,
@@ -163,7 +166,7 @@ export default function AdvertisementPage() {
 
   const handleLogout = () => {
     dispatch(logoutAction());
-    navigate(ROUTES.LOGIN);
+    navigate(ROUTES.HOME);
   };
 
   if (isAuthenticated) {
@@ -414,7 +417,7 @@ export default function AdvertisementPage() {
           </MobileNav>
         </Navbar>
       </div>
-      <section className="min-h-min flex items-center justify-center px-4 md:px-6 pt-24 pb-12 md:pb-16">
+      <section className="min-h-min flex items-center justify-center px-6 sm:px-8 pt-40 pb-24 sm:pt-44 sm:pb-28 md:px-10 md:pt-28 md:pb-20">
         <AnimatedBlock>
           <div className="max-w-5xl text-center space-y-10">
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
@@ -460,27 +463,93 @@ export default function AdvertisementPage() {
         </div>
       </section>
 
-      <section id="features" className="py-12 md:py-16 px-4 md:px-6">
-        <div className="mx-auto w-full max-w-5xl space-y-8">
-          <AnimatedContainer className="mx-auto max-w-3xl text-center">
+      <section id="features" className="py-16 md:py-24 px-4 md:px-6">
+        <div className="mx-auto w-full max-w-6xl">
+          <AnimatedContainer className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl font-bold tracking-wide md:text-4xl lg:text-5xl">
               Everything for Your Wedding
             </h2>
-            <p className="text-muted-foreground mt-4 text-sm md:text-base">
+            <p className="text-muted-foreground mt-4 text-sm md:text-base max-w-2xl mx-auto">
               Simple, beautiful, and powerful tools to manage your big day.
             </p>
           </AnimatedContainer>
+          
 
-          <AnimatedContainer
-            delay={0.4}
-            className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3">
-            {features.map((feature, i) => (
-              <FeatureCard key={i} feature={feature} />
-            ))}
-          </AnimatedContainer>
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
+            <AnimatedContainer delay={0.2} className="flex-1 max-w-md space-y-6">
+              <div className="space-y-4">
+                <Badge className="bg-primary/10 text-primary border-primary/20">
+                  Core Features
+                </Badge>
+                <h3 className="text-2xl md:text-3xl font-bold">
+                  Built for couples who want it all
+                </h3>
+                <p className="text-muted-foreground">
+                  From photo sharing to guest management, we've got everything you need to make your wedding unforgettable.
+                </p>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-sm">Secure photo sharing</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-sm">Easy guest management</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-sm">Shareable event timeline</span>
+                </li>
+              </ul>
+            </AnimatedContainer>
+
+            <AnimatedContainer delay={0.4} className="flex items-center justify-center">
+              <CardStack
+                items={[
+                  {
+                    id: 1,
+                    image: image1,
+                  },
+                  {
+                    id: 2,
+                    image: image2 ,
+                  },
+                  {
+                    id: 3,
+                    image: image10 ,   
+                  },
+                ]}
+              />
+            </AnimatedContainer>
+          </div>
         </div>
       </section>
-
+      <section id="features" className="py-16 md:py-24 px-4 md:px-6">
+        <div className="mx-auto w-full max-w-6xl">
+          <AnimatedContainer className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl font-bold tracking-wide md:text-4xl lg:text-5xl">
+              Key Features of WedShare
+            </h2>
+            <p className="text-muted-foreground mt-4 text-sm md:text-base max-w-2xl mx-auto">
+              Discover the tools that make WedShare the perfect wedding planning companion.
+            </p>
+          </AnimatedContainer>
+          <AnimatedContainer
+            delay={0.4}
+            className="features-grid">
+            {features.map((feature, i) => (
+              <FeatureCard
+                key={i}
+                feature={{
+                  ...feature,
+                  icon: (props) => <feature.icon {...props} className="feature-icon" />,
+                }}
+              />
+            ))}
+          </AnimatedContainer>
+          </div>
+      </section>
       <section id="updates" className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedContainer className="mb-8 md:mb-12">
@@ -514,7 +583,6 @@ export default function AdvertisementPage() {
           </div>
         </div>
       </section>
-
       <section id="faq" className="py-12 md:py-16 px-4 md:px-6 bg-muted/40">
         <div className="max-w-4xl mx-auto">
           <AnimatedContainer className="mb-8 md:mb-12">
@@ -533,6 +601,7 @@ export default function AdvertisementPage() {
           </Accordion>
         </div>
       </section>
+      
 
       <section className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">

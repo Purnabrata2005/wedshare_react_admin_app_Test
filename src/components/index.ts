@@ -6,7 +6,9 @@ export * from "./ui/badge";
 export * from "./ui/avatar";
 export * from "./ui/accordion";
 export * from "./ui/dropdown-menu";
-export * from "./ui/resizable-navbar";
+export * from "./ui/resizable-navbar"
+export * from "./ui/shadcn-io/flip-words"
+export * from "./ui/card-stack";
 
 // Export reusable wedding components
 export { EventScheduleCard } from "./ui/eventScheduleCard";
@@ -22,7 +24,7 @@ export { PasswordInput } from "./layout/PasswordInput";
 
 // Export layout components
 export { default as AuthLayout } from "./layout/AuthLayout";
-export { default as Footer } from "./layout/Footer";
+export { Footer } from "./layout/Footer";
 
 // Export form components
 export * from "./forms";
