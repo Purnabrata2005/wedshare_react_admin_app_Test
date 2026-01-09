@@ -288,7 +288,6 @@ function* registerMetadataForPhotosSaga(
 
     // Get albumPublicKey and processPublicKey from the wedding and Redux store
     const weddings: Wedding[] = state?.weddings?.weddings || []
-    const processPublicKey: string | null = state?.weddings?.processPublicKey || null
     const currentWedding = weddings.find((w) => w.weddingId === weddingId || w.id === weddingId)
     const albumPublicKey = currentWedding?.albumPublicKey || undefined
 
@@ -325,11 +324,6 @@ function* registerMetadataForPhotosSaga(
     // Log the complete payload being sent to the API
 
 
-    const registerRes: any = yield call(
-      AxiosWedding.post,
-      `weddings/${weddingId}/photos`,
-      payload
-    )
 
     // Log the endpoint and response for easier debugging/verification
     try {

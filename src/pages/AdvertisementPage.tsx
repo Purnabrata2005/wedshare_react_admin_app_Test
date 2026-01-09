@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Users, MapPin, Gift, Bell, Calendar, Lock, Shield, Eye, Key } from "lucide-react";
+import { Camera, Users, MapPin, Gift, Bell, Calendar, Lock, Eye,  } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floatingActionButton";
 import { Card, CardContent } from "@/components/ui/card";
