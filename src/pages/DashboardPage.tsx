@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { Outlet } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
+import { clearSelection } from "@/redux/slices/weddingSlice";
 import { Calendar, Plus, Moon, Sun } from "lucide-react"
 import { Navbar } from "@/components/ui/navbar"
 import { WeddingCard } from "@/components/WeddingCard"
@@ -51,6 +52,7 @@ export default function DashboardPage() {
   }
 
   const handleAddWedding = () => {
+    dispatch(clearSelection());
     navigate('/add-wedding');
   }
 

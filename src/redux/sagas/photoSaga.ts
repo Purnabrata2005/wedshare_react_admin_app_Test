@@ -347,9 +347,7 @@ function* registerMetadataForPhotosSaga(
     for (const photo of photos) {
       try {
         yield call(() => photoDB.queue.delete(photo.uuid))
-
       } catch (deleteErr) {
-
       }
       // Record globally to prevent re-enqueue attempts from generating duplicate metadata
       uploadedPhotoIds.add(photo.uuid)
@@ -363,6 +361,7 @@ function* registerMetadataForPhotosSaga(
     for (const item of completedItems) {
       yield call(() => photoDB.queue.delete(item.uuid))
       uploadedPhotoIds.add(item.uuid)
+      
     }
 
     // Check if all uploads are complete after removing from queue
@@ -371,26 +370,52 @@ function* registerMetadataForPhotosSaga(
     
     // Close the modal - queue should be empty now
     if (remainingItems.length === 0) {
-
+    
       yield put(uploadPhotosCompleted())
       hasUploadBeenRequested = false
     } else {
-      // Force complete if all remaining are completed status
-      const allCompleted = remainingItems.every(item => item.status === "completed")
-      if (allCompleted) {
-        // Delete all completed and close
-        for (const item of remainingItems) {
-          yield call(() => photoDB.queue.delete(item.uuid))
+      // Fallback: If uploads are stuck, force clear queue and update Redux
+      const stuckItems = remainingItems.filter(item => item.status !== 'completed');
+      if (stuckItems.length > 0) {
+        console.warn('[PhotoSaga] Fallback: Force clearing stuck items from queue:', stuckItems);
+        for (const item of stuckItems) {
+          try {
+            yield call(() => photoDB.queue.delete(item.uuid));
+            console.log('[PhotoSaga] Fallback deleted stuck item:', item.uuid);
+          } catch (err) {
+            console.error('[PhotoSaga] Fallback error deleting stuck item:', item.uuid, err);
+          }
         }
-        yield put(uploadPhotosCompleted())
-        hasUploadBeenRequested = false
+        yield put(uploadPhotosCompleted());
+        hasUploadBeenRequested = false;
+      } else {
+        // Force complete if all remaining are completed status
+        const allCompleted = remainingItems.every(item => item.status === "completed")
+        if (allCompleted) {
+          // Delete all completed and close
+          for (const item of remainingItems) {
+            yield call(() => photoDB.queue.delete(item.uuid))
+           
+          }
+          yield put(uploadPhotosCompleted())
+          hasUploadBeenRequested = false
+        }
       }
     }
   } catch (err) {
 
     // Even on error, close the modal
-    yield put(uploadPhotosCompleted())
-    hasUploadBeenRequested = false
+    // Always try to clear queue and update Redux on error
+    try {
+      const allItems: PendingPhoto[] = yield call(() => photoDB.queue.toArray());
+      for (const item of allItems) {
+        yield call(() => photoDB.queue.delete(item.uuid));
+      }
+    } catch (cleanupErr) {
+      console.error('[PhotoSaga] Error clearing queue on error:', cleanupErr);
+    }
+    yield put(uploadPhotosCompleted());
+    hasUploadBeenRequested = false;
   }
 }
 

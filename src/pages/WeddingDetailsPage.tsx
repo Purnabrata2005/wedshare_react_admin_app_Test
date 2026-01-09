@@ -186,11 +186,7 @@ export default function WeddingDetailsPage() {
           <div className="mt-8">
             <Card className="bg-muted/50">
               <CardContent className="py-6">
-                <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-3 text-center">
-                  <QuickInfoItem
-                    label="Created"
-                    value={formatDateSafe(wedding.createdAt)}
-                  />
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-2 text-center">
                   <QuickInfoItem
                     label="Days Until Wedding"
                     value={getDaysUntilWedding(wedding.weddingDate)}

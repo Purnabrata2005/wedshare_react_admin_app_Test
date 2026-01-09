@@ -59,6 +59,7 @@ export default function PhotoUploadPage() {
 
   const isUploading = Boolean(uploading)
 
+
   // Calculate upload stats - only count photos that are currently selected
   const totalPhotos = photos.length
   const selectedPhotoUuids = new Set(photos.map(p => p.uuid))
@@ -136,7 +137,6 @@ export default function PhotoUploadPage() {
   // Upload photos to server
   const handleUploadToServer = () => {
     if (photos.length === 0 || isUploading) return
-
     dispatch(
       uploadPhotosRequest({
         weddingId,
