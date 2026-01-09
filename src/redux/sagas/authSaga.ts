@@ -1,5 +1,6 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import AxiosInstance from "../service/axiosInstance";
+import AxiosGoogle from "../service/axiosGoogle";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
 
@@ -29,7 +30,7 @@ import {
 function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
   try {
     yield call(() =>
-      AxiosInstance.post("/login/send-otp", {
+      AxiosGoogle.post("/login/send-otp", {
         recipient: action.payload.recipient,
         recipientType: action.payload.recipientType,
       })
@@ -51,7 +52,7 @@ function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
 function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): any {
   try {
     const response = yield call(() =>
-      AxiosInstance.post("/login/otp", {
+      AxiosGoogle.post("/login/otp", {
         recipient: action.payload.recipient,
         recipientType: action.payload.recipientType,
         otp: action.payload.otp,
