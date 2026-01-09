@@ -14,6 +14,8 @@ import ProtectedRoute from "@/components/ProtectedRoute"
 import { AddWeddingForm } from "@/pages/addWeddingForm"
 import ROUTES from "./routePath"
 
+import AuthCallbackPage from "@/pages/AuthCallbackPage"
+
 
 // Wrapper component to handle navigation for AddWeddingForm
 function AddWeddingPage() {
@@ -42,6 +44,8 @@ export default function App() {
           <Route element={<AuthLayout />}>
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.SIGNUP} element={<RegisterPage />} />
+            {/* Google OAuth Callback Route */}
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
           </Route>
 
           {/* Profile Route */}
