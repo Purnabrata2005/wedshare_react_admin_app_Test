@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 
 export interface Wedding {
@@ -16,15 +15,19 @@ export interface Wedding {
   invitationTemplate: number | null
   invitationText: string | null
   coverImageKey: string | null
+  albumPublicKey: string | null
   createdBy: string
   createdAt?: string
+  updatedAt?: string
 }
+
 
 interface WeddingState {
   weddings: Wedding[]
   selectedWedding: Wedding | null
   loading: boolean
   error: string | null
+  processPublicKey: string | null
 }
 
 const initialState: WeddingState = {
@@ -32,6 +35,7 @@ const initialState: WeddingState = {
   selectedWedding: null,
   loading: false,
   error: null,
+  processPublicKey: null,
 }
 
 const weddingSlice = createSlice({
@@ -41,8 +45,14 @@ const weddingSlice = createSlice({
     loadWeddingsRequest: (state) => {
       state.loading = true
     },
-    loadWeddingsSuccess: (state, action: PayloadAction<Wedding[]>) => {
-      state.weddings = action.payload
+    loadWeddingsSuccess: (state, action: PayloadAction<{ weddings: Wedding[]; processPublicKey?: string | null } | Wedding[]>) => {
+      if (Array.isArray(action.payload)) {
+        state.weddings = action.payload
+        state.processPublicKey = null
+      } else {
+        state.weddings = action.payload.weddings
+        state.processPublicKey = action.payload.processPublicKey || null
+      }
       state.loading = false
     },
     loadWeddingsFailure: (state, action: PayloadAction<string>) => {
@@ -107,6 +117,7 @@ const weddingSlice = createSlice({
     },
   },
 })
+
 
 export const {
   loadWeddingsRequest,

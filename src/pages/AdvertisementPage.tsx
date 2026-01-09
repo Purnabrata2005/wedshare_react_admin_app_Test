@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Users, MapPin, Gift, Bell, Calendar } from "lucide-react";
+import { Camera, Users, MapPin, Gift, Bell, Calendar, Lock, Shield, Eye, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingActionButton } from "@/components/ui/floatingActionButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -83,43 +83,50 @@ const features = [
     icon: Camera,
     title: "Guest Photo Gallery",
     description: "Guests upload photos and videos directly.",
-    image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=900",
     reverse: false,
   },
   {
     icon: Users,
     title: "Guest Management",
     description: "RSVPs, preferences, and seating in one place.",
-    image: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=900",
     reverse: true,
   },
   {
     icon: MapPin,
     title: "Venue & Timeline",
     description: "Share location and wedding schedule.",
-    image: "https://images.unsplash.com/photo-1519225421180-fbb5a32266cc?w=900",
     reverse: false,
   },
   {
     icon: Gift,
     title: "Wedding Registry",
     description: "Create and manage your wishlist.",
-    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=900",
     reverse: true,
   },
   {
     icon: Calendar,
     title: "Event Schedule",
     description: "Keep guests updated with ceremonies and event timings.",
-    image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=900",
     reverse: false,
   },
   {
     icon: Bell,
     title: "Guest Notifications",
     description: "Send instant updates and reminders to all guests.",
-    image: "https://images.unsplash.com/photo-1515169067865-5387ec356754?w=900",
     reverse: true,
+  },
+];
+
+const securityFeatures = [
+  {
+    icon: Lock,
+    title: "Your Memories Are Safe",
+    description: "Enterprise-grade encryption protects every photo and memory you share.",
+  },
+  {
+    icon: Eye,
+    title: "Your Privacy, Your Control",
+    description: "Only share with people you choose. You control every single permission.",
   },
 ];
 
@@ -134,11 +141,15 @@ const faqs = [
   },
   {
     q: "Is my data secure?",
-    a: "Yes. We use enterprise-grade encryption.",
+    a: "Yes. We use enterprise-grade encryption with AES-256 for all photos and data. Your wedding details are protected with industry-standard security protocols.",
   },
   {
     q: "Can non-users access my wedding?",
-    a: "Yes. Share a link—no account required.",
+    a: "Yes. You can share a link with guests—no account required. You control who can view and upload content.",
+  },
+  {
+    q: "What encryption methods do you use?",
+    a: "We use AES-256-GCM for data encryption and RSA-2048 for secure key management, ensuring your photos are protected in transit and at rest.",
   },
 ];
 
@@ -175,6 +186,7 @@ export default function AdvertisementPage() {
 
   const navItems = [
     { name: "Features", link: "#features" },
+    { name: "Security", link: "#security" },
     { name: "FAQ", link: "#faq" },
     { name: "Updates", link: "#updates" },
   ];
@@ -550,6 +562,43 @@ export default function AdvertisementPage() {
           </AnimatedContainer>
           </div>
       </section>
+
+      <section id="security" className="py-16 md:py-24 px-4 md:px-6">
+        <div className="mx-auto w-full max-w-6xl">
+          <AnimatedContainer className="text-center mb-16 md:mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              A safe home for your memories
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Your wedding moments deserve the best protection.
+            </p>
+          </AnimatedContainer>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {securityFeatures.map((feature, i) => (
+              <AnimatedContainer key={i} delay={i * 0.2}>
+                <div className="group relative p-8 md:p-10 rounded-2xl border-2 border-primary/20 bg-card overflow-hidden transition-all duration-500 hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1">
+                  {/* Animated gradient background on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+                  
+                  {/* Content */}
+                  <div className="relative z-10 space-y-4">
+                    <div className="inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+                      <feature.icon className="text-primary size-8 group-hover:rotate-12 transition-transform duration-300" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="font-bold text-foreground mb-3 text-2xl group-hover:text-primary transition-colors duration-300">{feature.title}</h3>
+                    <p className="text-muted-foreground text-base leading-relaxed group-hover:text-foreground transition-colors duration-300">{feature.description}</p>
+                  </div>
+                </div>
+              </AnimatedContainer>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="updates" className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedContainer className="mb-8 md:mb-12">

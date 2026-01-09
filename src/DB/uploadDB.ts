@@ -6,15 +6,20 @@ export type UploadStatus = "pending" | "uploading" | "failed" | "completed"
 export interface PendingPhoto {
   uuid: string
   weddingId: string
-  file: Blob            // File is also a Blob, so this works
+  file: Blob
   extension: string
-  originalFilename: string  // Original filename for metadata registration
+  originalFilename: string
   status: UploadStatus
   progress: number
   retries: number
   createdAt: number
-  metadataRegistered?: boolean  // Track if metadata has been sent to backend
+
+  crypto?: {
+    wrappedPhotoKey?: string
+    wrappedProcessKey?: string
+  }
 }
+
 
 class PhotoDB extends Dexie {
   queue!: Table<PendingPhoto, string>

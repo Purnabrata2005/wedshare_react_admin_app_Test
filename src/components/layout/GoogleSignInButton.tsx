@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 
 export default function GoogleSignInButton() {
   const handleGoogleSignIn = () => {
-    // TODO: Implement Google Sign-In logic
-    console.log("Google Sign-In clicked");
+    window.location.href =
+    `${import.meta.env.VITE_API_BASE_URL}/login/google-auth`;
   };
 
   return (

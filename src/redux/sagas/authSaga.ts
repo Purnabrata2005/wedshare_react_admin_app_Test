@@ -1,6 +1,9 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import AxiosInstance from "../service/axiosInstance";
 import { photoDB } from "@/DB/uploadDB";
+import { clearPhotos } from "../slices/photoSlice";
+
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 import {
   loginAction,
@@ -11,13 +14,77 @@ import {
   registerFailure,
   setLoading,
   logoutAction,
+  sendOtpRequest,
+  sendOtpSuccess,
+  sendOtpFailure,
+  verifyOtpRequest,
+  verifyOtpSuccess,
+  verifyOtpFailure,
   type LoginPayload,
   type RegisterPayload,
+  type SendOtpPayload,
+  type VerifyOtpPayload,
 } from "../slices/authSlice";
+// SEND OTP SAGA
+function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
+  try {
+    yield call(() =>
+      AxiosInstance.post("/login/send-otp", {
+        recipient: action.payload.recipient,
+        recipientType: action.payload.recipientType,
+      })
+    );
+    yield put(sendOtpSuccess());
+    if (action.payload.onSuccess) action.payload.onSuccess();
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Failed to send OTP";
+    yield put(sendOtpFailure(message));
+    if (action.payload.onError) action.payload.onError(message);
+  }
+}
 
-import { clearPhotos } from "../slices/photoSlice";
+// VERIFY OTP SAGA
+function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): any {
+  try {
+    const response = yield call(() =>
+      AxiosInstance.post("/login/otp", {
+        recipient: action.payload.recipient,
+        recipientType: action.payload.recipientType,
+        otp: action.payload.otp,
+      })
+    );
+    const api = response.data?.data;
+    if (!api) throw new Error("Invalid API response");
+    const token = api.access_token;
+    if (!token) throw new Error("Token missing!");
+    const user = {
+      id: api.userid,
+      username: api.username,
+      fullname: api.fullname,
+      phoneNumber: api.phonenumber,
+      email: api.email,
+      roles: api.roles,
+      profile: null,
+    };
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    yield put(verifyOtpSuccess({ user, token }));
+    if (action.payload.onSuccess) action.payload.onSuccess();
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "OTP verification failed";
+    yield put(verifyOtpFailure(message));
+    if (action.payload.onError) action.payload.onError(message);
+  }
+}
 
-import type { PayloadAction } from "@reduxjs/toolkit";
 
 // LOGIN SAGA
 function* loginSaga(action: PayloadAction<LoginPayload>): any {
@@ -199,4 +266,6 @@ export default function* authSaga() {
   yield takeLatest(loginAction.type, loginSaga);
   yield takeLatest(registerAction.type, registerSaga);
   yield takeLatest(logoutAction.type, logoutSaga);
+  yield takeLatest(sendOtpRequest.type, sendOtpSaga);
+  yield takeLatest(verifyOtpRequest.type, verifyOtpSaga);
 }

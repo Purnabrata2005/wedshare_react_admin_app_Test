@@ -15,6 +15,14 @@ export interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  otpSent: boolean;
+  otpLoading: boolean;
+  otpError: string | null;
+}
+
+export interface OAuthSuccessPayload {
+  token: string;
+  user: User;
 }
 
 //  LOGIN PAYLOAD
@@ -42,7 +50,27 @@ const initialState: AuthState = {
   token: null,
   loading: false,
   error: null,
+  otpSent: false,
+  otpLoading: false,
+  otpError: null,
 };
+
+// OTP SEND PAYLOAD
+export interface SendOtpPayload {
+  recipient: string;
+  recipientType: number;
+  onSuccess?: () => void;
+  onError?: (msg: string) => void;
+}
+
+// OTP VERIFY PAYLOAD
+export interface VerifyOtpPayload {
+  recipient: string;
+  recipientType: number;
+  otp: string;
+  onSuccess?: () => void;
+  onError?: (msg: string) => void;
+}
 
 const authSlice = createSlice({
   name: "auth",
@@ -50,9 +78,7 @@ const authSlice = createSlice({
   reducers: {
     //  LOGIN REQUEST (Saga listens to this)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    loginAction: (_state, _action: PayloadAction<LoginPayload>) => {
-      
-    },
+    loginAction: (_state, _action: PayloadAction<LoginPayload>) => {},
 
     loginSuccess: (
       state,
@@ -83,6 +109,17 @@ const authSlice = createSlice({
       state.loading = false;
     },
 
+    /* ---------- GOOGLE OAUTH RESULT ---------- */
+    oauthLoginSuccess: (
+      state,
+      action: PayloadAction<OAuthSuccessPayload>
+    ) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.loading = false;
+      state.error = null;
+    },
+
     //  COMMON
     setLoading: (state) => {
       state.loading = true;
@@ -103,7 +140,6 @@ const authSlice = createSlice({
     initializeAuth: (state) => {
       const token = localStorage.getItem("token");
       const userStr = localStorage.getItem("user");
-      
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
@@ -115,6 +151,43 @@ const authSlice = createSlice({
           localStorage.removeItem("user");
         }
       }
+    },
+
+    // SEND OTP
+    sendOtpRequest: (state) => {
+      state.otpLoading = true;
+      state.otpError = null;
+      state.otpSent = false;
+    },
+    sendOtpSuccess: (state) => {
+      state.otpLoading = false;
+      state.otpSent = true;
+      state.otpError = null;
+    },
+    sendOtpFailure: (state, action: PayloadAction<string>) => {
+      state.otpLoading = false;
+      state.otpError = action.payload;
+      state.otpSent = false;
+    },
+
+    // VERIFY OTP
+    verifyOtpRequest: (state) => {
+      state.otpLoading = true;
+      state.otpError = null;
+    },
+    verifyOtpSuccess: (
+      state,
+      action: PayloadAction<{ user: User; token: string }>
+    ) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.otpLoading = false;
+      state.otpError = null;
+      state.otpSent = false;
+    },
+    verifyOtpFailure: (state, action: PayloadAction<string>) => {
+      state.otpLoading = false;
+      state.otpError = action.payload;
     },
   },
 });
@@ -130,6 +203,13 @@ export const {
   setError,
   logoutAction,
   initializeAuth,
+  oauthLoginSuccess,
+  sendOtpRequest,
+  sendOtpSuccess,
+  sendOtpFailure,
+  verifyOtpRequest,
+  verifyOtpSuccess,
+  verifyOtpFailure,
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -81,10 +81,10 @@ export const Footer = ({
   legalLinks = defaultLegalLinks,
 }: FooterProps) => {
   return (
-    <section className="py-16 bg-muted/40">
+    <section className="py-10 bg-muted/40">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left w-full lg:w-1/3">
+        <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-4 items-center lg:items-start text-center lg:text-left w-full lg:w-1/3">
             <div className="flex items-center gap-2 justify-center lg:justify-start">
               <a href={logo.url}>
                 <img
@@ -109,15 +109,16 @@ export const Footer = ({
               ))}
             </ul>
           </div>
-          <div className="grid w-full gap-8 md:grid-cols-3 lg:gap-16 mt-8 lg:mt-0">
+          <div className="flex w-full gap-4 sm:gap-8 lg:gap-12 mt-6 lg:mt-0 overflow-x-auto pb-2 text-center sm:text-left">
             {sections.map((section, sectionIdx) => (
-              <div key={sectionIdx}>
-                <h3 className="mb-4 font-bold text-primary/90">{section.title}</h3>
-                <ul className="space-y-3 text-sm text-muted-foreground">
+              <div key={sectionIdx} className="min-w-[150px] flex-shrink-0">
+                <h3 className="mb-2 font-semibold text-primary/90 text-base">{section.title}</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   {section.links.map((link, linkIdx) => (
                     <li
                       key={linkIdx}
-                      className="font-medium hover:text-primary">
+                      className="font-medium hover:text-primary"
+                    >
                       <a href={link.href}>{link.name}</a>
                     </li>
                   ))}
@@ -126,9 +127,9 @@ export const Footer = ({
             ))}
           </div>
         </div>
-        <div className="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t py-8 text-xs font-medium text-muted-foreground text-center md:text-left">
+        <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-t py-6 text-xs font-medium text-muted-foreground text-center md:text-left">
           <p className="order-2 md:order-1 w-full md:w-auto">{copyright}</p>
-          <ul className="order-1 md:order-2 flex flex-col md:flex-row gap-2 md:gap-6 w-full md:w-auto justify-center md:justify-end">
+          <ul className="order-1 md:order-2 flex flex-col md:flex-row gap-1 md:gap-6 w-full md:w-auto justify-center md:justify-end">
             {legalLinks.map((link, idx) => (
               <li key={idx} className="hover:text-primary">
                 <a href={link.href}> {link.name}</a>
