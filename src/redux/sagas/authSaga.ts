@@ -1,6 +1,5 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import AxiosInstance from "../service/axiosInstance";
-import AxiosGoogle from "../service/axiosGoogle";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
 
@@ -30,7 +29,7 @@ import {
 function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
   try {
     yield call(() =>
-      AxiosGoogle.post("/login/send-otp", {
+      AxiosInstance.post("/login/send-otp", {
         recipient: action.payload.recipient,
         recipientType: action.payload.recipientType,
       })
@@ -52,7 +51,7 @@ function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
 function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): any {
   try {
     const response = yield call(() =>
-      AxiosGoogle.post("/login/otp", {
+      AxiosInstance.post("/login/otp", {
         recipient: action.payload.recipient,
         recipientType: action.payload.recipientType,
         otp: action.payload.otp,
@@ -92,51 +91,50 @@ function* loginSaga(action: PayloadAction<LoginPayload>): any {
   try {
     yield put(setLoading());
 
-    const response = yield call(() =>
-      AxiosInstance.post("/login", {
-        username: action.payload.username,
-        password: action.payload.password,
-      })
-    );
-
-    // Backend response structure:
-    // { data: { userId, username, fullname, phoneNumber, email, roles, access_token } }
-    const api = response.data?.data;
-
-    if (!api) throw new Error("Invalid API response");
-
-    const token = api.access_token;
-    if (!token) throw new Error("Token missing!");
-
-    const user = {
-      id: api.userId,
-      username: api.username,
-      fullname: api.fullname,
-      phoneNumber: api.phoneNumber,
-      email: api.email,
-      roles: api.roles,
-      profile: null,
-    };
-
-    // Save token & user locally
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    // Dispatch success
-    yield put(loginSuccess({ user, token }));
-
-    // Call success callback if provided
-    if (action.payload.onSuccess) action.payload.onSuccess();
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Login failed";
-
-    yield put(loginFailure(message));
-
-    if (action.payload.onError) action.payload.onError(message);
+    try {
+      const response = yield call(() =>
+        AxiosInstance.post("/login", {
+          username: action.payload.username,
+          password: action.payload.password,
+        })
+      );
+      console.log("[LOGIN SAGA] Backend response:", response);
+      const api = response.data?.data;
+      if (!api) {
+        console.error("[LOGIN SAGA] Invalid API response", response);
+        throw new Error("Invalid API response");
+      }
+      const token = api.access_token;
+      if (!token) {
+        console.error("[LOGIN SAGA] Token missing!", api);
+        throw new Error("Token missing!");
+      }
+      const user = {
+        id: api.userid || api.userId,
+        username: api.username,
+        fullname: api.fullname,
+        phoneNumber: api.phonenumber || api.phoneNumber,
+        email: api.email,
+        roles: api.roles,
+        profile: null,
+      };
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      yield put(loginSuccess({ user, token }));
+      if (action.payload.onSuccess) action.payload.onSuccess();
+    } catch (error: any) {
+      console.error("[LOGIN SAGA] Login error:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Login failed";
+      yield put(loginFailure(message));
+      if (action.payload.onError) action.payload.onError(message);
+    }
+  } catch (error) {
+    // Top-level error handling (optional)
+    console.error("[LOGIN SAGA] Unexpected error:", error);
   }
 }
 
