@@ -165,10 +165,8 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
   const weddingId = batch[0].weddingId
 
   // Get albumPublicKey and processPublicKey from Redux store
-  const weddings: Wedding[] = yield select((state: any) => state.weddings?.weddings || [])
   const processPublicKey: string | null = yield select((state: any) => state.weddings?.processPublicKey || null)
-  const currentWedding = weddings.find((w) => w.weddingId === weddingId || w.id === weddingId)
-  const albumPublicKey = currentWedding?.albumPublicKey || undefined
+  const albumPublicKey: string | null = yield select((state: any) => state.weddings?.albumPublicKey || null)
 
 
 
@@ -222,7 +220,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
         const encrypted = yield call(
           () => encryptPhotoIfNeeded(
             compressed,
-            albumPublicKey,  // From wedding in Redux
+            albumPublicKey ?? undefined,  // From wedding in Redux, ensure undefined not null
             processPublicKey ?? undefined  // From Redux, not env; ensure undefined not null
           )
         )

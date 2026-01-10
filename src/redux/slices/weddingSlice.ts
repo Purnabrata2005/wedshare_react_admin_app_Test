@@ -22,12 +22,14 @@ export interface Wedding {
 }
 
 
+
 interface WeddingState {
   weddings: Wedding[]
   selectedWedding: Wedding | null
   loading: boolean
   error: string | null
   processPublicKey: string | null
+  albumPublicKey: string | null
 }
 
 const initialState: WeddingState = {
@@ -36,6 +38,7 @@ const initialState: WeddingState = {
   loading: false,
   error: null,
   processPublicKey: null,
+  albumPublicKey: null,
 }
 
 const weddingSlice = createSlice({
@@ -45,13 +48,15 @@ const weddingSlice = createSlice({
     loadWeddingsRequest: (state) => {
       state.loading = true
     },
-    loadWeddingsSuccess: (state, action: PayloadAction<{ weddings: Wedding[]; processPublicKey?: string | null } | Wedding[]>) => {
+    loadWeddingsSuccess: (state, action: PayloadAction<{ weddings: Wedding[]; processPublicKey?: string | null; albumPublicKey?: string | null } | Wedding[]>) => {
       if (Array.isArray(action.payload)) {
         state.weddings = action.payload
         state.processPublicKey = null
+        state.albumPublicKey = null
       } else {
         state.weddings = action.payload.weddings
         state.processPublicKey = action.payload.processPublicKey || null
+        state.albumPublicKey = action.payload.albumPublicKey || null
       }
       state.loading = false
     },
