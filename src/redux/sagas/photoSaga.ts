@@ -254,7 +254,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
         // Only add to successful list if upload completed without errors
         successfullyUploadedKeys.push({ uuid: item.uuid, key: s3.key, originalFilename: item.originalFilename || item.uuid })
       } catch (err) {
-
+        console.error("[uploadBatchSaga] Error uploading photo:", err, item)
         item.retries += 1
         item.status = "failed"
         yield put(updatePhotoStatus({ weddingId: item.weddingId, uuid: item.uuid, status: "failed" }))
@@ -272,7 +272,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
       yield call(registerMetadataForPhotosSaga, weddingId, successfullyUploadedKeys)
     }
   } catch (err) {
-
+    console.error("[uploadBatchSaga] Batch upload error:", err, batch)
   }
 }
 
@@ -348,6 +348,7 @@ function* registerMetadataForPhotosSaga(
       try {
         yield call(() => photoDB.queue.delete(photo.uuid))
       } catch (deleteErr) {
+        console.error('[registerMetadataForPhotosSaga] Error deleting photo from queue:', deleteErr, photo)
       }
       // Record globally to prevent re-enqueue attempts from generating duplicate metadata
       uploadedPhotoIds.add(photo.uuid)
@@ -403,7 +404,7 @@ function* registerMetadataForPhotosSaga(
       }
     }
   } catch (err) {
-
+    console.error('[registerMetadataForPhotosSaga] Error:', err, weddingId, photos)
     // Even on error, close the modal
     // Always try to clear queue and update Redux on error
     try {
