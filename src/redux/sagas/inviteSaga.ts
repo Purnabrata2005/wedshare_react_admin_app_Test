@@ -19,7 +19,7 @@ function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Gene
 
     // Make API call to send invitations
     const response = yield call(() =>
-      AxiosWedding.post("/emails/send", {
+      AxiosWedding.post("/invitations/create", {
         emails,
         data,
       })

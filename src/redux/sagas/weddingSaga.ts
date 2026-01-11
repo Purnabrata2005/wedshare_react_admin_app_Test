@@ -34,7 +34,7 @@ function* fetchWeddingsSaga(): SagaIterator {
       return
     }
 
-    const res = yield call(AxiosWedding.get, `weddings/${userId}/weddings`)
+    const res = yield call(AxiosWedding.get, `/weddings/users/fetch-weddings`)
     // Normalize response so frontend has consistent id / weddingId
     const list: any[] = res?.data?.weddings || res?.data || []
     const processPublicKey = res?.data?.processPublicKey || null
@@ -74,7 +74,7 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
     const userId: string | undefined = yield select((state: any) => state.auth?.user?.id)
     if (userId) {
       try {
-        const listRes = yield call(AxiosWedding.get, `weddings/${userId}/weddings`)
+        const listRes = yield call(AxiosWedding.get, `/weddings/users/fetch-weddings`)
         const list: any[] = listRes?.data?.weddings || listRes?.data || []
         const processPublicKey = listRes?.data?.processPublicKey || null
         

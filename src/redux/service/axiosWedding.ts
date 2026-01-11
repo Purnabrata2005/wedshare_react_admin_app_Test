@@ -5,6 +5,7 @@ const AxiosWedding = axios.create({
     import.meta.env.VITE_API_BASE_URL1 ,
   headers: {
     "Content-Type": "application/json",
+    "Authorization": `Bearer ${localStorage.getItem("token")}`,
   },
 });
 
