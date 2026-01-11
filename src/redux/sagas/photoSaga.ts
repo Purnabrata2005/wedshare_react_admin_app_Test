@@ -4,7 +4,7 @@ import AxiosWedding from "@/redux/service/axiosWedding"
 import imageCompression from "browser-image-compression"
 import { photoDB, type PendingPhoto } from "@/DB/uploadDB"
 import { encryptPhotoIfNeeded } from "@/crypto/photoEncryption"
-import type { Wedding } from "@/redux/slices/weddingSlice"
+
 
 
 
@@ -15,9 +15,8 @@ import {
   uploadPhotosFailure,
   updatePhotoProgress,
   updatePhotoStatus,
-  addUploadedPhotos,
 } from "@/redux/slices/photoSlice"
-import type { UploadPhotosPayload, UploadedPhotoResponse } from "@/redux/slices/photoSlice"
+import type { UploadPhotosPayload,  } from "@/redux/slices/photoSlice"
 import { store } from "@/redux/store" // ensure your store exports this
 
 const RETRY_INTERVAL = 5000
