@@ -38,13 +38,15 @@ function* fetchWeddingsSaga(): SagaIterator {
     // Normalize response so frontend has consistent id / weddingId
     const list: any[] = res?.data?.weddings || res?.data || []
     const processPublicKey = res?.data?.processPublicKey || null
-    const albumPublicKey = res?.data?.albumPublicKey || null
+    
     const normalized = list.map((w: any) => ({
       ...w,
       id: w.id || w._id || w.weddingId || "",
       weddingId: w.weddingId || w.id || w._id || "",
+      processPublicKey: processPublicKey, // Add root-level processPublicKey to each wedding
+      albumPublicKey: w.albumPublicKey || null, // Keep per-wedding albumPublicKey
     }))
-    yield put(loadWeddingsSuccess({ weddings: normalized, processPublicKey, albumPublicKey }))
+    yield put(loadWeddingsSuccess({ weddings: normalized }))
   } catch (err: any) {
     yield put(loadWeddingsFailure(err.message || "Failed to load weddings"))
   }
@@ -75,13 +77,15 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
         const listRes = yield call(AxiosWedding.get, `weddings/${userId}/weddings`)
         const list: any[] = listRes?.data?.weddings || listRes?.data || []
         const processPublicKey = listRes?.data?.processPublicKey || null
-        const albumPublicKey = listRes?.data?.albumPublicKey || null
+        
         const normalized = list.map((w: any) => ({
           ...w,
           id: w.id || w._id || w.weddingId || "",
           weddingId: w.weddingId || w.id || w._id || "",
+          processPublicKey: processPublicKey,
+          albumPublicKey: w.albumPublicKey || null,
         }))
-        yield put(loadWeddingsSuccess({ weddings: normalized, processPublicKey, albumPublicKey }))
+        yield put(loadWeddingsSuccess({ weddings: normalized }))
       } catch (err: any) {
         yield put(loadWeddingsFailure(err.message || "Failed to refresh weddings"))
       }

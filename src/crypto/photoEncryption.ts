@@ -17,28 +17,24 @@ export async function encryptPhotoIfNeeded(
   albumPublicKey?: string,
   pythonPublicKey?: string
 ): Promise<EncryptedPhoto> {
-  // Passthrough if no encryption required
-  if (!albumPublicKey && !pythonPublicKey) {
-    return { encryptedBlob: file }
-  }
-
+  // Always generate a unique photoKey (AES-256-GCM) for each photo
   // Read photo into ArrayBuffer
   const buffer = await file.arrayBuffer()
 
-  // Generate AES-256-GCM key
-  const aesKey = await crypto.subtle.generateKey(
+  // Generate AES-256-GCM key (photoKey)
+  const photoKey = await crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
     true,
-    ["encrypt"]
+    ["encrypt", "decrypt"]
   )
 
   // Generate IV (12 bytes recommended for GCM)
   const iv = crypto.getRandomValues(new Uint8Array(12))
 
-  // Encrypt photo
+  // Encrypt photo with photoKey
   const encrypted = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
-    aesKey,
+    photoKey,
     buffer
   )
 
@@ -47,14 +43,20 @@ export async function encryptPhotoIfNeeded(
   combined.set(iv, 0)
   combined.set(new Uint8Array(encrypted), iv.byteLength)
 
+  // Wrap the photoKey with albumPublicKey and processPublicKey if provided
+  let wrappedPhotoKey: string | undefined = undefined
+  let wrappedProcessKey: string | undefined = undefined
+  if (albumPublicKey) {
+    wrappedPhotoKey = await wrapKey(photoKey, albumPublicKey)
+  }
+  if (pythonPublicKey) {
+    wrappedProcessKey = await wrapKey(photoKey, pythonPublicKey)
+  }
+
   return {
     encryptedBlob: new Blob([combined]),
-    wrappedPhotoKey: albumPublicKey
-      ? await wrapKey(aesKey, albumPublicKey)
-      : undefined,
-    wrappedProcessKey: pythonPublicKey
-      ? await wrapKey(aesKey, pythonPublicKey)
-      : undefined,
+    wrappedPhotoKey,
+    wrappedProcessKey,
   }
 }
 

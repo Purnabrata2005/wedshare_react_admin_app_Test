@@ -160,15 +160,32 @@ function* processUploadQueue(): Generator<any, void, any> {
 
 //  Upload a batch of up to 10 photos
 function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
-  if (!batch.length) return
+  if (!batch.length) return;
 
-  const weddingId = batch[0].weddingId
+  const weddingId = batch[0].weddingId;
 
   // Get albumPublicKey and processPublicKey from Redux store
-  const processPublicKey: string | null = yield select((state: any) => state.weddings?.processPublicKey || null)
-  const albumPublicKey: string | null = yield select((state: any) => state.weddings?.albumPublicKey || null)
+  const state = yield select();
+  const weddings = state?.weddings?.weddings || [];
+  const currentWedding = weddings.find(
+    (w: any) => w.weddingId === weddingId || w.id === weddingId
+  );
+  const albumPublicKey = currentWedding?.albumPublicKey;
+  const processPublicKey = currentWedding?.processPublicKey;
 
+  // Log the keys before validation
+  console.log("albumPublicKey for wedding", weddingId, ":", albumPublicKey);
+  console.log("processPublicKey:", processPublicKey);
 
+  if (!albumPublicKey || typeof albumPublicKey !== "string" || albumPublicKey.trim() === "") {
+    console.error("No valid albumPublicKey found for wedding:", weddingId);
+    return;
+  }
+
+  if (!processPublicKey || typeof processPublicKey !== "string" || processPublicKey.trim() === "") {
+    console.error("No valid processPublicKey found for wedding:", weddingId);
+    return;
+  }
 
   // Filter out any photos whose metadata were somehow already registered (defensive)
   const effectiveBatch = batch.filter((p) => !uploadedPhotoIds.has(p.uuid))
@@ -280,20 +297,11 @@ function* registerMetadataForPhotosSaga(
   photos: Array<{ uuid: string; key: string; originalFilename: string }>
 ): Generator<any, void, any> {
   try {
-    // include the current user's id as `uploadedBy` so backend validation passes
-    const state = store.getState()
-    const uploadedBy: string = (state?.auth?.user?.id as string) || ""
+    const state = store.getState();
+    const uploadedBy: string = (state?.auth?.user?.id as string) || "";
 
-    // Get albumPublicKey and processPublicKey from the wedding and Redux store
-    const weddings: Wedding[] = state?.weddings?.weddings || []
-    const currentWedding = weddings.find((w) => w.weddingId === weddingId || w.id === weddingId)
-    const albumPublicKey = currentWedding?.albumPublicKey || undefined
-
-
-    // For each photo, look up the corresponding item in Dexie to get crypto metadata
     const payload = [];
     for (const p of photos) {
-      // Try to get the item from Dexie queue (should exist if not yet deleted)
       let dbItem: PendingPhoto | undefined = undefined;
       try {
         dbItem = yield call(() => photoDB.queue.get(p.uuid));
@@ -301,120 +309,55 @@ function* registerMetadataForPhotosSaga(
         dbItem = undefined;
       }
 
-      const photoPayload = {
-        photoId: p.uuid,
+      payload.push({
         originalFilename: p.originalFilename,
+        photoId: p.uuid,
         storageKey: p.key,
         uploadedBy,
-        uploadSource: "ADMIN",
-        albumPublicKey: albumPublicKey || undefined,
-        wrappedPhotoKey: dbItem?.crypto?.wrappedPhotoKey || undefined,
-        wrappedAlbumPrivateKey: undefined,
-        wrappedProcessKey: dbItem?.crypto?.wrappedProcessKey || undefined,
-      };
-
-      // Log individual photo payload for debugging
-
-
-      payload.push(photoPayload);
+        uploadSource: "GUEST", // or "ADMIN" if you want
+        wrappedPhotoKey: dbItem?.crypto?.wrappedPhotoKey
+          ? String(dbItem.crypto.wrappedPhotoKey)
+          : "",
+        wrappedProcessKey: dbItem?.crypto?.wrappedProcessKey
+          ? String(dbItem.crypto.wrappedProcessKey)
+          : "",
+      });
     }
 
-    // Log the complete payload being sent to the API
+    if (payload.length > 0) {
+      // Log payload shape and sizes of wrapped keys
+      console.groupCollapsed(`[POST] weddings/${weddingId}/photos`);
+      console.log("payload length:", payload.length);
+      console.table(
+        payload.map(p => ({
+          originalFilename: p.originalFilename,
+          photoId: p.photoId,
+          storageKey: p.storageKey,
+          uploadedBy: p.uploadedBy,
+          uploadSource: p.uploadSource,
+          wrappedPhotoKey_len: p.wrappedPhotoKey?.length || 0,
+          wrappedProcessKey_len: p.wrappedProcessKey?.length || 0,
+        }))
+      );
+      console.log("raw payload:", payload);
+      console.groupEnd();
 
-
-
-    // Log the endpoint and response for easier debugging/verification
-    try {
-
-    } catch (e) {
-      // ignore logging errors
-    }
-
-    // Store the uploaded photos response in Redux
-    const uploadedPhotosResponse: UploadedPhotoResponse[] = payload.map((p) => ({
-      originalFilename: p.originalFilename,
-      storageKey: p.storageKey,
-      uploadedBy: p.uploadedBy,
-      uploadSource: p.uploadSource as "ADMIN",
-    }))
-    yield put(addUploadedPhotos({ weddingId, photos: uploadedPhotosResponse }))
-
-    // Mark all photos as having metadata registered and remove from queue
-
-    
-    for (const photo of photos) {
-      try {
-        yield call(() => photoDB.queue.delete(photo.uuid))
-      } catch (deleteErr) {
-        console.error('[registerMetadataForPhotosSaga] Error deleting photo from queue:', deleteErr, photo)
-      }
-      // Record globally to prevent re-enqueue attempts from generating duplicate metadata
-      uploadedPhotoIds.add(photo.uuid)
-    }
-
-    // Also delete any completed items that might be stuck in the queue
-    const completedItems: PendingPhoto[] = yield call(() =>
-      photoDB.queue.where("status").equals("completed").toArray()
-    )
-
-    for (const item of completedItems) {
-      yield call(() => photoDB.queue.delete(item.uuid))
-      uploadedPhotoIds.add(item.uuid)
-      
-    }
-
-    // Check if all uploads are complete after removing from queue
-    const remainingItems: PendingPhoto[] = yield call(() => photoDB.queue.toArray())
-
-    
-    // Close the modal - queue should be empty now
-    if (remainingItems.length === 0) {
-    
-      yield put(uploadPhotosCompleted())
-      hasUploadBeenRequested = false
-    } else {
-      // Fallback: If uploads are stuck, force clear queue and update Redux
-      const stuckItems = remainingItems.filter(item => item.status !== 'completed');
-      if (stuckItems.length > 0) {
-        console.warn('[PhotoSaga] Fallback: Force clearing stuck items from queue:', stuckItems);
-        for (const item of stuckItems) {
-          try {
-            yield call(() => photoDB.queue.delete(item.uuid));
-            console.log('[PhotoSaga] Fallback deleted stuck item:', item.uuid);
-          } catch (err) {
-            console.error('[PhotoSaga] Fallback error deleting stuck item:', item.uuid, err);
-          }
-        }
-        yield put(uploadPhotosCompleted());
-        hasUploadBeenRequested = false;
-      } else {
-        // Force complete if all remaining are completed status
-        const allCompleted = remainingItems.every(item => item.status === "completed")
-        if (allCompleted) {
-          // Delete all completed and close
-          for (const item of remainingItems) {
-            yield call(() => photoDB.queue.delete(item.uuid))
-           
-          }
-          yield put(uploadPhotosCompleted())
-          hasUploadBeenRequested = false
-        }
+      yield call(
+        AxiosWedding.post,
+        `weddings/${weddingId}/photos`,
+        payload
+      );
+      // After successful metadata registration, drop completed items from Dexie and mark as uploaded to prevent duplicates
+      yield all(
+        photos.map((p) => call(() => photoDB.queue.delete(p.uuid)))
+      );
+      for (const p of photos) {
+        uploadedPhotoIds.add(p.uuid);
       }
     }
   } catch (err) {
-    console.error('[registerMetadataForPhotosSaga] Error:', err, weddingId, photos)
-    // Even on error, close the modal
-    // Always try to clear queue and update Redux on error
-    try {
-      const allItems: PendingPhoto[] = yield call(() => photoDB.queue.toArray());
-      for (const item of allItems) {
-        yield call(() => photoDB.queue.delete(item.uuid));
-      }
-    } catch (cleanupErr) {
-      console.error('[PhotoSaga] Error clearing queue on error:', cleanupErr);
-    }
-    yield put(uploadPhotosCompleted());
-    hasUploadBeenRequested = false;
+    console.error('[registerMetadataForPhotosSaga] API error:', err);
+    // Optionally handle API error (retry, notify user, etc.)
   }
 }
 
