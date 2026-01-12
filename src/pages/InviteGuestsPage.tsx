@@ -243,7 +243,7 @@ export default function InviteGuestsPage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleEmailInput}
-                    className="flex-1 min-w-[200px] outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
+                    className="flex-1 min-w-[320px] sm:min-w-[420px] h-11 px-4 text-base outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
