@@ -9,9 +9,9 @@ import {
   loginSuccess,
   loginFailure,
 
-  registerAction,
-  registerSuccess,
-  registerFailure,
+  // registerAction,
+  // registerSuccess,
+  // registerFailure,
 
   verifySessionAction,
   logoutAction,
@@ -27,7 +27,7 @@ import {
 
   setLoading,
   type LoginPayload,
-  type RegisterPayload,
+  // type RegisterPayload,
   type SendOtpPayload,
   type VerifyOtpPayload,
 } from "../slices/authSlice";
@@ -74,35 +74,35 @@ function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, a
    REGISTER
 ======================= */
 
-function* registerSaga(action: PayloadAction<RegisterPayload>): Generator<any, void, any> {
-  try {
-    yield put(setLoading());
+// function* registerSaga(action: PayloadAction<RegisterPayload>): Generator<any, void, any> {
+//   try {
+//     yield put(setLoading());
 
-    yield call(() =>
-      AxiosInstance.post("/register", {
-        fullname: action.payload.fullname,
-        lastName: action.payload.lastName,
-        email: action.payload.email,
-        password: action.payload.password,
-        phoneNumber: action.payload.phoneNumber,
-        role: action.payload.role,
-      })
-    );
+//     yield call(() =>
+//       AxiosInstance.post("/register", {
+//         fullname: action.payload.fullname,
+//         lastName: action.payload.lastName,
+//         email: action.payload.email,
+//         password: action.payload.password,
+//         phoneNumber: action.payload.phoneNumber,
+//         role: action.payload.role,
+//       })
+//     );
 
-    yield put(registerSuccess());
+//     yield put(registerSuccess());
 
-    // Auto-login via cookie
-    const user = yield call(fetchCurrentUser);
-    yield put(loginSuccess(user));
+//     // Auto-login via cookie
+//     const user = yield call(fetchCurrentUser);
+//     yield put(loginSuccess(user));
 
-    action.payload.onSuccess?.();
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message || "Registration failed";
-    yield put(registerFailure(message));
-    action.payload.onError?.(message);
-  }
-}
+//     action.payload.onSuccess?.();
+//   } catch (error: any) {
+//     const message =
+//       error?.response?.data?.message || "Registration failed";
+//     yield put(registerFailure(message));
+//     action.payload.onError?.(message);
+//   }
+// }
 
 /* =======================
    OTP
@@ -182,7 +182,7 @@ function* logoutSaga(): Generator<any, void, any> {
 
 export default function* authSaga(): Generator<any, void, any> {
   yield takeLatest(loginAction.type, loginSaga);
-  yield takeLatest(registerAction.type, registerSaga);
+  // yield takeLatest(registerAction.type, registerSaga);
   yield takeLatest(sendOtpRequest.type, sendOtpSaga);
   yield takeLatest(verifyOtpRequest.type, verifyOtpSaga);
   yield takeLatest(verifySessionAction.type, verifySessionSaga);

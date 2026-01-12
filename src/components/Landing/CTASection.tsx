@@ -20,7 +20,7 @@ export function CTASection() {
           </p>
         </AnimatedContainer>
         <AnimatedContainer delay={0.4}>
-          <Button size="lg" onClick={() => navigate(ROUTES.SIGNUP)}>
+          <Button size="lg" onClick={() => navigate(ROUTES.LOGIN)}>
             Get Started for Free
           </Button>
         </AnimatedContainer>

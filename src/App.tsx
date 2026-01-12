@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { verifySessionAction } from "@/redux/slices/authSlice"
 import AdvertisementPage from "@/pages/AdvertisementPage"
 import LoginPage from "@/pages/LoginPage"
-import RegisterPage from "@/pages/RegisterPage"
 import ProfilePage from "@/pages/ProfilePage"
 import DashboardPage from "@/pages/DashboardPage"
 import WeddingDetailsPage from "@/pages/WeddingDetailsPage"
@@ -59,7 +58,6 @@ function AppRoutes() {
       {/* Auth Routes with Layout */}
       <Route element={<AuthLayout />}>
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.SIGNUP} element={<RegisterPage />} />
         <Route path="/auth/success" element={<AuthCallbackPage />} />
       </Route>
 

@@ -48,7 +48,7 @@ export default function AdvertisementPage() {
       <FloatingActionButton
         position="bottom-right"
         size="md"
-        onClick={() => navigate(ROUTES.SIGNUP)}
+        onClick={() => navigate(ROUTES.LOGIN)}
         className="!rounded-full !w-auto !h-auto px-6 py-3">
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-semibold">Get the App</span>

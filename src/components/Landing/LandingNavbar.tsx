@@ -108,7 +108,7 @@ export function LandingNavbar({ navItems = [] }: NavbarProps) {
       </DropdownMenuItem>
       <DropdownMenuItem
         className="dark:text-wedshare-dark-text-primary cursor-pointer"
-        onClick={() => navigate(ROUTES.SIGNUP)}>
+        onClick={() => navigate(ROUTES.LOGIN)}>
         Sign Up
       </DropdownMenuItem>
       <DropdownMenuSeparator />
@@ -241,7 +241,7 @@ export function LandingNavbar({ navItems = [] }: NavbarProps) {
                       <DropdownMenuItem
                         className="dark:text-wedshare-dark-text-primary cursor-pointer"
                         onClick={() => {
-                          navigate(ROUTES.SIGNUP);
+                          navigate(ROUTES.LOGIN);
                           setMobileMenuOpen(false);
                         }}>
                         Sign Up

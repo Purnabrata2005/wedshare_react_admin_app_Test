@@ -33,7 +33,7 @@ export function HeroSection() {
             <Button
               size="custom"
               className="text-lg font-bold"
-              onClick={() => navigate(ROUTES.SIGNUP)}>
+              onClick={() => navigate(ROUTES.LOGIN)}>
               Start Planning
             </Button>
             <Button
