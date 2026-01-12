@@ -20,6 +20,7 @@ import { useTheme } from "@/components/layout/theme-provider"
 import { useAppSelector, useAppDispatch } from "@/redux/hooks"
 import { loadWeddingsRequest, selectWedding } from "@/redux/slices/weddingSlice"
 import type { Wedding } from "@/redux/slices/weddingSlice"
+import ROUTES from "@/routePath"
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch()
@@ -42,17 +43,17 @@ export default function DashboardPage() {
 
   const handleSelectWedding = (wedding: Wedding) => {
     dispatch(selectWedding(wedding))
-    navigate('/wedding-details') // or your actual wedding details route path
+    navigate(ROUTES.WEDDING_DETAILS)
   }
 
   const handleEditWedding = (wedding: Wedding) => {
     dispatch(selectWedding(wedding))
-    navigate('/add-wedding')
+    navigate(ROUTES.ADD_WEDDING)
   }
 
   const handleAddWedding = () => {
     dispatch(clearSelection());
-    navigate('/add-wedding');
+    navigate(ROUTES.ADD_WEDDING);
   }
 
   const AvatarDropdown = () => (
