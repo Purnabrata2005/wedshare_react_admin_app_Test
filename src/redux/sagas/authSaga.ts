@@ -14,6 +14,8 @@ import {
   // registerFailure,
 
   verifySessionAction,
+  verifySessionSuccess,
+  verifySessionFailure,
   logoutAction,
   logoutSuccess,
 
@@ -155,9 +157,9 @@ function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): Generator<any,
 function* verifySessionSaga(): Generator<any, void, any> {
   try {
     const user = yield call(fetchCurrentUser);
-    yield put(loginSuccess(user));
+    yield put(verifySessionSuccess(user));
   } catch {
-    yield put(logoutSuccess());
+    yield put(verifySessionFailure());
   }
 }
 

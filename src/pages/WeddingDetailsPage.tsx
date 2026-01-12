@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Route, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +22,7 @@ import {
 } from "@/redux/slices/weddingSlice";
 import { formatDateSafe } from "@/lib/dateUtils";
 import { cn } from "@/lib/utils";
+import ROUTES from "@/routePath";
 
 export default function WeddingDetailsPage() {
   const navigate = useNavigate();
@@ -42,13 +43,13 @@ export default function WeddingDetailsPage() {
 
   const handleBack = () => {
     dispatch(clearSelection());
-    navigate(-1);
+    navigate(ROUTES.DASHBOARD);
   };
 
   const handleEdit = () => {
     if (wedding) {
       dispatch(selectWedding(wedding));
-      navigate("/add-wedding");
+      navigate(ROUTES.ADD_WEDDING);
     }
   };
 

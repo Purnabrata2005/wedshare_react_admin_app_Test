@@ -21,12 +21,15 @@ import AuthCallbackPage from "@/pages/AuthCallbackPage"
 function AppRoutes() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { loading } = useAppSelector((state) => state.auth)
+  const { loading, isAuthenticated } = useAppSelector((state) => state.auth)
 
-  // Verify session on app load
+  // Verify session on app load only if not already authenticated
   useEffect(() => {
-    dispatch(verifySessionAction())
-  }, [dispatch])
+    // Only verify session if we don't have auth state from persistence
+    if (!isAuthenticated) {
+      dispatch(verifySessionAction())
+    }
+  }, [dispatch, isAuthenticated])
 
   // Show loading screen while verifying session
   if (loading) {

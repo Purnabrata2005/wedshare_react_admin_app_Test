@@ -113,7 +113,20 @@ const authSlice = createSlice({
     },
 
     /* ---------- SESSION VERIFY ---------- */
-    verifySessionAction: () => {},
+    verifySessionAction: (state) => {
+      state.loading = true;
+    },
+    verifySessionSuccess: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.loading = false;
+      state.error = null;
+    },
+    verifySessionFailure: (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.user = null;
+    },
     logoutSuccess: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -170,6 +183,8 @@ export const {
   registerFailure,
 
   verifySessionAction,
+  verifySessionSuccess,
+  verifySessionFailure,
   logoutAction,
   logoutSuccess,
 
