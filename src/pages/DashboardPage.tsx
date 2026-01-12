@@ -41,8 +41,8 @@ export default function DashboardPage() {
   }
 
   const handleSelectWedding = (wedding: Wedding) => {
-    console.log("Selected wedding:", wedding)
-    // Navigate or perform other actions
+    dispatch(selectWedding(wedding))
+    navigate('/wedding-details') // or your actual wedding details route path
   }
 
   const handleEditWedding = (wedding: Wedding) => {
