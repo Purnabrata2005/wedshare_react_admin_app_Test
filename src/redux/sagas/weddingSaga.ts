@@ -15,17 +15,18 @@ import {
   updateWeddingFailure
 } from "../slices/weddingSlice"
 import AxiosWedding from "@/redux/service/axiosWedding"
+import type { RootState } from "../store";
 
 function* fetchWeddingsSaga(): SagaIterator {
   try {
     // Get userId from Redux state
-    let userId: string | undefined = yield select((state: any) => state.auth?.user?.id)
+    let userId: string | undefined = yield select((state: RootState) => state.auth?.user?.userid)
     
     // If userId is not available yet, wait for it (max 5 seconds)
     let attempts = 0;
     while (!userId && attempts < 50) {
       yield delay(100); // Wait 100ms using redux-saga delay
-      userId = yield select((state: any) => state.auth?.user?.id)
+      userId = yield select((state: RootState) => state.auth?.user?.userid);
       attempts++;
     }
 
@@ -42,7 +43,7 @@ function* fetchWeddingsSaga(): SagaIterator {
     const normalized = list.map((w: any) => ({
       ...w,
       id: w.id || w._id || w.weddingId || "",
-      weddingId: w.weddingId || w.id || w._id || "",
+      weddingId: w.weddingId || "",
       processPublicKey: processPublicKey, // Add root-level processPublicKey to each wedding
       albumPublicKey: w.albumPublicKey || null, // Keep per-wedding albumPublicKey
     }))
@@ -63,15 +64,15 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
     const normalizedCreated = created
       ? {
           ...created,
-          id: created.id || created._id || created.weddingId || action.payload?.weddingId || "",
-          weddingId: created.weddingId || created.id || created._id || action.payload?.weddingId || "",
+          id: created.id || created._id || "",
+          weddingId: created.weddingId || action.payload?.weddingId || "",
         }
       : null
 
     if (normalizedCreated) yield put(addWeddingSuccess(normalizedCreated))
     // After successfully adding a wedding, re-fetch the user's weddings
     // so the store has full wedding details (prevents null details in array)
-    const userId: string | undefined = yield select((state: any) => state.auth?.user?.id)
+    const userId: string | undefined = yield select((state: RootState) => state.auth?.user?.userid)
     if (userId) {
       try {
         const listRes = yield call(AxiosWedding.get, `/weddings/users/fetch-weddings`)
@@ -80,8 +81,8 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
         
         const normalized = list.map((w: any) => ({
           ...w,
-          id: w.id || w._id || w.weddingId || "",
-          weddingId: w.weddingId || w.id || w._id || "",
+          id: w.id || w._id ||  "",
+          weddingId: w.weddingId ||  "",
           processPublicKey: processPublicKey,
           albumPublicKey: w.albumPublicKey || null,
         }))
