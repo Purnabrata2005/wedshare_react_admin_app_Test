@@ -42,6 +42,7 @@ export default function DashboardPage() {
   }
 
   const handleSelectWedding = (wedding: Wedding) => {
+    console.log("Wedding selected:", wedding)
     dispatch(selectWedding(wedding))
     navigate(ROUTES.WEDDING_DETAILS)
   }
