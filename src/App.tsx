@@ -1,4 +1,7 @@
+import { useEffect } from "react"
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
+import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { verifySessionAction } from "@/redux/slices/authSlice"
 import AdvertisementPage from "@/pages/AdvertisementPage"
 import LoginPage from "@/pages/LoginPage"
 import RegisterPage from "@/pages/RegisterPage"
@@ -16,59 +19,79 @@ import ROUTES from "./routePath"
 
 import AuthCallbackPage from "@/pages/AuthCallbackPage"
 
-
-// Wrapper component to handle navigation for AddWeddingForm
-function AddWeddingPage() {
+function AppRoutes() {
   const navigate = useNavigate()
-  
-  const handleSave = () => {
-    navigate(ROUTES.DASHBOARD)
+  const dispatch = useAppDispatch()
+  const { loading } = useAppSelector((state) => state.auth)
+
+  // Verify session on app load
+  useEffect(() => {
+    dispatch(verifySessionAction())
+  }, [dispatch])
+
+  // Show loading screen while verifying session
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
   }
-  
-  const handleBack = () => {
-    navigate(-1)
+
+  // Wrapper component to handle navigation for AddWeddingForm
+  function AddWeddingPage() {
+    const handleSave = () => {
+      navigate(ROUTES.DASHBOARD)
+    }
+    
+    const handleBack = () => {
+      navigate(-1)
+    }
+    
+    return <AddWeddingForm onSave={handleSave} onBack={handleBack} />
   }
-  
-  return <AddWeddingForm onSave={handleSave} onBack={handleBack} />
+
+  return (
+    <Routes>
+      {/* Home Route */}
+      <Route path={ROUTES.HOME} element={<AdvertisementPage />} />
+
+      {/* Auth Routes with Layout */}
+      <Route element={<AuthLayout />}>
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route path={ROUTES.SIGNUP} element={<RegisterPage />} />
+        <Route path="/auth/success" element={<AuthCallbackPage />} />
+      </Route>
+
+      {/* Profile Route */}
+      <Route path={ROUTES.PROFILE} element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+      {/* Dashboard Route */}
+      <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+
+      {/* Add Wedding Form Route */}
+      <Route path={ROUTES.ADD_WEDDING} element={<ProtectedRoute><AddWeddingPage /></ProtectedRoute>} />
+
+      {/* Wedding Details Route */}
+      <Route path={ROUTES.WEDDING_DETAILS} element={<ProtectedRoute><WeddingDetailsPage /></ProtectedRoute>} />
+
+      {/* Photo Upload Route */}
+      <Route path={ROUTES.PHOTO_UPLOAD} element={<ProtectedRoute><PhotoUploadPage /></ProtectedRoute>} />
+
+      {/* Invite Guests Route */}
+      <Route path={ROUTES.INVITE_GUESTS} element={<ProtectedRoute><InviteGuestsPage /></ProtectedRoute>} />
+
+      {/* 404 Not Found Route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  )
 }
 
 export default function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
-        <Routes>
-          {/* Home Route */}
-          <Route path={ROUTES.HOME} element={<AdvertisementPage />} />
-
-          {/* Auth Routes with Layout */}
-          <Route element={<AuthLayout />}>
-            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-            <Route path={ROUTES.SIGNUP} element={<RegisterPage />} />
-            {/* Google OAuth Callback Route */}
-            <Route path="/auth/success" element={<AuthCallbackPage />} />
-          </Route>
-
-          {/* Profile Route */}
-          <Route path={ROUTES.PROFILE} element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-
-          {/* Dashboard Route */}
-          <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-
-          {/* Add Wedding Form Route */}
-          <Route path={ROUTES.ADD_WEDDING} element={<ProtectedRoute><AddWeddingPage /></ProtectedRoute>} />
-
-          {/* Wedding Details Route */}
-          <Route path={ROUTES.WEDDING_DETAILS} element={<ProtectedRoute><WeddingDetailsPage /></ProtectedRoute>} />
-
-          {/* Photo Upload Route */}
-          <Route path={ROUTES.PHOTO_UPLOAD} element={<ProtectedRoute><PhotoUploadPage /></ProtectedRoute>} />
-
-          {/* Invite Guests Route */}
-          <Route path={ROUTES.INVITE_GUESTS} element={<ProtectedRoute><InviteGuestsPage /></ProtectedRoute>} />
-
-          {/* 404 Not Found Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </ThemeProvider>
   )

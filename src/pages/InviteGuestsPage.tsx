@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { Mail, Trash2, Users, Send, Plus } from "lucide-react"
+import { Mail, Trash2, Users, Send, Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -79,28 +79,52 @@ export default function InviteGuestsPage() {
     navigate("/dashboard", { replace: true })
   }
 
-  const [guestEmails, setGuestEmails] = useState("")
+  const [guestEmails, setGuestEmails] = useState<string[]>([])
+  const [inputValue, setInputValue] = useState("")
   const [eventType, setEventType] = useState<"marriage" | "reception" | "both">("both")
 
-  const handleAddGuests = () => {
-    const emails = guestEmails
-      .split(/[\n,]+/)
-      .map((email) => email.trim().toLowerCase())
-      .filter((email) => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+  }
 
-    if (emails.length === 0) {
-      alert("Please enter valid email addresses")
+  const handleEmailInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const value = inputValue.trim()
+
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault()
+
+      if (value && isValidEmail(value)) {
+        if (!guestEmails.includes(value.toLowerCase())) {
+          setGuestEmails([...guestEmails, value.toLowerCase()])
+          setInputValue("")
+        } else {
+          alert("This email is already added")
+        }
+      } else if (value) {
+        alert("Please enter a valid email address")
+      }
+    }
+  }
+
+  const removeEmail = (email: string) => {
+    setGuestEmails(guestEmails.filter((e) => e !== email))
+  }
+
+  const handleAddGuests = () => {
+    if (guestEmails.length === 0) {
+      alert("Please add at least one email address")
       return
     }
 
-    const newGuests: GuestItem[] = emails.map((email) => ({
+    const newGuests: GuestItem[] = guestEmails.map((email) => ({
       id: Date.now() + Math.random(),
       email,
       eventType,
     }))
 
     dispatch(addGuests(newGuests))
-    setGuestEmails("")
+    setGuestEmails([])
+    setInputValue("")
   }
 
   const handleRemoveGuest = (id: number) => {
@@ -196,14 +220,32 @@ export default function InviteGuestsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Email Input */}
-              <div className="space-y-2">
-                <textarea
-                  placeholder="Enter email addresses separated by comma or new line&#10;(e.g., john@example.com, jane@example.com)"
-                  value={guestEmails}
-                  onChange={(e) => setGuestEmails(e.target.value)}
-                  className="w-full min-h-28 px-4 py-3 rounded-xl border-2 border-input bg-background resize-none transition-all duration-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
-                />
+              {/* Email Input with Chips */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2 p-3 rounded-xl border-2 border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-300">
+                  {guestEmails.map((email) => (
+                    <div
+                      key={email}
+                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary text-primary text-sm"
+                    >
+                      <span>{email}</span>
+                      <button
+                        onClick={() => removeEmail(email)}
+                        className="hover:text-primary/70 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <input
+                    type="email"
+                    placeholder="Type email and press space or enter..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleEmailInput}
+                    className="flex-1 min-w-[200px] outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
               </div>
 
               {/* Event Type Selection */}
@@ -245,11 +287,12 @@ export default function InviteGuestsPage() {
               {/* Add Button */}
               <Button
                 onClick={handleAddGuests}
+                disabled={guestEmails.length === 0}
                 className="w-full gap-2"
                 size="lg"
               >
                 <Plus className="w-5 h-5" />
-                Add Guests
+                Add Guests ({guestEmails.length})
               </Button>
             </CardContent>
           </Card>

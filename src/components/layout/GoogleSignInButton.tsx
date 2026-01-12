@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export default function GoogleSignInButton() {
   const handleGoogleSignIn = () => {
     // Backend endpoint that starts Google OAuth
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/login/google-auth`;
   };
 
   return (

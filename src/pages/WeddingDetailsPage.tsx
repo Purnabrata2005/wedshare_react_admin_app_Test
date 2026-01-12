@@ -85,7 +85,6 @@ export default function WeddingDetailsPage() {
       {/* Header Section */}
       <Navbar
         title="Wedding Details"
-        subtitle={`${wedding.brideName} & ${wedding.groomName}`}
         showBackButton
         onBackClick={handleBack}
       >
