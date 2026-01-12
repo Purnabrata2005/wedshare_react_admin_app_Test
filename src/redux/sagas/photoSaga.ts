@@ -297,7 +297,7 @@ function* registerMetadataForPhotosSaga(
 ): Generator<any, void, any> {
   try {
     const state = store.getState();
-    const uploadedBy: string = (state?.auth?.user?.id as string) || "";
+    const uploadedBy: string = (state.auth.user?.userid as string) || "";
 
     const payload = [];
     for (const p of photos) {
@@ -313,7 +313,7 @@ function* registerMetadataForPhotosSaga(
         photoId: p.uuid,
         storageKey: p.key,
         uploadedBy,
-        uploadSource: "GUEST", // or "ADMIN" if you want
+        uploadSource: "ADMIN", // or "ADMIN" if you want
         wrappedPhotoKey: dbItem?.crypto?.wrappedPhotoKey
           ? String(dbItem.crypto.wrappedPhotoKey)
           : "",

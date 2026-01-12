@@ -83,7 +83,7 @@ const convertDateToYYYYMMDD = (dateString: string): string => {
 export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const userId = useAppSelector((state) => state.auth.user?.id)
+  const userId = useAppSelector((state) => state.auth.user?.userid)
   const { weddings, selectedWedding } = useAppSelector((state) => state.weddings)
   const isEditMode = !!selectedWedding
 

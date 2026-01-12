@@ -1,47 +1,28 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import axios from "axios";
-import ROUTES from "../routePath";
-import { oauthLoginSuccess } from "@/redux/slices/authSlice";
 
-const getCookie = (name: string) => {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
-};
+import { useAppDispatch } from "@/redux/hooks";
+import { verifySessionAction } from "@/redux/slices/authSlice";
+import ROUTES from "@/routePath";
 
 export default function AuthCallbackPage() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    const run = async () => {
-      try {
-        const accessToken = getCookie("accessToken");
-        if (!accessToken) throw new Error("No access token in cookies");
+    // Google OAuth has already set the HttpOnly cookie.
+    // We just need to verify the session.
+    dispatch(verifySessionAction());
 
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/login/verify`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-            withCredentials: true,
-          }
-        );
-
-        dispatch(
-          oauthLoginSuccess({
-            token: accessToken,
-            user: data?.data, // API returns user info in data.data
-          })
-        );
-        navigate(ROUTES.DASHBOARD, { replace: true });
-      } catch {
-        navigate(ROUTES.LOGIN, { replace: true });
-      }
-    };
-
-    run();
+    // Redirect immediately; route guards will handle auth state
+    navigate(ROUTES.DASHBOARD, { replace: true });
   }, [dispatch, navigate]);
 
-  return null; // nothing rendered
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-sm text-muted-foreground">
+        Signing you in…
+      </p>
+    </div>
+  );
 }

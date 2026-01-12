@@ -4,8 +4,7 @@ import { useAppSelector } from "@/redux/hooks";
 import TextAnimationHeading from "./textAnimation";
 
 export default function AuthLayout() {
-  const { token, user } = useAppSelector((state) => state.auth);
-  const isAuthenticated = !!token && !!user;
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   // If user is already authenticated, redirect to dashboard
   if (isAuthenticated) {

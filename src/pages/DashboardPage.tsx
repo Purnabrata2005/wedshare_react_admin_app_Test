@@ -37,8 +37,7 @@ export default function DashboardPage() {
   const getAvatarFallback = () => {
     if (!user) return "U"
     const firstName = user.fullname?.charAt(0) || ""
-    const lastName = user.lastName?.charAt(0) || ""
-    return (firstName + lastName).toUpperCase() || "U"
+    return (firstName ).toUpperCase() || "U"
   }
 
   const handleSelectWedding = (wedding: Wedding) => {

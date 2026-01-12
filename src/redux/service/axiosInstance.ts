@@ -1,21 +1,23 @@
 import axios from "axios";
 
-
 const AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true, // 🔑 send HttpOnly cookies
   headers: {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${localStorage.getItem("token")}`,
   },
 });
 
-// Add a request interceptor to attach token
-AxiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+/* Optional: global response handler */
+AxiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized – session expired or not logged in");
+      // Do NOT redirect here — let route guards handle it
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default AxiosInstance;

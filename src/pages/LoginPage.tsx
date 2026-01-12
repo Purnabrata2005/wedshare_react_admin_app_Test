@@ -1,9 +1,37 @@
-import GoogleSignInButton  from "@/components/layout/GoogleSignInButton";
-import LoginForm  from "@/components/layout/LoginForm";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+import GoogleSignInButton from "@/components/layout/GoogleSignInButton";
+import LoginForm from "@/components/layout/LoginForm";
 import ROUTES from "@/routePath";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
+  const { isAuthenticated, loading } = useSelector(
+    (state: any) => state.auth
+  );
+
+  /* -------------------------------------------------
+     Redirect if already logged in
+  ------------------------------------------------- */
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
+
+  /* -------------------------------------------------
+     Prevent flicker while checking session
+  ------------------------------------------------- */
+  if (loading) {
+    return null;
+  }
+
+  /* -------------------------------------------------
+     LOGIN PAGE
+  ------------------------------------------------- */
   return (
     <div className="min-h-screen flex items-center justify-center bg-wedshare-light-bg dark:bg-wedshare-dark-bg px-4 py-8 sm:py-12">
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
@@ -17,10 +45,8 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Google Sign In Button */}
-        <div>
-          <GoogleSignInButton />
-        </div>
+        {/* Google Sign In */}
+        <GoogleSignInButton />
 
         {/* Divider */}
         <div className="flex items-center gap-3 sm:gap-4">
@@ -32,14 +58,12 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div>
-          <LoginForm />
-        </div>
+        <LoginForm />
 
-        {/* Sign Up Link */}
+        {/* Sign Up */}
         <div className="text-center">
           <p className="text-sm sm:text-base text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               to={ROUTES.SIGNUP}
               className="font-semibold text-wedshare-light-primary dark:text-wedshare-dark-primary hover:text-wedshare-light-secondary dark:hover:text-wedshare-dark-secondary transition-colors duration-200"

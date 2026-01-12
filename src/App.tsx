@@ -45,7 +45,7 @@ export default function App() {
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.SIGNUP} element={<RegisterPage />} />
             {/* Google OAuth Callback Route */}
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/auth/success" element={<AuthCallbackPage />} />
           </Route>
 
           {/* Profile Route */}

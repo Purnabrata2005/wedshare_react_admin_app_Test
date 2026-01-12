@@ -172,8 +172,7 @@ export default function AdvertisementPage() {
   const navigate = useNavigate();
   const { setTheme } = useTheme();
   const dispatch = useAppDispatch();
-  const { token, user } = useAppSelector((state) => state.auth);
-  const isAuthenticated = !!token && !!user;
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logoutAction());
@@ -221,7 +220,7 @@ export default function AdvertisementPage() {
                     <>
                       <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
                         <p className="font-semibold text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
-                          {user.fullname} {user.lastName}
+                          {user.fullname} 
                         </p>
                         <p className="text-xs text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
                           {user.email}
@@ -338,7 +337,7 @@ export default function AdvertisementPage() {
                       <>
                         <div className="px-2 py-2 text-sm border-b dark:border-slate-700">
                           <p className="font-semibold text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
-                            {user.fullname} {user.lastName}
+                            {user.fullname}
                           </p>
                           <p className="text-xs text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
                             {user.email}

@@ -1,26 +1,39 @@
 import { Button } from "@/components/ui/button";
 
+/**
+ * Google OAuth must be a FULL PAGE REDIRECT.
+ * Do NOT use axios/fetch here.
+ */
 export default function GoogleSignInButton() {
   const handleGoogleSignIn = () => {
-    window.location.href =
-    `${import.meta.env.VITE_API_BASE_URL}/login/google-auth`;
+    // Backend endpoint that starts Google OAuth
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
   };
 
   return (
     <div className="w-full">
       <Button
+        type="button"
         variant="outline"
-        className="w-full bg-white dark:bg-slate-800 dark:border-slate-600 border-gray-300 text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
+        className="w-full bg-white dark:bg-slate-800 dark:border-slate-600 border-gray-300
+                   text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary
+                   hover:bg-gray-50 dark:hover:bg-slate-700 transition"
         onClick={handleGoogleSignIn}
       >
         <span className="flex w-full items-center justify-center gap-2 sm:gap-3">
           <GoogleIcon />
-          <span className="text-sm sm:text-base">Sign in with Google</span>
+          <span className="text-sm sm:text-base font-medium">
+            Continue with Google
+          </span>
         </span>
       </Button>
     </div>
   );
 }
+
+/* ---------------------------------------------
+   GOOGLE ICON
+---------------------------------------------- */
 
 function GoogleIcon() {
   return (
@@ -30,6 +43,7 @@ function GoogleIcon() {
       height="1.2em"
       viewBox="0 0 256 262"
       className="flex-shrink-0"
+      aria-hidden="true"
     >
       <path
         fill="#4285F4"

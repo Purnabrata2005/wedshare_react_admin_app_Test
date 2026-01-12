@@ -1,27 +1,31 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-// Email types based on API (0-indexed)
-// 0 = Marriage only, 1 = Reception only, 2 = Both
+/* ======================================================
+   EMAIL TYPES (API CONTRACT)
+====================================================== */
+
 export const EmailType = {
   MARRIAGE: 0,
   RECEPTION: 1,
   BOTH: 2,
 } as const;
 
-export type EmailTypeValue = (typeof EmailType)[keyof typeof EmailType];
+export type EmailTypeValue =
+  (typeof EmailType)[keyof typeof EmailType];
 
-// Single email recipient
+/* ======================================================
+   TYPES
+====================================================== */
+
 export interface EmailRecipient {
   to: string;
 }
 
-// Email object structure
 export interface EmailObject {
   emailType: EmailTypeValue;
   body: EmailRecipient[];
 }
 
-// Wedding data for invitation
 export interface InviteWeddingData {
   weddingId: string;
   bride_name: string;
@@ -34,26 +38,27 @@ export interface InviteWeddingData {
   reception_venue: string;
 }
 
-// Send invitation payload
 export interface SendInvitationPayload {
   emails: EmailObject[];
   data: InviteWeddingData;
 }
 
-// Guest item for UI
 export interface GuestItem {
   id: number;
   email: string;
   eventType: "marriage" | "reception" | "both";
 }
 
-// Invite state
 export interface InviteState {
   guests: GuestItem[];
   loading: boolean;
   error: string | null;
   success: boolean;
 }
+
+/* ======================================================
+   STATE
+====================================================== */
 
 const initialState: InviteState = {
   guests: [],
@@ -62,52 +67,57 @@ const initialState: InviteState = {
   success: false,
 };
 
+/* ======================================================
+   SLICE
+====================================================== */
+
 const inviteSlice = createSlice({
   name: "invite",
   initialState,
   reducers: {
-    // Add guests to the list
     addGuests: (state, action: PayloadAction<GuestItem[]>) => {
-      state.guests = [...state.guests, ...action.payload];
+      state.guests.push(...action.payload);
     },
 
-    // Remove a guest from the list
     removeGuest: (state, action: PayloadAction<number>) => {
-      state.guests = state.guests.filter((guest) => guest.id !== action.payload);
+      state.guests = state.guests.filter(
+        (g) => g.id !== action.payload
+      );
     },
 
-    // Clear all guests
     clearGuests: (state) => {
       state.guests = [];
     },
 
-    // Send invitation request (Saga listens to this)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sendInvitationAction: (_state, _action: PayloadAction<SendInvitationPayload>) => {},
+    // Saga trigger
+    sendInvitationAction: (
+      _state,
+      _action: PayloadAction<SendInvitationPayload>
+    ) => {},
 
-    // Set loading state
     setInviteLoading: (state) => {
       state.loading = true;
       state.error = null;
       state.success = false;
     },
 
-    // Send invitation success
     sendInvitationSuccess: (state) => {
       state.loading = false;
-      state.error = null;
       state.success = true;
+      state.error = null;
       state.guests = [];
     },
 
-    // Send invitation failure
-    sendInvitationFailure: (state, action: PayloadAction<string>) => {
+    sendInvitationFailure: (
+      state,
+      action: PayloadAction<string>
+    ) => {
       state.loading = false;
       state.error = action.payload;
       state.success = false;
     },
 
-    // Reset invite state
+    // 🔑 allow UI to reset success state cleanly
     resetInviteState: (state) => {
       state.loading = false;
       state.error = null;

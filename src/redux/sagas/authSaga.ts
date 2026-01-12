@@ -2,150 +2,83 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import AxiosInstance from "../service/axiosInstance";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
-
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 import {
   loginAction,
   loginSuccess,
   loginFailure,
+
   registerAction,
   registerSuccess,
   registerFailure,
-  setLoading,
+
+  verifySessionAction,
   logoutAction,
+  logoutSuccess,
+
   sendOtpRequest,
   sendOtpSuccess,
   sendOtpFailure,
+
   verifyOtpRequest,
   verifyOtpSuccess,
   verifyOtpFailure,
+
+  setLoading,
   type LoginPayload,
   type RegisterPayload,
   type SendOtpPayload,
   type VerifyOtpPayload,
 } from "../slices/authSlice";
-// SEND OTP SAGA
-function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): any {
+
+/* =======================
+   HELPERS
+======================= */
+
+function* fetchCurrentUser(): Generator<any, any, any> {
+  const response = yield call(() =>
+    AxiosInstance.get("/login/verify",{ withCredentials: true })
+  );
+  return response.data?.data;
+}
+
+/* =======================
+   LOGIN (ID + PASSWORD)
+======================= */
+
+function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, any> {
   try {
+    yield put(setLoading());
+
     yield call(() =>
-      AxiosInstance.post("/login/send-otp", {
-        recipient: action.payload.recipient,
-        recipientType: action.payload.recipientType,
+      AxiosInstance.post("/login", {
+        username: action.payload.username,
+        password: action.payload.password,
       })
     );
-    yield put(sendOtpSuccess());
-    if (action.payload.onSuccess) action.payload.onSuccess();
+
+    const user = yield call(fetchCurrentUser);
+    yield put(loginSuccess(user));
+
+    action.payload.onSuccess?.();
   } catch (error: any) {
     const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Failed to send OTP";
-    yield put(sendOtpFailure(message));
-    if (action.payload.onError) action.payload.onError(message);
+      error?.response?.data?.message || "Login failed";
+    yield put(loginFailure(message));
+    action.payload.onError?.(message);
   }
 }
 
-// VERIFY OTP SAGA
-function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): any {
-  try {
-    const response = yield call(() =>
-      AxiosInstance.post("/login/otp", {
-        recipient: action.payload.recipient,
-        recipientType: action.payload.recipientType,
-        otp: action.payload.otp,
-      })
-    );
-    const api = response.data?.data;
-    if (!api) throw new Error("Invalid API response");
-    const token = api.access_token;
-    if (!token) throw new Error("Token missing!");
-    const user = {
-      id: api.userid,
-      username: api.username,
-      fullname: api.fullname,
-      phoneNumber: api.phonenumber,
-      email: api.email,
-      roles: api.roles,
-      profile: null,
-    };
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    yield put(verifyOtpSuccess({ user, token }));
-    if (action.payload.onSuccess) action.payload.onSuccess();
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "OTP verification failed";
-    yield put(verifyOtpFailure(message));
-    if (action.payload.onError) action.payload.onError(message);
-  }
-}
+/* =======================
+   REGISTER
+======================= */
 
-
-// LOGIN SAGA
-function* loginSaga(action: PayloadAction<LoginPayload>): any {
+function* registerSaga(action: PayloadAction<RegisterPayload>): Generator<any, void, any> {
   try {
     yield put(setLoading());
 
-    try {
-      const response = yield call(() =>
-        AxiosInstance.post("/login", {
-          username: action.payload.username,
-          password: action.payload.password,
-        })
-      );
-      console.log("[LOGIN SAGA] Backend response:", response);
-      const api = response.data?.data;
-      if (!api) {
-        console.error("[LOGIN SAGA] Invalid API response", response);
-        throw new Error("Invalid API response");
-      }
-      const token = api.access_token;
-      if (!token) {
-        console.error("[LOGIN SAGA] Token missing!", api);
-        throw new Error("Token missing!");
-      }
-      const user = {
-        id: api.userid || api.userId,
-        username: api.username,
-        fullname: api.fullname,
-        phoneNumber: api.phonenumber || api.phoneNumber,
-        email: api.email,
-        roles: api.roles,
-        profile: null,
-      };
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      yield put(loginSuccess({ user, token }));
-      if (action.payload.onSuccess) action.payload.onSuccess();
-    } catch (error: any) {
-      console.error("[LOGIN SAGA] Login error:", error);
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Login failed";
-      yield put(loginFailure(message));
-      if (action.payload.onError) action.payload.onError(message);
-    }
-  } catch (error) {
-    // Top-level error handling (optional)
-    console.error("[LOGIN SAGA] Unexpected error:", error);
-  }
-}
-
-// -------------------------------------------------------
-// REGISTER SAGA
-// -------------------------------------------------------
-function* registerSaga(action: PayloadAction<RegisterPayload>): any {
-  try {
-    yield put(setLoading());
-
-    const response = yield call(() =>
+    yield call(() =>
       AxiosInstance.post("/register", {
         fullname: action.payload.fullname,
         lastName: action.payload.lastName,
@@ -156,115 +89,102 @@ function* registerSaga(action: PayloadAction<RegisterPayload>): any {
       })
     );
 
-    yield put(registerSuccess(response.data));
+    yield put(registerSuccess());
 
-    // Auto-login after successful registration
-    // Try to get token from registration response
-    const apiData = response.data?.data || response.data;
-    let token = apiData?.access_token || apiData?.token;
-    
-    if (token) {
-      // If token exists in registration response, use it directly
-      const user = {
-        id: apiData?.userId || apiData?.id || "",
-        username: apiData?.username || action.payload.email,
-        fullname: action.payload.fullname,
-        lastName: action.payload.lastName,
-        phoneNumber: action.payload.phoneNumber,
-        email: action.payload.email,
-        roles: apiData?.roles || [action.payload.role],
-        profile: null,
-      };
+    // Auto-login via cookie
+    const user = yield call(fetchCurrentUser);
+    yield put(loginSuccess(user));
 
-      // Save token & user locally
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // Dispatch login success to update Redux state
-      yield put(loginSuccess({ user, token }));
-      
-      console.log("✓ User auto-logged in after registration (token from register response)");
-    } else {
-      // If no token in registration response, login using email and password
-      console.log("No token in registration response. Attempting auto-login with credentials...");
-      
-      try {
-        const loginResponse = yield call(() =>
-          AxiosInstance.post("/login", {
-            username: action.payload.email,
-            password: action.payload.password,
-          })
-        );
-
-        const loginData = loginResponse.data?.data;
-        if (!loginData) throw new Error("Invalid login response");
-
-        const loginToken = loginData.access_token;
-        if (!loginToken) throw new Error("Token missing from login!");
-
-        const user = {
-          id: loginData.userId,
-          username: loginData.username || action.payload.email,
-          fullname: loginData.fullname || action.payload.fullname,
-          phoneNumber: loginData.phoneNumber || action.payload.phoneNumber,
-          email: loginData.email || action.payload.email,
-          roles: loginData.roles,
-          profile: null,
-        };
-
-        // Save token & user locally
-        localStorage.setItem("token", loginToken);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        // Dispatch login success to update Redux state
-        yield put(loginSuccess({ user, token: loginToken }));
-        
-        console.log("✓ User auto-logged in after registration (via login endpoint)");
-      } catch (loginError: any) {
-        console.warn("Auto-login failed after registration. User should login manually.", loginError.message);
-      }
-    }
-
-    if (action.payload.onSuccess) action.payload.onSuccess();
+    action.payload.onSuccess?.();
   } catch (error: any) {
     const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Registration failed";
-
+      error?.response?.data?.message || "Registration failed";
     yield put(registerFailure(message));
-
-    if (action.payload.onError) action.payload.onError(message);
+    action.payload.onError?.(message);
   }
 }
 
-// -------------------------------------------------------
-// LOGOUT SAGA
-// -------------------------------------------------------
-function* logoutSaga(): any {
+/* =======================
+   OTP
+======================= */
+
+function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): Generator<any, void, any> {
   try {
-    // Clear Dexie photo queue database
-    yield call(() => photoDB.queue.clear());
-
-    // Clear localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    // Dispatch action to clear Redux photo state
-    yield put(clearPhotos());
+    yield call(() =>
+      AxiosInstance.post("/login/send-otp", {
+        recipient: action.payload.recipient,
+        recipientType: action.payload.recipientType,
+      })
+    );
+    yield put(sendOtpSuccess());
+    action.payload.onSuccess?.();
   } catch (error: any) {
-    console.error("Logout saga error:", error);
+    const message =
+      error?.response?.data?.message || "Failed to send OTP";
+    yield put(sendOtpFailure(message));
+    action.payload.onError?.(message);
   }
 }
 
-// -------------------------------------------------------
-// ROOT SAGA
-// -------------------------------------------------------
-export default function* authSaga() {
+function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): Generator<any, void, any> {
+  try {
+    yield call(() =>
+      AxiosInstance.post("/login/otp/web", {
+        recipient: action.payload.recipient,
+        recipientType: action.payload.recipientType,
+        otp: action.payload.otp,
+      })
+    );
+
+    const user = yield call(fetchCurrentUser);
+    yield put(verifyOtpSuccess(user));
+
+    action.payload.onSuccess?.();
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message || "OTP verification failed";
+    yield put(verifyOtpFailure(message));
+    action.payload.onError?.(message);
+  }
+}
+
+/* =======================
+   VERIFY SESSION (APP LOAD)
+======================= */
+
+function* verifySessionSaga(): Generator<any, void, any> {
+  try {
+    const user = yield call(fetchCurrentUser);
+    yield put(loginSuccess(user));
+  } catch {
+    yield put(logoutSuccess());
+  }
+}
+
+/* =======================
+   LOGOUT
+======================= */
+
+function* logoutSaga(): Generator<any, void, any> {
+  try {
+    yield call(() => AxiosInstance.post("/logout"));
+    yield call(() => photoDB.queue.clear());
+    yield put(clearPhotos());
+    yield put(logoutSuccess());
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+}
+
+/* =======================
+   ROOT
+======================= */
+
+export default function* authSaga(): Generator<any, void, any> {
   yield takeLatest(loginAction.type, loginSaga);
   yield takeLatest(registerAction.type, registerSaga);
-  yield takeLatest(logoutAction.type, logoutSaga);
   yield takeLatest(sendOtpRequest.type, sendOtpSaga);
   yield takeLatest(verifyOtpRequest.type, verifyOtpSaga);
+  yield takeLatest(verifySessionAction.type, verifySessionSaga);
+  yield takeLatest(logoutAction.type, logoutSaga);
 }

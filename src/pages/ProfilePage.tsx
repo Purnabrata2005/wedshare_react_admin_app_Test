@@ -75,12 +75,12 @@ export default function ProfilePage() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const [profile, setProfile] = useState({
-    id: authUser?.id || "user123",
+    id: authUser?.userid || "user123",
     fullname: authUser?.fullname || "John",
-    lastName: authUser?.lastName || "Doe",
+    lastName: authUser?.lastname,
     email: authUser?.email || "user@example.com",
     phoneNumber: authUser?.phoneNumber || "+1 (555) 000-0000",
-    role: authUser?.role || "User",
+    role: authUser?.roles || "User",
     location: "New York, USA",
     bio: "Welcome to my profile! 💕✨",
     joinDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
@@ -162,7 +162,7 @@ export default function ProfilePage() {
     }
   }
 
-  const initials = `${profile.fullname.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()
+  const initials = `${profile.fullname.charAt(0)}`
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,7 +1,7 @@
 import { call, put, takeLatest } from "redux-saga/effects";
-import AxiosWedding from "../service/axiosWedding";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
+import AxiosWedding from "../service/axiosWedding";
 import {
   sendInvitationAction,
   setInviteLoading,
@@ -10,26 +10,24 @@ import {
   type SendInvitationPayload,
 } from "../slices/inviteSlice";
 
-// SEND INVITATION SAGA
-function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Generator<any, void, any> {
+/* ======================================================
+   SAGA
+====================================================== */
+
+function* sendInvitationSaga(
+  action: PayloadAction<SendInvitationPayload>
+): Generator {
   try {
     yield put(setInviteLoading());
 
-    const { emails, data } = action.payload;
-
-    // Make API call to send invitations
     const response = yield call(() =>
-      AxiosWedding.post("/invitations/create", {
-        emails,
-        data,
-      })
+      AxiosWedding.post("/invitations/create", action.payload)
     );
 
-    // Check if response is successful
     if (response.status === 200 || response.status === 201) {
       yield put(sendInvitationSuccess());
     } else {
-      throw new Error("Failed to send invitations");
+      throw new Error("Invitation API returned an error");
     }
   } catch (error: any) {
     const message =
@@ -42,7 +40,13 @@ function* sendInvitationSaga(action: PayloadAction<SendInvitationPayload>): Gene
   }
 }
 
-// WATCHER SAGA
+/* ======================================================
+   WATCHER
+====================================================== */
+
 export default function* inviteSaga() {
-  yield takeLatest(sendInvitationAction.type, sendInvitationSaga);
+  yield takeLatest(
+    sendInvitationAction.type,
+    sendInvitationSaga
+  );
 }
