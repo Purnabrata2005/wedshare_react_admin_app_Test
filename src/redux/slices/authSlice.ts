@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 
 /* =======================
    TYPES
@@ -132,6 +133,23 @@ const authSlice = createSlice({
       state.otpLoading = false;
       state.otpError = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(REHYDRATE as any, (state, action: any) => {
+      const inbound = action.payload?.auth as AuthState | undefined;
+
+      // Restore durable fields; reset volatile flags to safe defaults
+      state.user = inbound?.user ?? null;
+      state.isAuthenticated = Boolean(inbound?.isAuthenticated && inbound?.user?.userid);
+      state.error = null;
+      state.loading = false;
+
+      state.otpSent = false;
+      state.otpLoading = false;
+      state.otpError = null;
+
+      state.rehydrated = true;
+    });
   },
 });
 
