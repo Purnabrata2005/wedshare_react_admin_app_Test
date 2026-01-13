@@ -396,9 +396,22 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
             <Button
               type="button"
-              onClick={() => {
-                canSubmitRef.current = true
-                handleSubmit(handleFormSubmit)()
+              onClick={async () => {
+               canSubmitRef.current = true
+               // Manually trigger submission logic instead of form submit
+               const data = {
+                 groom: formValues.groom,
+                 bride: formValues.bride,
+                 date: formValues.date,
+                 time: formValues.time,
+                 venue: formValues.venue,
+                 receptionSame: formValues.receptionSame,
+                 receptionDate: formValues.receptionDate,
+                 receptionTime: formValues.receptionTime,
+                 receptionVenue: formValues.receptionVenue,
+                 invitationTemplate: formValues.invitationTemplate,
+               }
+               await handleFormSubmit(data)
               }}
               disabled={isSubmitting}
               className="w-full mt-6"
