@@ -41,7 +41,8 @@ function* fetchCurrentUser(): Generator<any, any, any> {
   const response = yield call(() =>
     AxiosInstance.get("/login/verify", { withCredentials: true })
   );
-  return response.data;
+  // Some APIs wrap payload as { error, statuscode, message, data: { ...user }}
+  return response?.data?.data ?? response?.data;
 }
 
 /* =======================
@@ -89,13 +90,11 @@ function* verifyOtpSaga(
       return;
     }
 
-    const loginResponse = yield call(() =>
-      AxiosInstance.post("/login/otp/web", action.payload)
-    );
+    // Perform OTP verification; backend sets auth cookie
+    yield call(() => AxiosInstance.post("/login/otp/web", action.payload));
 
-    // Prefer user info returned from login response; fallback to verify endpoint
-    const userFromLogin = loginResponse?.data?.data?.user ?? loginResponse?.data?.user;
-    const user = userFromLogin ?? (yield call(fetchCurrentUser));
+    // Always fetch current user from verify endpoint after cookie is set
+    const user = yield call(fetchCurrentUser);
 
     const parsed = userSchema.safeParse(user);
     if (!parsed.success || !user?.userid) {
