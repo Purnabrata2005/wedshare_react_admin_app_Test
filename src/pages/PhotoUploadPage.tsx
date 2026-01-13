@@ -1,9 +1,10 @@
 import { useState, type DragEvent, useCallback } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
-import { Upload, ImageIcon } from "lucide-react"
+import { Upload,  ImageIcon } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navbar } from "@/components/ui/navbar"
@@ -11,7 +12,7 @@ import {
   PhotoDropzone,
   PhotoGrid,
   UploadingOverlay,
-  UploadStats,
+
 } from "@/components/photos"
 import { uploadPhotosRequest } from "@/redux/slices/photoSlice"
 import type { RootState } from "@/redux/store"
@@ -38,9 +39,11 @@ export default function PhotoUploadPage() {
   const dispatch = useDispatch()
   const location = useLocation()
 
+  // Get weddingId from location state
   const state = location.state as LocationState | null
   const weddingId = state?.weddingId || ""
 
+  // Redirect if no weddingId provided
   if (!weddingId) {
     navigate("/dashboard", { replace: true })
   }
@@ -48,6 +51,7 @@ export default function PhotoUploadPage() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
+  // Redux state selectors
   const uploading = useSelector((state: RootState) => state.photos?.uploading)
   const progressMap = useSelector(
     (state: RootState) =>
@@ -55,9 +59,13 @@ export default function PhotoUploadPage() {
   )
 
   const isUploading = Boolean(uploading)
+
+
+  // Calculate upload stats - only count photos that are currently selected
   const totalPhotos = photos.length
   const selectedPhotoUuids = new Set(photos.map(p => p.uuid))
-
+  
+  // Only count progress for currently selected photos
   const completedPhotos = Object.entries(progressMap).filter(
     ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "completed"
   ).length
@@ -66,12 +74,14 @@ export default function PhotoUploadPage() {
     ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "uploading"
   ).length
 
+  // Process selected files
   const processFiles = useCallback((files: FileList | null) => {
     if (!files) return
 
     const newItems: LocalPhoto[] = []
 
     Array.from(files).forEach((file) => {
+      // Only accept image files
       if (!file.type.startsWith("image/")) return
 
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
@@ -89,6 +99,7 @@ export default function PhotoUploadPage() {
     setPhotos((prev) => [...prev, ...newItems])
   }, [])
 
+  // Drag and drop handlers
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
@@ -113,16 +124,19 @@ export default function PhotoUploadPage() {
     processFiles(e.dataTransfer.files)
   }
 
+  // Delete a photo from the list
   const handleDeletePhoto = (index: number) => {
     setPhotos((prev) => {
       const photo = prev[index]
       if (photo) {
+        // Revoke the object URL to free memory
         URL.revokeObjectURL(photo.url)
       }
       return prev.filter((_, i) => i !== index)
     })
   }
 
+  // Upload photos to server
   const handleUploadToServer = () => {
     if (photos.length === 0 || isUploading) return
     dispatch(
@@ -138,6 +152,7 @@ export default function PhotoUploadPage() {
     )
   }
 
+  // Clear all selected photos
   const handleClearAll = () => {
     photos.forEach((photo) => URL.revokeObjectURL(photo.url))
     setPhotos([])
@@ -149,8 +164,10 @@ export default function PhotoUploadPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Uploading Overlay */}
       <UploadingOverlay isVisible={isUploading} />
 
+      {/* Navbar */}
       <Navbar
         title="Upload Photos"
         subtitle="Add photos to your wedding gallery"
@@ -158,23 +175,58 @@ export default function PhotoUploadPage() {
         onBackClick={handleBack}
       />
 
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="space-y-6">
+          {/* Upload Stats Card */}
           {totalPhotos > 0 && (
             <Card>
               <CardContent className="py-4">
-                <UploadStats
-                  totalPhotos={totalPhotos}
-                  completedPhotos={completedPhotos}
-                  uploadingPhotos={uploadingPhotos}
-                  isUploading={isUploading}
-                  onClearAll={handleClearAll}
-                  onUploadToServer={handleUploadToServer}
-                />
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Selected Photos:</span>
+                      <Badge variant="secondary">{totalPhotos}</Badge>
+                    </div>
+                    {completedPhotos > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Uploaded:</span>
+                        <Badge variant="default">{completedPhotos}</Badge>
+                      </div>
+                    )}
+                    {uploadingPhotos > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">In Progress:</span>
+                        <Badge variant="outline">{uploadingPhotos}</Badge>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearAll}
+                      disabled={isUploading}
+                    >
+                      Clear All
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleUploadToServer}
+                      disabled={isUploading || totalPhotos === 0}
+                      className="gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {isUploading ? "Uploading..." : "Upload Photos"}
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
 
+          {/* Dropzone Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -195,6 +247,7 @@ export default function PhotoUploadPage() {
             </CardContent>
           </Card>
 
+          {/* Photo Grid */}
           {photos.length > 0 && (
             <Card>
               <CardHeader>
@@ -206,6 +259,14 @@ export default function PhotoUploadPage() {
                       {photos.length}
                     </Badge>
                   </CardTitle>
+                  <Button
+                    onClick={handleUploadToServer}
+                    disabled={isUploading || photos.length === 0}
+                    className="gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {isUploading ? "Uploading..." : "Upload All"}
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -219,6 +280,7 @@ export default function PhotoUploadPage() {
             </Card>
           )}
 
+          {/* Empty State */}
           {photos.length === 0 && (
             <Card className="bg-muted/30">
               <CardContent className="py-12">
