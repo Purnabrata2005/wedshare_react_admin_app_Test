@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navbar } from "@/components/ui/navbar"
-import { cn } from "@/lib/utils"
 import { formatDateDDMMYYYY } from "@/lib/dateUtils"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
@@ -91,7 +90,7 @@ export default function InviteGuestsPage() {
 
   const [guestEmails, setGuestEmails] = useState<string[]>([])
   const [inputValue, setInputValue] = useState("")
-  const [eventType, setEventType] = useState<
+  const [eventType,  ] = useState<
     "marriage" | "reception" | "both"
   >("both")
   const [emailError, setEmailError] = useState("")
