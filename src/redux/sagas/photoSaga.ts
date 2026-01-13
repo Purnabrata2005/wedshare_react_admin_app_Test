@@ -170,7 +170,7 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
     (w: any) => w.weddingId === weddingId || w.id === weddingId
   );
   const albumPublicKey = currentWedding?.albumPublicKey;
-  const processPublicKey = currentWedding?.processPublicKey;
+  const processPublicKey = state?.weddings?.processPublicKey;
 
   // Log the keys before validation
   console.log("albumPublicKey for wedding", weddingId, ":", albumPublicKey);
