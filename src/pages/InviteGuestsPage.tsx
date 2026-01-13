@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navbar } from "@/components/ui/navbar"
 import { formatDateDDMMYYYY } from "@/lib/dateUtils"
+import { cn } from "@/lib/utils"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
   addGuests,
@@ -83,7 +84,7 @@ export default function InviteGuestsPage() {
 
   const [guestEmails, setGuestEmails] = useState<string[]>([])
   const [inputValue, setInputValue] = useState("")
-  const [eventType,  ] = useState<
+  const [eventType, setEventType] = useState<
     "marriage" | "reception" | "both"
   >("both")
   const [emailError, setEmailError] = useState("")
@@ -265,6 +266,41 @@ export default function InviteGuestsPage() {
             {emailError && (
               <p className="text-sm text-destructive">{emailError}</p>
             )}
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-muted-foreground">
+                Event Type
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { value: "marriage", label: "Marriage Only" },
+                  { value: "reception", label: "Reception Only" },
+                  { value: "both", label: "Both Events" },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      "flex items-center gap-3 cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 border-2",
+                      eventType === option.value
+                        ? "bg-primary/10 border-primary"
+                        : "bg-muted/50 border-transparent hover:bg-muted"
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="eventType"
+                      value={option.value}
+                      checked={eventType === option.value}
+                      onChange={(e) => setEventType(e.target.value as typeof eventType)}
+                      className="w-4 h-4 cursor-pointer accent-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
             <Button
               onClick={handleAddGuests}
