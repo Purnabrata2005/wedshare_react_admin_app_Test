@@ -110,6 +110,15 @@ const weddingSlice = createSlice({
     clearSelection: (state) => {
       state.selectedWeddingId = null
     },
+
+    /* ---------- CLEAR ALL (FOR LOGOUT) ---------- */
+    clearWeddings: (state) => {
+      state.weddings = []
+      state.selectedWeddingId = null
+      state.loading = false
+      state.error = null
+      state.processPublicKey = null
+    },
   },
 })
 
@@ -136,6 +145,7 @@ export const {
 
   selectWedding,
   clearSelection,
+  clearWeddings,
 } = weddingSlice.actions
 
 export default weddingSlice.reducer

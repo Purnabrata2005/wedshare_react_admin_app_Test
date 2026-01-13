@@ -3,6 +3,8 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import AxiosInstance from "../service/axiosInstance";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
+import { clearWeddings } from "../slices/weddingSlice";
+import { clearGuests } from "../slices/inviteSlice";
 import { toast } from "sonner";
 
 import {
@@ -87,15 +89,19 @@ function* verifyOtpSaga(
       return;
     }
 
-    yield call(() =>
+    const loginResponse = yield call(() =>
       AxiosInstance.post("/login/otp/web", action.payload)
     );
 
-    const user = yield call(fetchCurrentUser);
+    // Prefer user info returned from login response; fallback to verify endpoint
+    const userFromLogin = loginResponse?.data?.data?.user ?? loginResponse?.data?.user;
+    const user = userFromLogin ?? (yield call(fetchCurrentUser));
 
     const parsed = userSchema.safeParse(user);
     if (!parsed.success || !user?.userid) {
-      yield put(verifySessionFailure());
+      const msg = "User info missing after OTP verification";
+      yield put(verifyOtpFailure(msg));
+      toast.error(msg);
       return;
     }
 
@@ -148,6 +154,8 @@ function* logoutSaga(
     yield call(() => AxiosInstance.post("/logout"));
     yield call(() => photoDB.queue.clear());
     yield put(clearPhotos());
+    yield put(clearWeddings());
+    yield put(clearGuests());
     yield put(logoutSuccess());
     toast.info("Logged out successfully");
   } catch {
