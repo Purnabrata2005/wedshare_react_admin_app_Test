@@ -50,7 +50,10 @@ export function AvatarDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-64 bg-wedshare-light-bg-primary dark:bg-wedshare-dark-bg-primary border-wedshare-light-border dark:border-wedshare-dark-border shadow-lg backdrop-blur-none"
+        className="w-64 border-wedshare-light-border dark:border-wedshare-dark-border shadow-lg backdrop-blur-none bg-opacity-100 dark:bg-opacity-100 !bg-wedshare-light-bg-primary !dark:!bg-wedshare-dark-bg-primary"
+        style={{
+          backgroundColor: theme === "dark" ? "#0f0f12" : "#ffffff", // solid fallback
+        }}
         sideOffset={5}
       >
         {/* User Info Section */}
