@@ -12,7 +12,7 @@ export const weddingSchema = z.object({
   brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
 
   weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters"),
+  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces"),
   weddingTime: z.string().min(1, "Wedding time is required"),
 
   receptionDate: z.string().min(1, "Reception date is required"),
@@ -41,7 +41,7 @@ export const createWeddingSchema = z.object({
   brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
 
   weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters"),
+  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces"),
   weddingTime: z.string().min(1, "Wedding time is required"),
 
   receptionDate: z.string().min(1, "Reception date is required"),
@@ -65,7 +65,7 @@ export const updateWeddingSchema = z.object({
   brideName: z.string().min(1).regex(/^[a-zA-Z]+$/, "Bride name can only contain letters").optional(),
 
   weddingDate: z.string().min(1).optional(),
-  weddingVenue: z.string().min(1).regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters").optional(),
+  weddingVenue: z.string().min(1).regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces").optional(),
   weddingTime: z.string().min(1).optional(),
 
   receptionDate: z.string().min(1).optional(),

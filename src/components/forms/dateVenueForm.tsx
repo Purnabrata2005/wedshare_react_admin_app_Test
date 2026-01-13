@@ -41,12 +41,21 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
     name: venueField,
     rules: {
       required: `${isReception ? "Reception" : "Wedding"} venue is required`,
-      minLength: { value: 3, message: "Venue must be at least 3 characters" },
+      minLength: { value: 1, message: `${isReception ? "Reception" : "Wedding"} venue must be at least 1 character` },
       validate: {
+        lettersAndSpacesOnly: (value) => {
+          // Only validate pattern for wedding venue, not reception venue
+          if (!isReception && !/^[a-zA-Z\s]+$/.test(value)) {
+            return "Wedding venue can only contain letters and spaces";
+          }
+          return true;
+        },
         noTrailingSpaces: (value) => {
           const trimmedValue = value.trim();
-          setValue(venueField, trimmedValue); // Update the value to trimmed
-          return trimmedValue === value || "Venue cannot have trailing spaces";
+          if (trimmedValue !== value) {
+            setValue(venueField, trimmedValue);
+          }
+          return true;
         }
       }
     }
@@ -66,7 +75,7 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
         label={isReception ? "Reception Date" : "Wedding Date"}
         value={dateController.field.value || ""}
         onChange={(date) => setValue(dateField as any, date)}
-        error={errors[dateField]}
+        error={dateController.fieldState.error?.message || errors[dateField]}
         disabled={isLoading}
       />
 
@@ -75,7 +84,7 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
         placeholder="Enter location (e.g., The Grand Ballroom)"
         value={venueController.field.value || ""}
         onChange={(e) => setValue(venueField as any, e.target.value)}
-        error={errors[venueField]}
+        error={venueController.fieldState.error?.message || errors[venueField]}
         disabled={isLoading}
       />
 
@@ -85,7 +94,7 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
         placeholder="e.g., 10:00 AM"
         value={timeController.field.value || ""}
         onChange={(e) => setValue(timeField as any, e.target.value)}
-        error={errors[timeField]}
+        error={timeController.fieldState.error?.message || errors[timeField]}
         disabled={isLoading}
       />
 
@@ -93,7 +102,15 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
         <Button
           type="button"
           onClick={onNext}
-          disabled={isLoading || !dateController.field.value || !venueController.field.value || !timeController.field.value || !!errors[dateField] || !!errors[venueField] || !!errors[timeField]}
+          disabled={
+            isLoading || 
+            !dateController.field.value || 
+            !venueController.field.value || 
+            !timeController.field.value || 
+            dateController.fieldState.invalid || 
+            venueController.fieldState.invalid || 
+            timeController.fieldState.invalid
+          }
           size="lg"
           className="w-full"
         >
