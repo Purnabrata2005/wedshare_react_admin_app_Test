@@ -89,19 +89,15 @@ function* verifyOtpSaga(
       return;
     }
 
-    const loginResponse = yield call(() =>
+    yield call(() =>
       AxiosInstance.post("/login/otp/web", action.payload)
     );
 
-    // Prefer user info returned from login response; fallback to verify endpoint
-    const userFromLogin = loginResponse?.data?.data?.user ?? loginResponse?.data?.user;
-    const user = userFromLogin ?? (yield call(fetchCurrentUser));
+    const user = yield call(fetchCurrentUser);
 
     const parsed = userSchema.safeParse(user);
     if (!parsed.success || !user?.userid) {
-      const msg = "User info missing after OTP verification";
-      yield put(verifyOtpFailure(msg));
-      toast.error(msg);
+      yield put(verifySessionFailure());
       return;
     }
 
