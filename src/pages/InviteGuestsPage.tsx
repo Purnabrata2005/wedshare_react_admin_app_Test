@@ -31,14 +31,16 @@ export default function InviteGuestsPage() {
   const location = useLocation()
   const dispatch = useAppDispatch()
 
-  // Get state from Redux
-  const { guests, loading: isSending, success, error } = useAppSelector((state) => state.invite)
-  const { weddings, selectedWedding } = useAppSelector((state) => state.weddings)
+  const { guests, loading: isSending, success, error } = useAppSelector(
+    (state) => state.invite
+  )
+  const { weddings, selectedWedding } = useAppSelector(
+    (state) => state.weddings
+  )
 
-  // Handle success and error states
   useEffect(() => {
     if (success) {
-      toast.success('Invitations sent successfully!')
+      toast.success("Invitations sent successfully!")
       dispatch(resetInviteState())
     }
   }, [success, dispatch])
@@ -50,110 +52,108 @@ export default function InviteGuestsPage() {
     }
   }, [error, dispatch])
 
-  // Get weddingId from location state
   const state = location.state as LocationState | null
   const weddingId = state?.weddingId || ""
 
-  // Find the wedding from store (either selectedWedding or from weddings list)
   const wedding = useMemo(() => {
-    if (selectedWedding && (selectedWedding.weddingId === weddingId || selectedWedding.id === weddingId)) {
+    if (
+      selectedWedding &&
+      (selectedWedding.weddingId === weddingId ||
+        selectedWedding.id === weddingId)
+    ) {
       return selectedWedding
     }
-    return weddings.find((w) => w.weddingId === weddingId || w.id === weddingId) || null
+    return (
+      weddings.find(
+        (w) => w.weddingId === weddingId || w.id === weddingId
+      ) || null
+    )
   }, [selectedWedding, weddings, weddingId])
 
-  // Wedding data for invitation from Redux store
-  const weddingData: InviteWeddingData = useMemo(() => ({
-    weddingId: wedding?.weddingId || wedding?.id || "",
-    bride_name: wedding?.brideName || "",
-    groom_name: wedding?.groomName || "",
-    wedding_date: formatDateDDMMYYYY(wedding?.weddingDate),
-    wedding_time: wedding?.weddingTime || "",
-    wedding_venue: wedding?.weddingVenue || "",
-    reception_date: formatDateDDMMYYYY(wedding?.receptionDate),
-    reception_time: wedding?.receptionTime || "",
-    reception_venue: wedding?.receptionVenue || "",
-  }), [wedding])
+  const weddingData: InviteWeddingData = useMemo(
+    () => ({
+      weddingId: wedding?.weddingId || wedding?.id || "",
+      bride_name: wedding?.brideName || "",
+      groom_name: wedding?.groomName || "",
+      wedding_date: formatDateDDMMYYYY(wedding?.weddingDate),
+      wedding_time: wedding?.weddingTime || "",
+      wedding_venue: wedding?.weddingVenue || "",
+      reception_date: formatDateDDMMYYYY(wedding?.receptionDate),
+      reception_time: wedding?.receptionTime || "",
+      reception_venue: wedding?.receptionVenue || "",
+    }),
+    [wedding]
+  )
 
-  // Redirect if no weddingId provided
   if (!weddingId) {
     navigate("/dashboard", { replace: true })
   }
 
   const [guestEmails, setGuestEmails] = useState<string[]>([])
   const [inputValue, setInputValue] = useState("")
-  const [eventType, setEventType] = useState<"marriage" | "reception" | "both">("both")
-  const [emailError, setEmailError] = useState<string>("")
+  const [eventType, setEventType] = useState<
+    "marriage" | "reception" | "both"
+  >("both")
+  const [emailError, setEmailError] = useState("")
 
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-  }
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
-  const handleEmailInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const value = inputValue.trim()
+  /* ================================
+     MOBILE SAFE EMAIL SEPARATION
+     ================================ */
 
-    if (e.key === " " || e.key === "," || e.key === "Enter") {
-      e.preventDefault()
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
 
-      if (value && isValidEmail(value)) {
-        if (!guestEmails.includes(value.toLowerCase())) {
-          setGuestEmails([...guestEmails, value.toLowerCase()])
-          setInputValue("")
-          setEmailError("")
-        } else {
-          setEmailError("This email is already added")
-        }
-      } else if (value) {
-        setEmailError("Please enter a valid email address")
+    if (!/[,\s]/.test(value)) return
+
+    const parts = value.split(/[,\s]+/)
+    const remaining = parts.pop() ?? ""
+
+    const newEmails: string[] = []
+
+    parts.forEach((email) => {
+      const normalized = email.trim().toLowerCase()
+      if (!normalized) return
+
+      if (!isValidEmail(normalized)) {
+        setEmailError(`Invalid email: ${normalized}`)
+        return
       }
+
+      if (
+        guestEmails.includes(normalized) ||
+        newEmails.includes(normalized)
+      ) {
+        setEmailError(`Duplicate email skipped: ${normalized}`)
+        return
+      }
+
+      newEmails.push(normalized)
+    })
+
+    if (newEmails.length > 0) {
+      setGuestEmails((prev) => [...prev, ...newEmails])
+      setEmailError("")
     }
+
+    setInputValue(remaining)
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
-    const pastedText = e.clipboardData.getData('text')
-    
-    // Split by comma, space, enter/newline and filter out empty strings
-    const emails = pastedText
-      .split(/[,\s\n]+/)
-      .map(email => email.trim())
-      .filter(email => email.length > 0)
-    
-    const validEmails: string[] = []
-    const invalidEmails: string[] = []
-    const duplicateEmails: string[] = []
-    
-    emails.forEach(email => {
-      const lowerEmail = email.toLowerCase()
-      if (!isValidEmail(email)) {
-        invalidEmails.push(email)
-      } else if (guestEmails.includes(lowerEmail) || validEmails.includes(lowerEmail)) {
-        duplicateEmails.push(email)
-      } else {
-        validEmails.push(lowerEmail)
-      }
-    })
-    
-    // Add valid emails
-    if (validEmails.length > 0) {
-      setGuestEmails([...guestEmails, ...validEmails])
-      setEmailError("")
+    handleInputChange(e.clipboardData.getData("text") + " ")
+  }
+
+  const handleBlur = () => {
+    if (inputValue.trim()) {
+      handleInputChange(inputValue + " ")
     }
-    
-    // Show feedback
-    if (invalidEmails.length > 0) {
-      setEmailError(`Invalid email(s): ${invalidEmails.join(', ')}`)
-    } else if (duplicateEmails.length > 0) {
-      setEmailError(`Duplicate email(s) skipped: ${duplicateEmails.join(', ')}`)
-    } else if (validEmails.length > 0) {
-      setEmailError("")
-    }
-    
-    setInputValue("")
   }
 
   const removeEmail = (email: string) => {
-    setGuestEmails(guestEmails.filter((e) => e !== email))
+    setGuestEmails((prev) => prev.filter((e) => e !== email))
   }
 
   const handleAddGuests = () => {
@@ -178,15 +178,14 @@ export default function InviteGuestsPage() {
     dispatch(removeGuest(id))
   }
 
-  // Helper function to convert eventType to EmailType
-  const getEmailType = (type: "marriage" | "reception" | "both"): EmailTypeValue => {
+  const getEmailType = (
+    type: "marriage" | "reception" | "both"
+  ): EmailTypeValue => {
     switch (type) {
       case "marriage":
         return EmailType.MARRIAGE
       case "reception":
         return EmailType.RECEPTION
-      case "both":
-        return EmailType.BOTH
       default:
         return EmailType.BOTH
     }
@@ -195,41 +194,22 @@ export default function InviteGuestsPage() {
   const handleSendInvitations = () => {
     if (guests.length === 0) return
 
-    // Group guests by event type
-    const groupedEmails: { [key: number]: EmailObject } = {}
+    const grouped: { [key: number]: EmailObject } = {}
 
     guests.forEach((guest) => {
       const emailType = getEmailType(guest.eventType)
-
-      if (!groupedEmails[emailType]) {
-        groupedEmails[emailType] = {
-          emailType,
-          body: [],
-        }
+      if (!grouped[emailType]) {
+        grouped[emailType] = { emailType, body: [] }
       }
-
-      groupedEmails[emailType].body.push({ to: guest.email })
+      grouped[emailType].body.push({ to: guest.email })
     })
 
-    const emails: EmailObject[] = Object.values(groupedEmails)
-
-    // Console log the send data
-    console.log("Sending invitation data:", {
-      emails,
-      data: weddingData,
-    })
-
-    // Dispatch send invitation action
     dispatch(
       sendInvitationAction({
-        emails,
+        emails: Object.values(grouped),
         data: weddingData,
       })
     )
-  }
-
-  const handleBack = () => {
-    navigate(-1)
   }
 
   const getEventBadge = (type: string) => {
@@ -247,207 +227,105 @@ export default function InviteGuestsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
       <Navbar
         title="Invite Guests"
         subtitle="Send invitations to your wedding guests"
         showBackButton
-        onBackClick={handleBack}
+        onBackClick={() => navigate(-1)}
       />
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="space-y-6">
-          {/* Add Guests Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
-                <Mail className="w-5 h-5 text-primary" />
-                Enter Guest Emails
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Enter Guest Emails
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2 p-3 rounded-xl border">
+              {guestEmails.map((email) => (
+                <div
+                  key={email}
+                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border text-sm"
+                >
+                  {email}
+                  <button onClick={() => removeEmail(email)}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              <input
+                value={inputValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onPaste={handlePaste}
+                onBlur={handleBlur}
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                placeholder="Type email, use space or comma"
+                className="flex-1 min-w-[150px] outline-none bg-transparent"
+              />
+            </div>
+
+            {emailError && (
+              <p className="text-sm text-destructive">{emailError}</p>
+            )}
+
+            <Button
+              onClick={handleAddGuests}
+              disabled={guestEmails.length === 0}
+              className="w-full gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Guests ({guestEmails.length})
+            </Button>
+          </CardContent>
+        </Card>
+
+        {guests.length > 0 && (
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                Guest List
               </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Email Input with Chips */}
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2 p-3 rounded-xl border-2 border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-300">
-                  {guestEmails.map((email) => (
-                    <div
-                      key={email}
-                      className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full bg-primary/10 border border-primary text-primary text-xs sm:text-sm flex-shrink-0 max-w-full"
-                    >
-                      <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-[300px]">{email}</span>
-                      <button
-                        onClick={() => removeEmail(email)}
-                        className="hover:text-primary/70 transition-colors flex-shrink-0"
-                      >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <input
-                    type="email"
-                    placeholder="Type email and press space, comma or enter..."
-                    value={inputValue}
-                    onChange={(e) => {
-                      setInputValue(e.target.value)
-                      if (emailError) setEmailError("")
-                    }}
-                    onKeyDown={handleEmailInput}
-                    onPaste={handlePaste}
-                    className="flex-1 min-w-[150px] h-11 px-4 text-base outline-none bg-transparent text-foreground placeholder:text-muted-foreground text-sm sm:text-base"
-                  />
-                </div>
-                {emailError && (
-                  <p className="text-sm text-destructive mt-1">{emailError}</p>
-                )}
-              </div>
-
-              {/* Event Type Selection */
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Event Type
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {[
-                    { value: "marriage", label: "Marriage Only" },
-                    { value: "reception", label: "Reception Only" },
-                    { value: "both", label: "Both Events" },
-                  ].map((option) => (
-                    <label
-                      key={option.value}
-                      className={cn(
-                        "flex items-center gap-3 cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 border-2",
-                        eventType === option.value
-                          ? "bg-primary/10 border-primary"
-                          : "bg-muted/50 border-transparent hover:bg-muted"
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="eventType"
-                        value={option.value}
-                        checked={eventType === option.value}
-                        onChange={(e) => setEventType(e.target.value as typeof eventType)}
-                        className="w-4 h-4 cursor-pointer accent-primary"
-                      />
-                      <span className="text-sm font-medium text-foreground">
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-}
-
-              {/* Add Button */}
               <Button
-                onClick={handleAddGuests}
-                disabled={guestEmails.length === 0}
-                className="w-full gap-2"
-                size="lg"
+                onClick={handleSendInvitations}
+                disabled={isSending}
               >
-                <Plus className="w-5 h-5" />
-                Add Guests ({guestEmails.length})
+                <Send className="w-4 h-4 mr-2" />
+                {isSending ? "Sending..." : "Send"}
               </Button>
+            </CardHeader>
+
+            <CardContent>
+              <table className="w-full">
+                <tbody>
+                  {guests.map((guest) => (
+                    <tr key={guest.id} className="border-b">
+                      <td className="py-3">{guest.email}</td>
+                      <td className="text-center">
+                        {getEventBadge(guest.eventType)}
+                      </td>
+                      <td className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveGuest(guest.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
-
-          {/* Guest List Card */}
-          {guests.length > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
-                    Guest List
-                    <Badge variant="secondary" className="ml-2">
-                      {guests.length}
-                    </Badge>
-                  </CardTitle>
-                  <Button
-                    onClick={handleSendInvitations}
-                    disabled={isSending}
-                    className="gap-2"
-                  >
-                    <Send className="w-4 h-4" />
-                    {isSending ? "Sending..." : "Send Invitations"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto rounded-xl border border-border">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-primary to-secondary text-primary-foreground">
-                        <th className="text-left px-4 sm:px-6 py-4 font-semibold">
-                          Email
-                        </th>
-                        <th className="text-center px-4 sm:px-6 py-4 font-semibold">
-                          Event
-                        </th>
-                        <th className="text-center px-4 sm:px-6 py-4 font-semibold">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {guests.map((guest, index) => (
-                        <tr
-                          key={guest.id}
-                          className={cn(
-                            "border-b border-border transition-colors hover:bg-muted/50",
-                            index % 2 === 0 ? "bg-background" : "bg-muted/20"
-                          )}
-                        >
-                          <td className="px-4 sm:px-6 py-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <Mail className="w-4 h-4 text-primary" />
-                              </div>
-                                <span className="text-xs sm:text-base font-medium text-foreground truncate">
-                                {guest.email}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 text-center">
-                            {getEventBadge(guest.eventType)}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 text-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveGuest(guest.id)}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Empty State */}
-          {guests.length === 0 && (
-            <Card className="bg-muted/30">
-              <CardContent className="py-12">
-                <div className="text-center space-y-3">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground/50" />
-                  <p className="text-lg text-muted-foreground">
-                    No guests added yet
-                  </p>
-                  <p className="text-sm text-muted-foreground/70">
-                    Start by entering email addresses above to invite your guests
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )
