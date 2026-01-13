@@ -54,14 +54,14 @@ export type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const sendOtpSchema = z.object({
   recipient: z.string().min(1, "Recipient is required"),
-  recipientType: z.number().int().min(0).max(1), // 0 for phone, 1 for email
+  recipientType: z.number().int().min(0).max(3), // 0 for phone, 1 for email
 });
 
 export type SendOtpFormData = z.infer<typeof sendOtpSchema>;
 
 export const verifyOtpSchema = z.object({
   recipient: z.string().min(1, "Recipient is required"),
-  recipientType: z.number().int().min(0).max(1),
+  recipientType: z.number().int().min(0).max(3),
   otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d+$/, "OTP must contain only numbers"),
 });
 
