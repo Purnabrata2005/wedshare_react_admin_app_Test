@@ -42,7 +42,7 @@ export default function LoginForm() {
     dispatch(
       verifyOtpRequest({
         recipient: email,
-        recipientType: 1, // 1 for email
+        recipientType: 2, // 2 for email
         otp,
         onSuccess: () => {
           setOtp("");
@@ -64,7 +64,7 @@ export default function LoginForm() {
     // Client-side validation with Zod
     const validation = sendOtpSchema.safeParse({
       recipient: email,
-      recipientType: 1, // 1 for email
+      recipientType: 2, // 2 for email
     });
 
     if (!validation.success) {
@@ -79,7 +79,7 @@ export default function LoginForm() {
     dispatch(
       sendOtpRequest({
         recipient: email,
-        recipientType: 1, // 1 for email
+        recipientType: 2, // 2 for email
         onSuccess: () => {},
         onError: () => {
           // Error is handled by saga with toast

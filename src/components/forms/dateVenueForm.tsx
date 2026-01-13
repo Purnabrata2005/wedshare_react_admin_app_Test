@@ -28,16 +28,26 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
   const dateController = useController({
     control,
     name: dateField,
+    rules: {
+      required: `${isReception ? "Reception" : "Wedding"} date is required`,
+    }
   })
 
   const venueController = useController({
     control,
     name: venueField,
+    rules: {
+      required: `${isReception ? "Reception" : "Wedding"} venue is required`,
+      minLength: { value: 3, message: "Venue must be at least 3 characters" }
+    }
   })
 
   const timeController = useController({
     control,
     name: timeField,
+    rules: {
+      required: `${isReception ? "Reception" : "Wedding"} time is required`,
+    }
   })
 
   return (
@@ -73,7 +83,7 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
         <Button
           type="button"
           onClick={onNext}
-          disabled={isLoading || !dateController.field.value || !venueController.field.value || !timeController.field.value}
+          disabled={isLoading || !dateController.field.value || !venueController.field.value || !timeController.field.value || !!errors[dateField] || !!errors[venueField] || !!errors[timeField]}
           size="lg"
           className="w-full"
         >

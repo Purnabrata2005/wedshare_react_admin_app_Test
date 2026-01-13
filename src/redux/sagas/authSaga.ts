@@ -5,16 +5,16 @@ import { clearPhotos } from "../slices/photoSlice";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 import { 
-  loginSchema, 
+  // loginSchema, 
   sendOtpSchema, 
   verifyOtpSchema,
   userSchema 
 } from "../schemas/authSchemas";
 
 import {
-  loginAction,
-  loginSuccess,
-  loginFailure,
+  // loginAction,
+  // loginSuccess,
+  // loginFailure,
 
   // registerAction,
   // registerSuccess,
@@ -34,8 +34,8 @@ import {
   verifyOtpSuccess,
   verifyOtpFailure,
 
-  setLoading,
-  type LoginPayload,
+  // setLoading,
+  // type LoginPayload,
   // type RegisterPayload,
   type SendOtpPayload,
   type VerifyOtpPayload,
@@ -56,57 +56,57 @@ function* fetchCurrentUser(): Generator<any, any, any> {
    LOGIN (ID + PASSWORD)
 ======================= */
 
-function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, any> {
-  try {
-    yield put(setLoading());
+// function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, any> {
+//   try {
+//     yield put(setLoading());
 
-    // Validate input
-    const validationResult = loginSchema.safeParse({
-      username: action.payload.username,
-      password: action.payload.password,
-    });
+//     // Validate input
+//     const validationResult = loginSchema.safeParse({
+//       username: action.payload.username,
+//       password: action.payload.password,
+//     });
 
-    if (!validationResult.success) {
-      const errorMessage = validationResult.error.issues[0].message;
-      yield put(loginFailure(errorMessage));
-      toast.error("Validation Error", {
-        description: errorMessage
-      });
-      action.payload.onError?.(errorMessage);
-      return;
-    }
+//     if (!validationResult.success) {
+//       const errorMessage = validationResult.error.issues[0].message;
+//       yield put(loginFailure(errorMessage));
+//       toast.error("Validation Error", {
+//         description: errorMessage
+//       });
+//       action.payload.onError?.(errorMessage);
+//       return;
+//     }
 
-    yield call(() =>
-      AxiosInstance.post("/login", {
-        username: action.payload.username,
-        password: action.payload.password,
-      })
-    );
+//     yield call(() =>
+//       AxiosInstance.post("/login", {
+//         username: action.payload.username,
+//         password: action.payload.password,
+//       })
+//     );
 
-    const user = yield call(fetchCurrentUser);
+//     const user = yield call(fetchCurrentUser);
     
-    // Validate user response
-    const userValidation = userSchema.safeParse(user);
-    if (!userValidation.success) {
-      console.warn("User data validation warning:", userValidation.error);
-    }
+//     // Validate user response
+//     const userValidation = userSchema.safeParse(user);
+//     if (!userValidation.success) {
+//       console.warn("User data validation warning:", userValidation.error);
+//     }
     
-    yield put(loginSuccess(user));
-    toast.success("Login successful!", {
-      description: `Welcome back, ${user?.fullname || 'User'}!`
-    });
+//     yield put(loginSuccess(user));
+//     toast.success("Login successful!", {
+//       description: `Welcome back, ${user?.fullname || 'User'}!`
+//     });
 
-    action.payload.onSuccess?.();
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message || "Login failed";
-    yield put(loginFailure(message));
-    toast.error("Login failed", {
-      description: message
-    });
-    action.payload.onError?.(message);
-  }
-}
+//     action.payload.onSuccess?.();
+//   } catch (error: any) {
+//     const message =
+//       error?.response?.data?.message || "Login failed";
+//     yield put(loginFailure(message));
+//     toast.error("Login failed", {
+//       description: message
+//     });
+//     action.payload.onError?.(message);
+//   }
+// }
 
 /* =======================
    REGISTER
@@ -275,7 +275,7 @@ function* logoutSaga(): Generator<any, void, any> {
 ======================= */
 
 export default function* authSaga(): Generator<any, void, any> {
-  yield takeLatest(loginAction.type, loginSaga);
+  // yield takeLatest(loginAction.type, loginSaga);
   // yield takeLatest(registerAction.type, registerSaga);
   yield takeLatest(sendOtpRequest.type, sendOtpSaga);
   yield takeLatest(verifyOtpRequest.type, verifyOtpSaga);

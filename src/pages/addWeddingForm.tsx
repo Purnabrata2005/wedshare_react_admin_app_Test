@@ -1,5 +1,5 @@
 import { type FC, useEffect, useRef, useState } from "react"
-import { useForm, type SubmitHandler } from "react-hook-form"
+import { useForm, type SubmitHandler, Controller } from "react-hook-form"
 import { ArrowLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
@@ -99,13 +99,14 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
     setValue,
     formState: { errors },
     reset,
+    trigger,
   } = useForm<WeddingFormData>({
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       groom: "",
       bride: "",
       date: "",
-      time: "10:00 AM",
+      time: "07:00 PM",
       venue: "",
       receptionSame: true,
       receptionDate: "",
@@ -236,28 +237,53 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
       case 1:
         return (
           <div className="space-y-6">
-            <InputField
-              label="Groom's Name"
-              placeholder="e.g., John"
-              value={formValues.groom}
-              onChange={(e) => setValue("groom", e.target.value)}
-              error={errors.groom}
-              disabled={isSubmitting}
+            <Controller
+              name="groom"
+              control={control}
+              rules={{
+                required: "Groom's name is required",
+                minLength: { value: 2, message: "Name must be at least 2 characters" },
+                pattern: { value: /^[a-zA-Z\s]+$/, message: "Name can only contain letters" }
+              }}
+              render={({ field }) => (
+                <InputField
+                  label="Groom's Name"
+                  placeholder="e.g., John"
+                  {...field}
+                  error={errors.groom}
+                  disabled={isSubmitting}
+                />
+              )}
             />
 
-            <InputField
-              label="Bride's Name"
-              placeholder="e.g., Sarah"
-              value={formValues.bride}
-              onChange={(e) => setValue("bride", e.target.value)}
-              error={errors.bride}
-              disabled={isSubmitting}
+            <Controller
+              name="bride"
+              control={control}
+              rules={{
+                required: "Bride's name is required",
+                minLength: { value: 2, message: "Name must be at least 2 characters" },
+                pattern: { value: /^[a-zA-Z\s]+$/, message: "Name can only contain letters" }
+              }}
+              render={({ field }) => (
+                <InputField
+                  label="Bride's Name"
+                  placeholder="e.g., Sarah"
+                  {...field}
+                  error={errors.bride}
+                  disabled={isSubmitting}
+                />
+              )}
             />
 
             <Button
               type="button"
-              onClick={() => setStep(2)}
-              disabled={!formValues.groom || !formValues.bride || isSubmitting}
+              onClick={async () => {
+                const isValid = await trigger(["groom", "bride"])
+                if (isValid) {
+                  setStep(2)
+                }
+              }}
+              disabled={!formValues.groom || !formValues.bride || isSubmitting || !!errors.groom || !!errors.bride}
               className="w-full"
               size="lg"
             >
@@ -272,7 +298,12 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
             control={control}
             setValue={setValue}
             errors={errors}
-            onNext={() => setStep(3)}
+            onNext={async () => {
+              const isValid = await trigger(["date", "time", "venue"])
+              if (isValid) {
+                setStep(3)
+              }
+            }}
             isLoading={isSubmitting}
           />
         )
@@ -306,10 +337,19 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
             <Button
               type="button"
-              onClick={() => setStep(4)}
+              onClick={async () => {
+                if (formValues.receptionSame) {
+                  setStep(4)
+                } else {
+                  const isValid = await trigger(["receptionDate", "receptionTime", "receptionVenue"])
+                  if (isValid) {
+                    setStep(4)
+                  }
+                }
+              }}
               disabled={
                 isSubmitting ||
-                (!formValues.receptionSame && (!formValues.receptionDate || !formValues.receptionVenue))
+                (!formValues.receptionSame && (!formValues.receptionDate || !formValues.receptionVenue || !!errors.receptionDate || !!errors.receptionVenue))
               }
               className="w-full"
               size="lg"
