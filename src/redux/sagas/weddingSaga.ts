@@ -90,6 +90,16 @@ function* loadWeddingsSaga(): SagaIterator {
 
 function* addWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIterator {
   try {
+    const userId: string | undefined = yield select(
+      (state: RootState) => state.auth.user?.userid
+    )
+    if (!userId) {
+      const msg = "User not authenticated"
+      yield put(addWeddingFailure(msg))
+      toast.error(msg)
+      return
+    }
+
     const validation = createWeddingSchema.safeParse(action.payload)
     if (!validation.success) {
       const msg = validation.error.issues[0].message
@@ -98,7 +108,11 @@ function* addWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIter
       return
     }
 
-    yield call(AxiosWedding.post, "/weddings/register", action.payload)
+    const payload = {
+      ...action.payload,
+      createdBy: action.payload?.createdBy || userId,
+    }
+    yield call(AxiosWedding.post, "/weddings/register", payload)
 
     yield put(addWeddingSuccess())
     yield put(loadWeddingsRequest())
@@ -119,6 +133,16 @@ function* updateWeddingSaga(
   action: ReturnType<typeof updateWeddingRequest>
 ): SagaIterator {
   try {
+    const userId: string | undefined = yield select(
+      (state: RootState) => state.auth.user?.userid
+    )
+    if (!userId) {
+      const msg = "User not authenticated"
+      yield put(updateWeddingFailure(msg))
+      toast.error(msg)
+      return
+    }
+
     const { weddingId, data } = action.payload
 
     const validation = updateWeddingSchema.safeParse(data)
@@ -150,6 +174,16 @@ function* deleteWeddingSaga(
   action: ReturnType<typeof deleteWeddingRequest>
 ): SagaIterator {
   try {
+    const userId: string | undefined = yield select(
+      (state: RootState) => state.auth.user?.userid
+    )
+    if (!userId) {
+      const msg = "User not authenticated"
+      yield put(deleteWeddingFailure(msg))
+      toast.error(msg)
+      return
+    }
+
     const validation = deleteWeddingSchema.safeParse({
       weddingId: action.payload,
     })

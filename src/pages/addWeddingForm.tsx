@@ -154,22 +154,36 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
   // Monitor weddings state to detect when save/update is complete
   useEffect(() => {
-    if (!isSubmitting || !lastWeddingIdRef.current) return
+    if (!isSubmitting || !lastWeddingIdRef.current) {
+      prevLoadingRef.current = weddingsLoading
+      return
+    }
 
     // For new weddings - check if the wedding exists in the list
     // For updates - check if loading changed from true to false (update completed)
     const found = weddings.some((w) => w.weddingId === lastWeddingIdRef.current)
-    const updateCompleted = isEditMode && prevLoadingRef.current && !weddingsLoading
-    
-    if (found || updateCompleted) {
-      const wedding = weddings.find((w) => w.weddingId === lastWeddingIdRef.current)
-      setIsSubmitting(false)
-      lastWeddingIdRef.current = null
-      onSave(wedding)
-    }
-    
-    prevLoadingRef.current = weddingsLoading
-  }, [weddings, isSubmitting, onSave, isEditMode, weddingsLoading])
+    const loadingTransitioned = prevLoadingRef.current && !weddingsLoading
+    const updateCompleted = isEditMode && loadingTransitioned
+    const createCompleted = !isEditMode && loadingTransitioned
+     
+    if (found || updateCompleted || createCompleted) {
+      const wedding =
+        weddings.find((w) => w.weddingId === lastWeddingIdRef.current) ||
+        weddings.find((w) => (w.id || w.weddingId) === lastWeddingIdRef.current) ||
+        weddings.find(
+          (w) =>
+            w.groomName === formValues.groom &&
+            w.brideName === formValues.bride &&
+            w.weddingDate === formValues.date
+        ) ||
+        null
+       setIsSubmitting(false)
+       lastWeddingIdRef.current = null
+       onSave(wedding)
+     }
+     
+     prevLoadingRef.current = weddingsLoading
+  }, [weddings, isSubmitting, onSave, isEditMode, weddingsLoading, formValues.bride, formValues.groom, formValues.date])
 
   const handleFormSubmit: SubmitHandler<WeddingFormData> = (data) => {
     // Only navigate steps, never submit until explicitly on final step

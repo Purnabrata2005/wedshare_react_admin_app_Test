@@ -77,7 +77,10 @@ const weddingSlice = createSlice({
     },
 
     /* ---------- CREATE ---------- */
-    addWeddingRequest: (_state, _action: PayloadAction<any>) => {},
+    addWeddingRequest: (state, _action: PayloadAction<any>) => {
+      state.loading = true
+      state.error = null
+    },
     addWeddingSuccess: () => {},
     addWeddingFailure: (state, action: PayloadAction<string>) => {
       state.error = action.payload
@@ -86,9 +89,12 @@ const weddingSlice = createSlice({
 
     /* ---------- UPDATE ---------- */
     updateWeddingRequest: (
-      _state,
+      state,
       _action: PayloadAction<{ weddingId: string; data: any }>
-    ) => {},
+    ) => {
+      state.loading = true
+      state.error = null
+    },
     updateWeddingSuccess: () => {},
     updateWeddingFailure: (state, action: PayloadAction<string>) => {
       state.error = action.payload
@@ -96,7 +102,10 @@ const weddingSlice = createSlice({
     },
 
     /* ---------- DELETE ---------- */
-    deleteWeddingRequest: (_state, _action: PayloadAction<string>) => {},
+    deleteWeddingRequest: (state, _action: PayloadAction<string>) => {
+      state.loading = true
+      state.error = null
+    },
     deleteWeddingSuccess: () => {},
     deleteWeddingFailure: (state, action: PayloadAction<string>) => {
       state.error = action.payload

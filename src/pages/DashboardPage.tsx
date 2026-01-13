@@ -2,21 +2,13 @@ import { useEffect } from "react"
 import { Outlet } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { clearSelection } from "@/redux/slices/weddingSlice";
-import { Calendar, Plus, Moon, Sun } from "lucide-react"
+import { Calendar, Plus } from "lucide-react"
 import { Navbar } from "@/components/ui/navbar"
 import { WeddingCard } from "@/components/WeddingCard"
 import {  WeddingCardsSkeletonGrid } from "@/components/ui/wedding-card-skeleton"
 import { EmptyWeddingsState } from "@/components/EmptyWeddingsState"
 import { FloatingActionButton } from "@/components/ui/floatingActionButton"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { useTheme } from "@/components/layout/theme-provider"
+import { AvatarDropdown } from "@/components/dashboard/AvatarDropdown"
 import { useAppSelector, useAppDispatch } from "@/redux/hooks"
 import { loadWeddingsRequest, selectWedding } from "@/redux/slices/weddingSlice"
 import type { Wedding } from "@/redux/slices/weddingSlice"
@@ -25,21 +17,12 @@ import ROUTES from "@/routePath"
 export default function DashboardPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { theme, setTheme } = useTheme()
   const { weddings, loading, error } = useAppSelector((state) => state.weddings)
-  const { user } = useAppSelector((state) => state.auth)
 
   // Load weddings on component mount
   useEffect(() => {
     dispatch(loadWeddingsRequest())
   }, [dispatch])
-
-  // Get user initials for avatar fallback
-  const getAvatarFallback = () => {
-    if (!user) return "U"
-    const firstName = user.fullname?.charAt(0) || ""
-    return (firstName ).toUpperCase() || "U"
-  }
 
   const handleSelectWedding = (wedding: Wedding) => {
     console.log("Wedding selected:", wedding)
@@ -62,54 +45,6 @@ export default function DashboardPage() {
     dispatch(clearSelection());
     navigate(ROUTES.ADD_WEDDING);
   }
-
-  const AvatarDropdown = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="cursor-pointer rounded-full hover:ring-2 hover:ring-white/50 transition-all">
-          <Avatar className="h-10 w-10 ring-2 ring-white/30">
-            <AvatarImage src="" alt={user?.fullname || "User"} />
-            <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground font-semibold">
-              {getAvatarFallback()}
-            </AvatarFallback>
-          </Avatar>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={() => navigate("/profile")}>
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1.5">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Theme</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setTheme("light")}
-              className={`flex-1 px-3 py-2 rounded-md text-sm transition-colors ${
-                theme === "light"
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-muted hover:bg-muted/80"
-              }`}
-            >
-              <Sun className="w-4 h-4 mx-auto mb-1" />
-              Light
-            </button>
-            <button
-              onClick={() => setTheme("dark")}
-              className={`flex-1 px-3 py-2 rounded-md text-sm transition-colors ${
-                theme === "dark"
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-muted hover:bg-muted/80"
-              }`}
-            >
-              <Moon className="w-4 h-4 mx-auto mb-1" />
-              Dark
-            </button>
-          </div>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 
   // Loading State
   if (loading) {
