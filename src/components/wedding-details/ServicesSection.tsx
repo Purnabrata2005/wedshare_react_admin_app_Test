@@ -9,7 +9,6 @@ interface ServicesSectionProps {
 }
 
 export function ServicesSection({
-  weddingId,
   onInviteGuestsClick,
   onUploadPhotosClick,
 }: ServicesSectionProps) {

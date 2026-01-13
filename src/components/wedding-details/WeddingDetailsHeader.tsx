@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Share2 } from "lucide-react";
+import { Edit, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { WeddingHeader } from "@/components/ui/wedding-header";
