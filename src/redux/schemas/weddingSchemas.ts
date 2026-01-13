@@ -8,15 +8,15 @@ export const weddingSchema = z.object({
   id: z.string().optional(),
   weddingId: z.string().optional(), // FIXED: optional
 
-  groomName: z.string().min(2, "Groom name must be at least 2 characters"),
-  brideName: z.string().min(2, "Bride name must be at least 2 characters"),
+  groomName: z.string().min(1, "Groom name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Groom name can only contain letters"),
+  brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
 
   weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(3, "Wedding venue must be at least 3 characters"),
+  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters"),
   weddingTime: z.string().min(1, "Wedding time is required"),
 
   receptionDate: z.string().min(1, "Reception date is required"),
-  receptionVenue: z.string().min(3, "Reception venue must be at least 3 characters"),
+  receptionVenue: z.string().min(1, "Reception venue must be at least 1 characters"),
   receptionTime: z.string().min(1, "Reception time is required"),
 
   invitationTemplate: z.number().nullable().optional(),
@@ -37,15 +37,15 @@ export type WeddingData = z.infer<typeof weddingSchema>;
 ======================= */
 
 export const createWeddingSchema = z.object({
-  groomName: z.string().min(2, "Groom name must be at least 2 characters"),
-  brideName: z.string().min(2, "Bride name must be at least 2 characters"),
+  groomName: z.string().min(1, "Groom name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Groom name can only contain letters"),
+  brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
 
   weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(3, "Wedding venue must be at least 3 characters"),
+  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters"),
   weddingTime: z.string().min(1, "Wedding time is required"),
 
   receptionDate: z.string().min(1, "Reception date is required"),
-  receptionVenue: z.string().min(3, "Reception venue must be at least 3 characters"),
+  receptionVenue: z.string().min(1, "Reception venue must be at least 1 characters"),
   receptionTime: z.string().min(1, "Reception time is required"),
 
   invitationTemplate: z.number().nullable().optional(),
@@ -61,15 +61,15 @@ export type CreateWeddingFormData = z.infer<typeof createWeddingSchema>;
 ======================= */
 
 export const updateWeddingSchema = z.object({
-  groomName: z.string().min(2).optional(),
-  brideName: z.string().min(2).optional(),
+  groomName: z.string().min(1).regex(/^[a-zA-Z]+$/, "Groom name can only contain letters").optional(),
+  brideName: z.string().min(1).regex(/^[a-zA-Z]+$/, "Bride name can only contain letters").optional(),
 
   weddingDate: z.string().min(1).optional(),
-  weddingVenue: z.string().min(3).optional(),
+  weddingVenue: z.string().min(1).regex(/^[a-zA-Z]+$/, "Wedding venue can only contain letters").optional(),
   weddingTime: z.string().min(1).optional(),
 
   receptionDate: z.string().min(1).optional(),
-  receptionVenue: z.string().min(3).optional(),
+  receptionVenue: z.string().min(1).optional(),
   receptionTime: z.string().min(1).optional(),
 
   invitationTemplate: z.number().nullable().optional(),

@@ -1,5 +1,7 @@
 import { type FC, useEffect, useRef, useState } from "react"
 import { useForm, type SubmitHandler, Controller } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
@@ -13,6 +15,7 @@ import { InputField } from "../components/forms/input-field"
 import { DateVenueForm } from "../components/forms/dateVenueForm"
 import { CheckboxField } from "../components/forms/checkbox-field"
 import { InvitationTemplateSelector, type InvitationTemplate } from "../components/forms/invitationTemplateSelector"
+import { weddingSchema } from "@/redux/schemas/weddingSchemas"
 
 const WEDDING_TEMPLATES: InvitationTemplate[] = [
   {
@@ -32,18 +35,20 @@ const WEDDING_TEMPLATES: InvitationTemplate[] = [
   },
 ]
 
-interface WeddingFormData {
-  groom: string
-  bride: string
-  date: string
-  time: string
-  venue: string
-  receptionSame: boolean
-  receptionDate: string
-  receptionTime: string
-  receptionVenue: string
-  invitationTemplate: number
-}
+const addWeddingFormSchema = z.object({
+  groom: weddingSchema.shape.groomName,
+  bride: weddingSchema.shape.brideName,
+  date: weddingSchema.shape.weddingDate,
+  time: weddingSchema.shape.weddingTime,
+  venue: weddingSchema.shape.weddingVenue,
+  receptionSame: z.boolean(),
+  receptionDate: weddingSchema.shape.receptionDate,
+  receptionTime: weddingSchema.shape.receptionTime,
+  receptionVenue: weddingSchema.shape.receptionVenue,
+  invitationTemplate: z.number().min(1, "Invitation template is required"),
+})
+
+type WeddingFormData = z.infer<typeof addWeddingFormSchema>
 
 interface AddWeddingFormProps {
   onSave: (data: any) => void
@@ -106,6 +111,7 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
     trigger,
   } = useForm<WeddingFormData>({
     mode: "onChange",
+    resolver: zodResolver(addWeddingFormSchema),
     defaultValues: {
       groom: "",
       bride: "",
@@ -244,11 +250,6 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
             <Controller
               name="groom"
               control={control}
-              rules={{
-                required: "Groom's name is required",
-                minLength: { value: 2, message: "Name must be at least 2 characters" },
-                pattern: { value: /^[a-zA-Z\s]+$/, message: "Name can only contain letters" }
-              }}
               render={({ field }) => (
                 <InputField
                   label="Groom's Name"
@@ -263,11 +264,6 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
             <Controller
               name="bride"
               control={control}
-              rules={{
-                required: "Bride's name is required",
-                minLength: { value: 2, message: "Name must be at least 2 characters" },
-                pattern: { value: /^[a-zA-Z\s]+$/, message: "Name can only contain letters" }
-              }}
               render={({ field }) => (
                 <InputField
                   label="Bride's Name"
@@ -287,7 +283,7 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
                   setStep(2)
                 }
               }}
-              disabled={!formValues.groom || !formValues.bride || isSubmitting || !!errors.groom || !!errors.bride}
+              disabled={isSubmitting}
               className="w-full"
               size="lg"
             >
