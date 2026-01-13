@@ -381,10 +381,13 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
             />
 
             <Button
-              type="submit"
-              data-role="primary-submit"
-              onClick={() => {
-                canSubmitRef.current = true
+              type="button"
+              onClick={async () => {
+                const isValid = await trigger("invitationTemplate")
+                if (isValid) {
+                  canSubmitRef.current = true
+                  handleSubmit(handleFormSubmit)()
+                }
               }}
               disabled={isSubmitting}
               className="w-full mt-6"
