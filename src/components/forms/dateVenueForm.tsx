@@ -30,6 +30,9 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
     name: dateField,
     rules: {
       required: `${isReception ? "Reception" : "Wedding"} date is required`,
+      validate: {
+        isValidDate: (value) => !isNaN(new Date(value).getTime()) || "Invalid date format",
+      },
     }
   })
 
@@ -38,7 +41,14 @@ export const DateVenueForm: FC<DateVenueFormProps<any>> = ({
     name: venueField,
     rules: {
       required: `${isReception ? "Reception" : "Wedding"} venue is required`,
-      minLength: { value: 3, message: "Venue must be at least 3 characters" }
+      minLength: { value: 3, message: "Venue must be at least 3 characters" },
+      validate: {
+        noTrailingSpaces: (value) => {
+          const trimmedValue = value.trim();
+          setValue(venueField, trimmedValue); // Update the value to trimmed
+          return trimmedValue === value || "Venue cannot have trailing spaces";
+        }
+      }
     }
   })
 
