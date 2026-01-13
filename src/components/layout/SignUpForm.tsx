@@ -6,12 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "./PasswordInput";
 
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { registerAction } from "@/redux/slices/authSlice";
+import { useAppSelector } from "@/redux/hooks";
 import ROUTES from "@/routePath";
 
 export default function SignUpForm() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { loading, error, isAuthenticated } = useAppSelector(
@@ -64,16 +62,16 @@ export default function SignUpForm() {
       return;
     }
 
-    dispatch(
-      registerAction({
-        fullname: name,
-        lastName,
-        email,
-        phoneNumber,
-        password,
-        role: "customer",
-      })
-    );
+    // TODO: Implement registration API call
+    // For now, just show a placeholder toast
+    console.log("Registration data:", {
+      fullname: name,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+      role: "customer",
+    });
   };
 
   /* -------------------------

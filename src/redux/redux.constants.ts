@@ -4,5 +4,5 @@ export type AuthUser = {
   email: string;
   avatar?: string;
   bio?: string;
-  role: "ADMIN" | "USER";
+  role: "ADMIN" ;
 };

@@ -43,13 +43,19 @@ export default function DashboardPage() {
 
   const handleSelectWedding = (wedding: Wedding) => {
     console.log("Wedding selected:", wedding)
-    dispatch(selectWedding(wedding))
-    navigate(ROUTES.WEDDING_DETAILS)
+    const weddingId = wedding.weddingId || wedding.id
+    if (weddingId) {
+      dispatch(selectWedding(weddingId))
+      navigate(ROUTES.WEDDING_DETAILS)
+    }
   }
 
   const handleEditWedding = (wedding: Wedding) => {
-    dispatch(selectWedding(wedding))
-    navigate(ROUTES.ADD_WEDDING)
+    const weddingId = wedding.weddingId || wedding.id
+    if (weddingId) {
+      dispatch(selectWedding(weddingId))
+      navigate(ROUTES.ADD_WEDDING)
+    }
   }
 
   const handleAddWedding = () => {

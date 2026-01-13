@@ -84,7 +84,11 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const userId = useAppSelector((state) => state.auth.user?.userid)
-  const { weddings, selectedWedding } = useAppSelector((state) => state.weddings)
+  const { weddings, selectedWeddingId } = useAppSelector((state) => state.weddings)
+  
+  const selectedWedding = weddings.find(
+    (w) => w.weddingId === selectedWeddingId || w.id === selectedWeddingId
+  )
   const isEditMode = !!selectedWedding
 
   const [step, setStep] = useState(1)
@@ -203,11 +207,11 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
       dispatch(
         updateWeddingRequest({
-          weddingId: selectedWedding.weddingId || selectedWedding.id,
+          weddingId: selectedWedding.weddingId || selectedWedding.id || "",
           data: updatePayload,
         })
       )
-      lastWeddingIdRef.current = selectedWedding.weddingId || selectedWedding.id
+      lastWeddingIdRef.current = selectedWedding.weddingId || selectedWedding.id || ""
     } else {
       // Create new wedding
       const weddingId = uuidv4()

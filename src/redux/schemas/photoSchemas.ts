@@ -89,7 +89,7 @@ export const photoMetadataSchema = z.object({
   photoId: z.string().uuid("Invalid photo ID"),
   storageKey: z.string().min(1, "Storage key is required"),
   uploadedBy: z.string().min(1, "Uploaded by is required"),
-  uploadSource: z.enum(["ADMIN", "USER"]),
+  uploadSource: z.enum(["ADMIN"]),
   wrappedPhotoKey: z.string().optional(),
   wrappedProcessKey: z.string().optional(),
 });

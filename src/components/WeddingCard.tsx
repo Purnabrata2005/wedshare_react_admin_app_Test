@@ -28,12 +28,15 @@ export function WeddingCard({ wedding, onClick, onEdit }: WeddingCardProps) {
   const navigate = useNavigate()
 
   const handleCardClick = () => {
-    dispatch(selectWedding(wedding))
-    if (onClick) {
-      onClick(wedding)
+    const weddingId = wedding.weddingId || wedding.id
+    if (weddingId) {
+      dispatch(selectWedding(weddingId))
+      if (onClick) {
+        onClick(wedding)
+      }
+      // Navigate to wedding details page
+      navigate('/wedding-details')
     }
-    // Navigate to wedding details page
-    navigate('/wedding-details')
   }
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -45,7 +48,10 @@ export function WeddingCard({ wedding, onClick, onEdit }: WeddingCardProps) {
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch(deleteWeddingRequest(wedding.weddingId || wedding.id))
+    const weddingId = wedding.weddingId || wedding.id
+    if (weddingId) {
+      dispatch(deleteWeddingRequest(weddingId))
+    }
   }
 
   const formattedDate = new Date(wedding.weddingDate).toLocaleDateString("en-US", {

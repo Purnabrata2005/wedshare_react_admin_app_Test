@@ -1,28 +1,21 @@
 import { call, put, takeLatest } from "redux-saga/effects";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import AxiosInstance from "../service/axiosInstance";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
-import type { PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "sonner";
-import { 
-  // loginSchema, 
-  sendOtpSchema, 
+
+import {
+  sendOtpSchema,
   verifyOtpSchema,
-  userSchema 
+  userSchema,
 } from "../schemas/authSchemas";
 
 import {
-  // loginAction,
-  // loginSuccess,
-  // loginFailure,
-
-  // registerAction,
-  // registerSuccess,
-  // registerFailure,
-
   verifySessionAction,
   verifySessionSuccess,
   verifySessionFailure,
+
   logoutAction,
   logoutSuccess,
 
@@ -34,9 +27,6 @@ import {
   verifyOtpSuccess,
   verifyOtpFailure,
 
-  // setLoading,
-  // type LoginPayload,
-  // type RegisterPayload,
   type SendOtpPayload,
   type VerifyOtpPayload,
 } from "../slices/authSlice";
@@ -47,204 +37,100 @@ import {
 
 function* fetchCurrentUser(): Generator<any, any, any> {
   const response = yield call(() =>
-    AxiosInstance.get("/login/verify",{ withCredentials: true })
+    AxiosInstance.get("/login/verify", { withCredentials: true })
   );
-  return response.data?.data;
+  return response.data;
 }
-
-/* =======================
-   LOGIN (ID + PASSWORD)
-======================= */
-
-// function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, any> {
-//   try {
-//     yield put(setLoading());
-
-//     // Validate input
-//     const validationResult = loginSchema.safeParse({
-//       username: action.payload.username,
-//       password: action.payload.password,
-//     });
-
-//     if (!validationResult.success) {
-//       const errorMessage = validationResult.error.issues[0].message;
-//       yield put(loginFailure(errorMessage));
-//       toast.error("Validation Error", {
-//         description: errorMessage
-//       });
-//       action.payload.onError?.(errorMessage);
-//       return;
-//     }
-
-//     yield call(() =>
-//       AxiosInstance.post("/login", {
-//         username: action.payload.username,
-//         password: action.payload.password,
-//       })
-//     );
-
-//     const user = yield call(fetchCurrentUser);
-    
-//     // Validate user response
-//     const userValidation = userSchema.safeParse(user);
-//     if (!userValidation.success) {
-//       console.warn("User data validation warning:", userValidation.error);
-//     }
-    
-//     yield put(loginSuccess(user));
-//     toast.success("Login successful!", {
-//       description: `Welcome back, ${user?.fullname || 'User'}!`
-//     });
-
-//     action.payload.onSuccess?.();
-//   } catch (error: any) {
-//     const message =
-//       error?.response?.data?.message || "Login failed";
-//     yield put(loginFailure(message));
-//     toast.error("Login failed", {
-//       description: message
-//     });
-//     action.payload.onError?.(message);
-//   }
-// }
-
-/* =======================
-   REGISTER
-======================= */
-
-// function* registerSaga(action: PayloadAction<RegisterPayload>): Generator<any, void, any> {
-//   try {
-//     yield put(setLoading());
-
-//     yield call(() =>
-//       AxiosInstance.post("/register", {
-//         fullname: action.payload.fullname,
-//         lastName: action.payload.lastName,
-//         email: action.payload.email,
-//         password: action.payload.password,
-//         phoneNumber: action.payload.phoneNumber,
-//         role: action.payload.role,
-//       })
-//     );
-
-//     yield put(registerSuccess());
-
-//     // Auto-login via cookie
-//     const user = yield call(fetchCurrentUser);
-//     yield put(loginSuccess(user));
-
-//     action.payload.onSuccess?.();
-//   } catch (error: any) {
-//     const message =
-//       error?.response?.data?.message || "Registration failed";
-//     yield put(registerFailure(message));
-//     action.payload.onError?.(message);
-//   }
-// }
 
 /* =======================
    OTP
 ======================= */
 
-function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): Generator<any, void, any> {
+function* sendOtpSaga(
+  action: PayloadAction<SendOtpPayload>
+): Generator<any, void, any> {
   try {
-    // Validate input
-    const validationResult = sendOtpSchema.safeParse({
-      recipient: action.payload.recipient,
-      recipientType: action.payload.recipientType,
-    });
-
-    if (!validationResult.success) {
-      const errorMessage = validationResult.error.issues[0].message;
-      yield put(sendOtpFailure(errorMessage));
-      toast.error("Validation Error", {
-        description: errorMessage
-      });
-      action.payload.onError?.(errorMessage);
+    const validation = sendOtpSchema.safeParse(action.payload);
+    if (!validation.success) {
+      const msg = validation.error.issues[0].message;
+      yield put(sendOtpFailure(msg));
+      toast.error(msg);
+      action.payload.onError?.(msg);
       return;
     }
 
     yield call(() =>
-      AxiosInstance.post("/login/send-otp", {
-        recipient: action.payload.recipient,
-        recipientType: action.payload.recipientType,
-      })
+      AxiosInstance.post("/login/send-otp", action.payload)
     );
+
     yield put(sendOtpSuccess());
-    toast.success("OTP sent successfully", {
-      description: `Check your ${action.payload.recipientType === 1 ? 'email' : 'phone'} for the verification code`
-    });
+    toast.success("OTP sent successfully");
     action.payload.onSuccess?.();
   } catch (error: any) {
-    const message =
-      error?.response?.data?.message || "Failed to send OTP";
-    yield put(sendOtpFailure(message));
-    toast.error("Failed to send OTP", {
-      description: message
-    });
-    action.payload.onError?.(message);
+    const msg = error?.response?.data?.message || "Failed to send OTP";
+    yield put(sendOtpFailure(msg));
+    toast.error(msg);
+    action.payload.onError?.(msg);
   }
 }
 
-function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): Generator<any, void, any> {
+function* verifyOtpSaga(
+  action: PayloadAction<VerifyOtpPayload>
+): Generator<any, void, any> {
   try {
-    // Validate input
-    const validationResult = verifyOtpSchema.safeParse({
-      recipient: action.payload.recipient,
-      recipientType: action.payload.recipientType,
-      otp: action.payload.otp,
-    });
-
-    if (!validationResult.success) {
-      const errorMessage = validationResult.error.issues[0].message;
-      yield put(verifyOtpFailure(errorMessage));
-      toast.error("Validation Error", {
-        description: errorMessage
-      });
-      action.payload.onError?.(errorMessage);
+    const validation = verifyOtpSchema.safeParse(action.payload);
+    if (!validation.success) {
+      const msg = validation.error.issues[0].message;
+      yield put(verifyOtpFailure(msg));
+      toast.error(msg);
+      action.payload.onError?.(msg);
       return;
     }
 
     yield call(() =>
-      AxiosInstance.post("/login/otp/web", {
-        recipient: action.payload.recipient,
-        recipientType: action.payload.recipientType,
-        otp: action.payload.otp,
-      })
+      AxiosInstance.post("/login/otp/web", action.payload)
     );
 
     const user = yield call(fetchCurrentUser);
-    
-    // Validate user response
-    const userValidation = userSchema.safeParse(user);
-    if (!userValidation.success) {
-      console.warn("User data validation warning:", userValidation.error);
-    }
-    
-    yield put(verifyOtpSuccess(user));
-    toast.success("Verification successful!", {
-      description: `Welcome, ${user?.fullname || 'User'}!`
-    });
 
+    const parsed = userSchema.safeParse(user);
+    if (!parsed.success || !user?.userid) {
+      yield put(verifySessionFailure());
+      return;
+    }
+
+    yield put(verifyOtpSuccess(user));
+    toast.success(`Welcome ${user?.fullname || ""}`);
     action.payload.onSuccess?.();
   } catch (error: any) {
-    const message =
-      error?.response?.data?.message || "OTP verification failed";
-    yield put(verifyOtpFailure(message));
-    toast.error("Verification failed", {
-      description: message
-    });
-    action.payload.onError?.(message);
+    const msg = error?.response?.data?.message || "OTP verification failed";
+    yield put(verifyOtpFailure(msg));
+    toast.error(msg);
+    action.payload.onError?.(msg);
   }
 }
 
 /* =======================
    VERIFY SESSION (APP LOAD)
 ======================= */
-
-function* verifySessionSaga(): Generator<any, void, any> {
+/**
+ * IMPORTANT:
+ * verifySessionAction has NO payload.
+ * Therefore the saga MUST explicitly declare PayloadAction<void>
+ * to avoid "action.payload possibly undefined" TypeScript error.
+ */
+function* verifySessionSaga(
+  _action: PayloadAction<void>
+): Generator<any, void, any> {
   try {
     const user = yield call(fetchCurrentUser);
+
+    const parsed = userSchema.safeParse(user);
+    if (!parsed.success || !user?.userid) {
+      yield put(verifySessionFailure());
+      return;
+    }
+
     yield put(verifySessionSuccess(user));
   } catch {
     yield put(verifySessionFailure());
@@ -255,18 +141,17 @@ function* verifySessionSaga(): Generator<any, void, any> {
    LOGOUT
 ======================= */
 
-function* logoutSaga(): Generator<any, void, any> {
+function* logoutSaga(
+  _action: PayloadAction<void>
+): Generator<any, void, any> {
   try {
     yield call(() => AxiosInstance.post("/logout"));
     yield call(() => photoDB.queue.clear());
     yield put(clearPhotos());
     yield put(logoutSuccess());
     toast.info("Logged out successfully");
-  } catch (error) {
-    console.error("Logout failed", error);
-    toast.error("Logout failed", {
-      description: "An error occurred while logging out"
-    });
+  } catch {
+    toast.error("Logout failed");
   }
 }
 
@@ -275,8 +160,6 @@ function* logoutSaga(): Generator<any, void, any> {
 ======================= */
 
 export default function* authSaga(): Generator<any, void, any> {
-  // yield takeLatest(loginAction.type, loginSaga);
-  // yield takeLatest(registerAction.type, registerSaga);
   yield takeLatest(sendOtpRequest.type, sendOtpSaga);
   yield takeLatest(verifyOtpRequest.type, verifyOtpSaga);
   yield takeLatest(verifySessionAction.type, verifySessionSaga);

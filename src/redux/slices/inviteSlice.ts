@@ -57,7 +57,7 @@ export interface InviteState {
 }
 
 /* ======================================================
-   STATE
+   INITIAL STATE
 ====================================================== */
 
 const initialState: InviteState = {
@@ -75,6 +75,7 @@ const inviteSlice = createSlice({
   name: "invite",
   initialState,
   reducers: {
+    /* ---------- GUESTS ---------- */
     addGuests: (state, action: PayloadAction<GuestItem[]>) => {
       state.guests.push(...action.payload);
     },
@@ -89,12 +90,13 @@ const inviteSlice = createSlice({
       state.guests = [];
     },
 
-    // Saga trigger
+    /* ---------- SAGA TRIGGER ---------- */
     sendInvitationAction: (
       _state,
       _action: PayloadAction<SendInvitationPayload>
     ) => {},
 
+    /* ---------- STATUS ---------- */
     setInviteLoading: (state) => {
       state.loading = true;
       state.error = null;
@@ -117,7 +119,7 @@ const inviteSlice = createSlice({
       state.success = false;
     },
 
-    // 🔑 allow UI to reset success state cleanly
+    /* ---------- UI RESET ---------- */
     resetInviteState: (state) => {
       state.loading = false;
       state.error = null;
@@ -130,6 +132,7 @@ export const {
   addGuests,
   removeGuest,
   clearGuests,
+
   sendInvitationAction,
   setInviteLoading,
   sendInvitationSuccess,

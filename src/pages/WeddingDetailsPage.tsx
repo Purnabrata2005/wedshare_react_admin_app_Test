@@ -19,17 +19,19 @@ export default function WeddingDetailsPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { selectedWedding, loading } = useAppSelector(
+  const { weddings, selectedWeddingId, loading } = useAppSelector(
     (state) => state.weddings
   );
 
-  const wedding = selectedWedding;
+  const wedding = weddings.find(
+    (w) => w.weddingId === selectedWeddingId || w.id === selectedWeddingId
+  );
 
   useEffect(() => {
-    if (!loading && !selectedWedding) {
+    if (!loading && !selectedWeddingId) {
       navigate(ROUTES.DASHBOARD);
     }
-  }, [selectedWedding, loading, navigate]);
+  }, [selectedWeddingId, loading, navigate]);
 
   const handleBack = () => {
     dispatch(clearSelection());
@@ -37,22 +39,29 @@ export default function WeddingDetailsPage() {
   };
 
   const handleEdit = () => {
-    if (wedding) {
-      dispatch(selectWedding(wedding));
+    const weddingId = wedding?.weddingId || wedding?.id;
+    if (weddingId) {
+      dispatch(selectWedding(weddingId));
       navigate(ROUTES.ADD_WEDDING);
     }
   };
 
   const handleShare = () => {
-    console.log("Share wedding:", wedding?.weddingId);
+    console.log("Share wedding:", wedding?.weddingId || wedding?.id);
   };
 
   const handleInviteGuests = () => {
-    navigate("/invite-guests", { state: { weddingId: wedding?.weddingId } });
+    const weddingId = wedding?.weddingId || wedding?.id;
+    if (weddingId) {
+      navigate("/invite-guests", { state: { weddingId } });
+    }
   };
 
   const handleUploadPhotos = () => {
-    navigate("/photo-upload", { state: { weddingId: wedding?.weddingId } });
+    const weddingId = wedding?.weddingId || wedding?.id;
+    if (weddingId) {
+      navigate("/photo-upload", { state: { weddingId } });
+    }
   };
 
   if (loading) {
@@ -92,15 +101,15 @@ export default function WeddingDetailsPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <WeddingCeremonyCard
             date={weddingDate}
-            venue={wedding.weddingVenue}
+            venue={wedding.weddingVenue || ""}
           />
-          <ReceptionCard date={receptionDate} venue={wedding.receptionVenue} />
+          <ReceptionCard date={receptionDate} venue={wedding.receptionVenue || ""} />
         </div>
 
         <QuickInfoSection weddingDate={wedding.weddingDate} />
 
         <ServicesSection
-          weddingId={wedding.weddingId}
+          weddingId={wedding.weddingId || wedding.id || ""}
           onInviteGuestsClick={handleInviteGuests}
           onUploadPhotosClick={handleUploadPhotos}
         />

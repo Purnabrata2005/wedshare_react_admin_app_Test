@@ -11,10 +11,10 @@ export interface User {
   lastname?: string;
   email?: string;
   phonenumber?: string | null;
-  isactive?: boolean;
-  extradata?: any;
   phoneNumber?: string;
   roles?: string[];
+  isactive?: boolean;
+  extradata?: any;
 }
 
 export interface AuthState {
@@ -23,32 +23,18 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
 
+  // OTP
   otpSent: boolean;
   otpLoading: boolean;
   otpError: string | null;
+
+  // App bootstrap flag
+  rehydrated: boolean;
 }
 
 /* =======================
    PAYLOADS
 ======================= */
-
-export interface LoginPayload {
-  username: string;
-  password: string;
-  onSuccess?: () => void;
-  onError?: (msg: string) => void;
-}
-
-export interface RegisterPayload {
-  fullname: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phoneNumber: string;
-  role: string;
-  onSuccess?: () => void;
-  onError?: (msg: string) => void;
-}
 
 export interface SendOtpPayload {
   recipient: string;
@@ -78,6 +64,8 @@ const initialState: AuthState = {
   otpSent: false,
   otpLoading: false,
   otpError: null,
+
+  rehydrated: false,
 };
 
 /* =======================
@@ -88,30 +76,6 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    /* ---------- LOGIN ---------- */
-    loginAction: (_state, _action: PayloadAction<LoginPayload>) => {},
-    loginSuccess: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
-      state.isAuthenticated = true;
-      state.loading = false;
-      state.error = null;
-    },
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    /* ---------- REGISTER ---------- */
-    registerAction: (_state, _action: PayloadAction<RegisterPayload>) => {},
-    registerSuccess: (state) => {
-      state.loading = false;
-      state.error = null;
-    },
-    registerFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
     /* ---------- SESSION VERIFY ---------- */
     verifySessionAction: (state) => {
       state.loading = true;
@@ -121,21 +85,22 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.loading = false;
       state.error = null;
+      state.rehydrated = true;
     },
     verifySessionFailure: (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
       state.user = null;
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.rehydrated = true;
     },
+
+    /* ---------- LOGOUT ---------- */
+    logoutAction: () => {},
     logoutSuccess: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-    },
-
-    /* ---------- COMMON ---------- */
-    setLoading: (state) => {
-      state.loading = true;
+      state.rehydrated = true;
     },
 
     /* ---------- OTP ---------- */
@@ -167,28 +132,16 @@ const authSlice = createSlice({
       state.otpLoading = false;
       state.otpError = action.payload;
     },
-
-    /* ---------- LOGOUT ---------- */
-    logoutAction: () => {},
   },
 });
 
 export const {
-  loginAction,
-  loginSuccess,
-  loginFailure,
-
-  registerAction,
-  registerSuccess,
-  registerFailure,
-
   verifySessionAction,
   verifySessionSuccess,
   verifySessionFailure,
+
   logoutAction,
   logoutSuccess,
-
-  setLoading,
 
   sendOtpRequest,
   sendOtpSuccess,

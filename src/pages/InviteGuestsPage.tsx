@@ -33,7 +33,7 @@ export default function InviteGuestsPage() {
   const { guests, loading: isSending, success, error } = useAppSelector(
     (state) => state.invite
   )
-  const { weddings, selectedWedding } = useAppSelector(
+  const { weddings } = useAppSelector(
     (state) => state.weddings
   )
 
@@ -55,19 +55,12 @@ export default function InviteGuestsPage() {
   const weddingId = state?.weddingId || ""
 
   const wedding = useMemo(() => {
-    if (
-      selectedWedding &&
-      (selectedWedding.weddingId === weddingId ||
-        selectedWedding.id === weddingId)
-    ) {
-      return selectedWedding
-    }
     return (
       weddings.find(
         (w) => w.weddingId === weddingId || w.id === weddingId
       ) || null
     )
-  }, [selectedWedding, weddings, weddingId])
+  }, [weddings, weddingId])
 
   const weddingData: InviteWeddingData = useMemo(
     () => ({
