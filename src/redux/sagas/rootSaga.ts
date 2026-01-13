@@ -2,7 +2,7 @@
 import { all, fork } from "redux-saga/effects"
 import weddingSaga from "./weddingSaga"
 import authSaga from "./authSaga"
-import photoSaga from "./photoSaga"
+import {photoSaga} from "./photoSaga"
 import inviteSaga from "./inviteSaga"
 
 export default function* rootSaga() {
