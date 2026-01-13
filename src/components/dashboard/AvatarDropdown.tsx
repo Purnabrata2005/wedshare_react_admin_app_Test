@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom"
 import { LogOut, Settings, User, Moon, Sun } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/layout/theme-provider"
 import { useAppSelector } from "@/redux/hooks"
+import "./AvatarDropdown.css"
 
 export function AvatarDropdown() {
   const navigate = useNavigate()
@@ -22,51 +22,53 @@ export function AvatarDropdown() {
   }
 
   return (
-    <div className={`side-menu ${theme}`}>
-      <div className="user-info">
-        <Avatar>
+    <div className="side-menu-container">
+      <div className="side-menu-header">
+        <Avatar className="side-menu-avatar">
           <AvatarImage src="" alt={user?.fullname || "User"} />
           <AvatarFallback className="bg-wedshare-light-primary/10 dark:bg-wedshare-dark-primary/10 text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary font-semibold">
             {getAvatarFallback()}
           </AvatarFallback>
         </Avatar>
-        <div>
-          <p className="text-sm font-medium leading-none text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
+        <div className="user-details">
+          <p className="user-name">
             {user?.fullname || "User"}
           </p>
-          <p className="text-xs leading-none text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
+          <p className="user-email">
             {user?.email || "user@example.com"}
           </p>
         </div>
       </div>
+
+      <div className="menu-divider"></div>
+
       <div className="menu-items">
         <button 
           onClick={() => navigate("/profile")} 
-          className="cursor-pointer hover:bg-wedshare-light-bg-secondary dark:hover:bg-wedshare-dark-bg-secondary text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
+          className="menu-item"
         >
-          <User className="mr-2 h-4 w-4" />
+          <User className="menu-icon" />
           <span>Profile</span>
         </button>
+
         <button 
           onClick={() => navigate("/settings")} 
-          className="cursor-pointer hover:bg-wedshare-light-bg-secondary dark:hover:bg-wedshare-dark-bg-secondary text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
+          className="menu-item"
         >
-          <Settings className="mr-2 h-4 w-4" />
+          <Settings className="menu-icon" />
           <span>Settings</span>
         </button>
-        <div className="theme-toggle px-2 py-2">
-          <div className="flex items-center justify-between">
-            <Label 
-              htmlFor="theme-toggle" 
-              className="flex items-center cursor-pointer text-sm font-normal text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
-            >
+
+        <div className="theme-toggle-item">
+          <div className="theme-toggle-content">
+            <div className="theme-label">
               {theme === "dark" ? (
-                <Moon className="mr-2 h-4 w-4" />
+                <Moon className="menu-icon" />
               ) : (
-                <Sun className="mr-2 h-4 w-4" />
+                <Sun className="menu-icon" />
               )}
               <span>{theme === "dark" ? "Dark Mode" : "Light Mode"}</span>
-            </Label>
+            </div>
             <Switch
               id="theme-toggle"
               checked={theme === "dark"}
@@ -74,11 +76,14 @@ export function AvatarDropdown() {
             />
           </div>
         </div>
+
+        <div className="menu-divider"></div>
+
         <button 
           onClick={() => navigate("/logout")} 
-          className="cursor-pointer hover:bg-wedshare-light-error/10 dark:hover:bg-wedshare-dark-error/10 text-wedshare-light-error dark:text-wedshare-dark-error"
+          className="menu-item logout-item"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="menu-icon" />
           <span>Log out</span>
         </button>
       </div>

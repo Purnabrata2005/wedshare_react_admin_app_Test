@@ -208,11 +208,11 @@ export default function InviteGuestsPage() {
   const getEventBadge = (type: string) => {
     switch (type) {
       case "marriage":
-        return <Badge variant="secondary">Marriage</Badge>
+        return <Badge className="bg-primary/20 text-primary border-primary/30">Marriage</Badge>
       case "reception":
-        return <Badge variant="outline">Reception</Badge>
+        return <Badge className="bg-primary/20 text-primary border-primary/30">Reception</Badge>
       case "both":
-        return <Badge variant="default">Both Events</Badge>
+        return <Badge className="bg-primary/20 text-primary border-primary/30">Both Events</Badge>
       default:
         return null
     }
