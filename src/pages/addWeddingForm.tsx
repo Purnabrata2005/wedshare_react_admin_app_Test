@@ -45,7 +45,7 @@ const addWeddingFormSchema = z.object({
   receptionDate: weddingSchema.shape.receptionDate,
   receptionTime: weddingSchema.shape.receptionTime,
   receptionVenue: weddingSchema.shape.receptionVenue,
-  invitationTemplate: z.number().min(1, "Invitation template is required"),
+  invitationTemplate: z.number().nullable().optional(),
 })
 
 type WeddingFormData = z.infer<typeof addWeddingFormSchema>
@@ -382,7 +382,7 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
             <InvitationTemplateSelector
               templates={WEDDING_TEMPLATES}
-              selectedId={formValues.invitationTemplate}
+              selectedId={formValues.invitationTemplate ?? WEDDING_TEMPLATES[0].id}
               onSelect={(templateId) => setValue("invitationTemplate", templateId)}
               preview={{
                 value: {
@@ -396,12 +396,9 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({ onSave, onBack }) => {
 
             <Button
               type="button"
-              onClick={async () => {
-                const isValid = await trigger("invitationTemplate")
-                if (isValid) {
-                  canSubmitRef.current = true
-                  handleSubmit(handleFormSubmit)()
-                }
+              onClick={() => {
+                canSubmitRef.current = true
+                handleSubmit(handleFormSubmit)()
               }}
               disabled={isSubmitting}
               className="w-full mt-6"

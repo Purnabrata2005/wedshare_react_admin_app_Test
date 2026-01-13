@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { LogOut, Settings, User, Moon, Sun } from "lucide-react"
+import { LogOut, User, Moon, Sun } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -12,10 +12,12 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/layout/theme-provider"
-import { useAppSelector } from "@/redux/hooks"
+import { useAppSelector, useAppDispatch } from "@/redux/hooks"
+import { logoutAction } from "@/redux/slices/authSlice"
 
 export function AvatarDropdown() {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { theme, setTheme } = useTheme()
   const { user } = useAppSelector((state) => state.auth)
 
@@ -27,6 +29,11 @@ export function AvatarDropdown() {
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  const handleLogout = () => {
+    dispatch(logoutAction())
+    navigate("/login")
   }
 
   return (
@@ -41,7 +48,11 @@ export function AvatarDropdown() {
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-wedshare-light-bg dark:bg-wedshare-dark-bg border-wedshare-light-border dark:border-wedshare-dark-border">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-64 bg-wedshare-light-bg dark:bg-wedshare-dark-bg border-wedshare-light-border dark:border-wedshare-dark-border shadow-lg backdrop-blur-none"
+        sideOffset={5}
+      >
         {/* User Info Section */}
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
@@ -62,14 +73,6 @@ export function AvatarDropdown() {
         >
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={() => navigate("/settings")} 
-          className="cursor-pointer hover:bg-wedshare-light-bg-secondary dark:hover:bg-wedshare-dark-bg-secondary text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary"
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="bg-wedshare-light-border dark:bg-wedshare-dark-border" />
@@ -100,7 +103,7 @@ export function AvatarDropdown() {
 
         {/* Logout */}
         <DropdownMenuItem 
-          onClick={() => navigate("/logout")} 
+          onClick={handleLogout}
           className="cursor-pointer hover:bg-wedshare-light-error/10 dark:hover:bg-wedshare-dark-error/10 text-wedshare-light-error dark:text-wedshare-dark-error"
         >
           <LogOut className="mr-2 h-4 w-4" />
