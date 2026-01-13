@@ -1,4 +1,4 @@
-import { PhotoThumbnail } from "./PhotoThumbnail"
+import { PhotoCard } from "./PhotoCard"
 import type { UploadStatus } from "@/DB/uploadDB"
 
 interface LocalPhoto {
@@ -16,36 +16,31 @@ interface PhotoProgressInfo {
 interface PhotoGridProps {
   photos: LocalPhoto[]
   progressMap: Record<string, PhotoProgressInfo>
-  isUploading?: boolean
+  isUploading: boolean
   onDeletePhoto: (index: number) => void
 }
 
 export function PhotoGrid({
   photos,
   progressMap,
-  isUploading = false,
+  isUploading,
   onDeletePhoto,
 }: PhotoGridProps) {
-  if (photos.length === 0) return null
-
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-      {photos.map((item, index) => {
-        const progressInfo = progressMap[item.uuid]
-        const progress = progressInfo?.progress ?? 0
-        const status = progressInfo?.status ?? "pending"
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {photos.map((photo, index) => {
+        const progress = progressMap[photo.uuid]
 
         return (
-          <PhotoThumbnail
-            key={item.uuid}
-            url={item.url}
-            fileName={item.file.name}
-            fileSize={item.file.size}
-            index={index}
-            progress={progress}
-            status={status}
+          <PhotoCard
+            key={photo.uuid}
+            uuid={photo.uuid}
+            url={photo.url}
+            filename={photo.file.name}
+            progress={progress?.progress || 0}
+            status={progress?.status || "pending"}
             isUploading={isUploading}
-            onDelete={onDeletePhoto}
+            onDelete={() => onDeletePhoto(index)}
           />
         )
       })}

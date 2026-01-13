@@ -1,5 +1,12 @@
 import { call, put, takeEvery, select, delay } from "redux-saga/effects"
 import type { SagaIterator } from "redux-saga"
+import { toast } from "sonner"
+import { 
+  createWeddingSchema, 
+  updateWeddingSchema, 
+  deleteWeddingSchema,
+  weddingSchema 
+} from "../schemas/weddingSchemas"
 import {
   loadWeddingsRequest,
   loadWeddingsSuccess,
@@ -32,6 +39,9 @@ function* fetchWeddingsSaga(): SagaIterator {
 
     if (!userId) {
       yield put(loadWeddingsFailure("User not authenticated"))
+      toast.error("Authentication Error", {
+        description: "Please log in to view weddings"
+      })
       return
     }
 
@@ -49,12 +59,28 @@ function* fetchWeddingsSaga(): SagaIterator {
     }))
     yield put(loadWeddingsSuccess({ weddings: normalized }))
   } catch (err: any) {
-    yield put(loadWeddingsFailure(err.message || "Failed to load weddings"))
+    const errorMsg = err.message || "Failed to load weddings"
+    yield put(loadWeddingsFailure(errorMsg))
+    toast.error("Failed to load weddings", {
+      description: errorMsg
+    })
   }
 }
 
 function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIterator {
   try {
+    // Validate input data
+    const validationResult = createWeddingSchema.safeParse(action.payload);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(addWeddingFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      return;
+    }
+
     const res = yield call(
       AxiosWedding.post,
       "weddings/register",
@@ -69,7 +95,14 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
         }
       : null
 
-    if (normalizedCreated) yield put(addWeddingSuccess(normalizedCreated))
+    if (normalizedCreated) {
+      // Validate response data
+      const responseValidation = weddingSchema.safeParse(normalizedCreated);
+      if (!responseValidation.success) {
+        console.warn("Wedding data validation warning:", responseValidation.error);
+      }
+      yield put(addWeddingSuccess(normalizedCreated))
+    }
     // After successfully adding a wedding, re-fetch the user's weddings
     // so the store has full wedding details (prevents null details in array)
     const userId: string | undefined = yield select((state: RootState) => state.auth?.user?.userid)
@@ -87,28 +120,68 @@ function* saveWeddingSaga(action: ReturnType<typeof addWeddingRequest>): SagaIte
           albumPublicKey: w.albumPublicKey || null,
         }))
         yield put(loadWeddingsSuccess({ weddings: normalized }))
+        toast.success("Wedding created successfully!", {
+          description: "Your wedding has been added to the list"
+        })
       } catch (err: any) {
         yield put(loadWeddingsFailure(err.message || "Failed to refresh weddings"))
       }
     }
   } catch (err: any) {
-    yield put(addWeddingFailure(err.message || "Failed to add wedding"))
+    const errorMsg = err.message || "Failed to add wedding"
+    yield put(addWeddingFailure(errorMsg))
+    toast.error("Failed to create wedding", {
+      description: errorMsg
+    })
   }
 }
 
 function* deleteWeddingSaga(action: ReturnType<typeof deleteWeddingRequest>): SagaIterator {
   try {
     const weddingId = action.payload
+    
+    // Validate input
+    const validationResult = deleteWeddingSchema.safeParse({ weddingId });
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(deleteWeddingFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      return;
+    }
+    
     yield call(AxiosWedding.delete, `weddings/${weddingId}`)
     yield put(deleteWeddingSuccess(weddingId))
+    toast.success("Wedding deleted", {
+      description: "The wedding has been removed successfully"
+    })
   } catch (err: any) {
-    yield put(deleteWeddingFailure(err.message || "Failed to delete wedding"))
+    const errorMsg = err.message || "Failed to delete wedding"
+    yield put(deleteWeddingFailure(errorMsg))
+    toast.error("Failed to delete wedding", {
+      description: errorMsg
+    })
   }
 }
 
 function* updateWeddingSaga(action: ReturnType<typeof updateWeddingRequest>): SagaIterator {
   try {
     const { weddingId, data } = action.payload
+    
+    // Validate input data
+    const validationResult = updateWeddingSchema.safeParse(data);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(updateWeddingFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      return;
+    }
+    
     const res = yield call(AxiosWedding.put, `weddings/${weddingId}`, data)
     const updated = res?.data?.wedding || res?.data || null
     const normalizedUpdated = updated
@@ -120,10 +193,23 @@ function* updateWeddingSaga(action: ReturnType<typeof updateWeddingRequest>): Sa
       : null
 
     if (normalizedUpdated) {
+      // Validate response data
+      const responseValidation = weddingSchema.safeParse(normalizedUpdated);
+      if (!responseValidation.success) {
+        console.warn("Wedding data validation warning:", responseValidation.error);
+      }
+      
       yield put(updateWeddingSuccess(normalizedUpdated))
+      toast.success("Wedding updated", {
+        description: "Your changes have been saved successfully"
+      })
     }
   } catch (err: any) {
-    yield put(updateWeddingFailure(err.message || "Failed to update wedding"))
+    const errorMsg = err.message || "Failed to update wedding"
+    yield put(updateWeddingFailure(errorMsg))
+    toast.error("Failed to update wedding", {
+      description: errorMsg
+    })
   }
 }
 

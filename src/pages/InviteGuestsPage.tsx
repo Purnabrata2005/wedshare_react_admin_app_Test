@@ -90,7 +90,7 @@ export default function InviteGuestsPage() {
   const handleEmailInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const value = inputValue.trim()
 
-    if (e.key === " " || e.key === "Enter") {
+      if (e.key === " " || e.key === "," || e.key === "Enter") {
       e.preventDefault()
 
       if (value && isValidEmail(value)) {
@@ -226,12 +226,12 @@ export default function InviteGuestsPage() {
                   {guestEmails.map((email) => (
                     <div
                       key={email}
-                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary text-primary text-sm"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary text-primary text-sm flex-shrink-0"
                     >
-                      <span>{email}</span>
+                        <span className="truncate max-w-[150px]">{email}</span>
                       <button
                         onClick={() => removeEmail(email)}
-                        className="hover:text-primary/70 transition-colors"
+                          className="hover:text-primary/70 transition-colors flex-shrink-0"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -239,11 +239,11 @@ export default function InviteGuestsPage() {
                   ))}
                   <input
                     type="email"
-                    placeholder="Type email and press space or enter..."
+                      placeholder="Type email and press space, comma or enter..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleEmailInput}
-                    className="flex-1 min-w-[320px] sm:min-w-[420px] h-11 px-4 text-base outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
+                      className="flex-1 min-w-[150px] h-11 px-4 text-base outline-none bg-transparent text-foreground placeholder:text-muted-foreground text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -346,10 +346,10 @@ export default function InviteGuestsPage() {
                         >
                           <td className="px-4 sm:px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <Mail className="w-4 h-4 text-primary" />
                               </div>
-                              <span className="text-sm sm:text-base font-medium text-foreground truncate max-w-[200px] sm:max-w-none">
+                                <span className="text-xs sm:text-base font-medium text-foreground truncate">
                                 {guest.email}
                               </span>
                             </div>

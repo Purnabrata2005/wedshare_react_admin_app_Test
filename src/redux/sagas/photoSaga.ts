@@ -4,6 +4,12 @@ import AxiosWedding from "@/redux/service/axiosWedding"
 import imageCompression from "browser-image-compression"
 import { photoDB, type PendingPhoto } from "@/DB/uploadDB"
 import { encryptPhotoIfNeeded } from "@/crypto/photoEncryption"
+import { toast } from "sonner"
+import { 
+  uploadPhotosPayloadSchema, 
+  encryptionKeysSchema,
+  batchMetadataSchema 
+} from "../schemas/photoSchemas"
 
 
 
@@ -61,6 +67,16 @@ function* enqueuePhotosSaga(action: {
   payload: UploadPhotosPayload
 }): Generator<any, void, any> {
   try {
+    // Validate input payload
+    const validationResult = uploadPhotosPayloadSchema.safeParse(action.payload);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(uploadPhotosFailure(errorMessage));
+      ;
+      return;
+    }
+
     const { weddingId, photos } = action.payload
     hasUploadBeenRequested = true
 
@@ -91,6 +107,7 @@ function* enqueuePhotosSaga(action: {
     }
 
     yield put(uploadPhotosEnqueued())
+    
   } catch (err: any) {
     console.error("enqueuePhotosSaga error:", err)
     yield put(uploadPhotosFailure(err.message || "Failed to enqueue photos"))
@@ -140,6 +157,9 @@ function* processUploadQueue(): Generator<any, void, any> {
     // Check if upload was requested and all uploads are complete
     if (hasUploadBeenRequested && pending.length === 0 && allItems.length === 0) {
       yield put(uploadPhotosCompleted())
+      toast.success("All photos uploaded successfully!", {
+        description: "Your photos are now available in the wedding album"
+      })
       hasUploadBeenRequested = false
     }
 
@@ -176,13 +196,14 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
   console.log("albumPublicKey for wedding", weddingId, ":", albumPublicKey);
   console.log("processPublicKey:", processPublicKey);
 
-  if (!albumPublicKey || typeof albumPublicKey !== "string" || albumPublicKey.trim() === "") {
-    console.error("No valid albumPublicKey found for wedding:", weddingId);
-    return;
-  }
+  // Validate encryption keys
+  const keysValidation = encryptionKeysSchema.safeParse({
+    albumPublicKey: albumPublicKey || "",
+    processPublicKey: processPublicKey || "",
+  });
 
-  if (!processPublicKey || typeof processPublicKey !== "string" || processPublicKey.trim() === "") {
-    console.error("No valid processPublicKey found for wedding:", weddingId);
+  if (!keysValidation.success) {
+    
     return;
   }
 
@@ -275,8 +296,14 @@ function* uploadBatchSaga(batch: PendingPhoto[]): Generator<any, void, any> {
 
         if (item.retries > MAX_RETRIES) {
           yield call(() => photoDB.queue.delete(item.uuid))
+          toast.error("Photo upload failed", {
+            description: `${item.originalFilename || 'Photo'} failed after ${MAX_RETRIES} attempts`
+          })
         } else {
           yield call(() => photoDB.queue.put(item))
+          toast.warning("Photo upload retry", {
+            description: `Retrying upload (${item.retries}/${MAX_RETRIES})...`
+          })
         }
       }
     }
@@ -324,6 +351,18 @@ function* registerMetadataForPhotosSaga(
     }
 
     if (payload.length > 0) {
+      // Validate metadata payload
+      const metadataValidation = batchMetadataSchema.safeParse(payload);
+      
+      if (!metadataValidation.success) {
+        const errorMessage = metadataValidation.error.issues[0].message;
+        console.error("Metadata validation failed:", errorMessage);
+        toast.error("Photo metadata validation failed", {
+          description: errorMessage
+        });
+        return;
+      }
+
       // Log payload shape and sizes of wrapped keys
       console.groupCollapsed(`[POST] weddings/${weddingId}/photos`);
       console.log("payload length:", payload.length);
@@ -356,6 +395,9 @@ function* registerMetadataForPhotosSaga(
     }
   } catch (err) {
     console.error('[registerMetadataForPhotosSaga] API error:', err);
+    toast.error("Failed to register photo metadata", {
+      description: "Photos uploaded but metadata registration failed. Please try again."
+    });
     // Optionally handle API error (retry, notify user, etc.)
   }
 }

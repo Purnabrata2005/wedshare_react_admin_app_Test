@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider"
 import AuthLayout from "@/components/layout/AuthLayout"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import { AddWeddingForm } from "@/pages/addWeddingForm"
+import { Toaster } from "@/components/ui/sonner"
 import ROUTES from "./routePath"
 
 import AuthCallbackPage from "@/pages/AuthCallbackPage"
@@ -94,6 +95,7 @@ export default function App() {
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
+      <Toaster />
     </ThemeProvider>
   )
 }

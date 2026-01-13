@@ -1,5 +1,7 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { toast } from "sonner";
+import { sendInvitationSchema } from "../schemas/inviteSchemas";
 
 import AxiosWedding from "../service/axiosWedding";
 import {
@@ -20,12 +22,27 @@ function* sendInvitationSaga(
   try {
     yield put(setInviteLoading());
 
+    // Validate input data
+    const validationResult = sendInvitationSchema.safeParse(action.payload);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(sendInvitationFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      return;
+    }
+
     const response = yield call(() =>
       AxiosWedding.post("/invitations/create", action.payload)
     );
 
     if (response.status === 200 || response.status === 201) {
       yield put(sendInvitationSuccess());
+      toast.success("Invitations sent successfully!", {
+        description: "Your wedding invitations have been delivered"
+      });
     } else {
       throw new Error("Invitation API returned an error");
     }
@@ -37,6 +54,9 @@ function* sendInvitationSaga(
       "Failed to send invitations";
 
     yield put(sendInvitationFailure(message));
+    toast.error("Failed to send invitations", {
+      description: message
+    });
   }
 }
 

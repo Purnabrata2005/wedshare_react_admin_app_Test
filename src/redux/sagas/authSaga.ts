@@ -3,6 +3,13 @@ import AxiosInstance from "../service/axiosInstance";
 import { photoDB } from "@/DB/uploadDB";
 import { clearPhotos } from "../slices/photoSlice";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { toast } from "sonner";
+import { 
+  loginSchema, 
+  sendOtpSchema, 
+  verifyOtpSchema,
+  userSchema 
+} from "../schemas/authSchemas";
 
 import {
   loginAction,
@@ -53,6 +60,22 @@ function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, a
   try {
     yield put(setLoading());
 
+    // Validate input
+    const validationResult = loginSchema.safeParse({
+      username: action.payload.username,
+      password: action.payload.password,
+    });
+
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(loginFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      action.payload.onError?.(errorMessage);
+      return;
+    }
+
     yield call(() =>
       AxiosInstance.post("/login", {
         username: action.payload.username,
@@ -61,13 +84,26 @@ function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, a
     );
 
     const user = yield call(fetchCurrentUser);
+    
+    // Validate user response
+    const userValidation = userSchema.safeParse(user);
+    if (!userValidation.success) {
+      console.warn("User data validation warning:", userValidation.error);
+    }
+    
     yield put(loginSuccess(user));
+    toast.success("Login successful!", {
+      description: `Welcome back, ${user?.fullname || 'User'}!`
+    });
 
     action.payload.onSuccess?.();
   } catch (error: any) {
     const message =
       error?.response?.data?.message || "Login failed";
     yield put(loginFailure(message));
+    toast.error("Login failed", {
+      description: message
+    });
     action.payload.onError?.(message);
   }
 }
@@ -112,6 +148,22 @@ function* loginSaga(action: PayloadAction<LoginPayload>): Generator<any, void, a
 
 function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): Generator<any, void, any> {
   try {
+    // Validate input
+    const validationResult = sendOtpSchema.safeParse({
+      recipient: action.payload.recipient,
+      recipientType: action.payload.recipientType,
+    });
+
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(sendOtpFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      action.payload.onError?.(errorMessage);
+      return;
+    }
+
     yield call(() =>
       AxiosInstance.post("/login/send-otp", {
         recipient: action.payload.recipient,
@@ -119,17 +171,40 @@ function* sendOtpSaga(action: PayloadAction<SendOtpPayload>): Generator<any, voi
       })
     );
     yield put(sendOtpSuccess());
+    toast.success("OTP sent successfully", {
+      description: `Check your ${action.payload.recipientType === 1 ? 'email' : 'phone'} for the verification code`
+    });
     action.payload.onSuccess?.();
   } catch (error: any) {
     const message =
       error?.response?.data?.message || "Failed to send OTP";
     yield put(sendOtpFailure(message));
+    toast.error("Failed to send OTP", {
+      description: message
+    });
     action.payload.onError?.(message);
   }
 }
 
 function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): Generator<any, void, any> {
   try {
+    // Validate input
+    const validationResult = verifyOtpSchema.safeParse({
+      recipient: action.payload.recipient,
+      recipientType: action.payload.recipientType,
+      otp: action.payload.otp,
+    });
+
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      yield put(verifyOtpFailure(errorMessage));
+      toast.error("Validation Error", {
+        description: errorMessage
+      });
+      action.payload.onError?.(errorMessage);
+      return;
+    }
+
     yield call(() =>
       AxiosInstance.post("/login/otp/web", {
         recipient: action.payload.recipient,
@@ -139,13 +214,26 @@ function* verifyOtpSaga(action: PayloadAction<VerifyOtpPayload>): Generator<any,
     );
 
     const user = yield call(fetchCurrentUser);
+    
+    // Validate user response
+    const userValidation = userSchema.safeParse(user);
+    if (!userValidation.success) {
+      console.warn("User data validation warning:", userValidation.error);
+    }
+    
     yield put(verifyOtpSuccess(user));
+    toast.success("Verification successful!", {
+      description: `Welcome, ${user?.fullname || 'User'}!`
+    });
 
     action.payload.onSuccess?.();
   } catch (error: any) {
     const message =
       error?.response?.data?.message || "OTP verification failed";
     yield put(verifyOtpFailure(message));
+    toast.error("Verification failed", {
+      description: message
+    });
     action.payload.onError?.(message);
   }
 }
@@ -173,8 +261,12 @@ function* logoutSaga(): Generator<any, void, any> {
     yield call(() => photoDB.queue.clear());
     yield put(clearPhotos());
     yield put(logoutSuccess());
+    toast.info("Logged out successfully");
   } catch (error) {
     console.error("Logout failed", error);
+    toast.error("Logout failed", {
+      description: "An error occurred while logging out"
+    });
   }
 }
 

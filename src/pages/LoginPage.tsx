@@ -60,18 +60,6 @@ export default function LoginPage() {
         {/* Login Form */}
         <LoginForm />
 
-        {/* Sign Up */}
-        <div className="text-center">
-          <p className="text-sm sm:text-base text-wedshare-light-text-secondary dark:text-wedshare-dark-text-secondary">
-            Don&apos;t have an account?{" "}
-            <Link
-              to={ROUTES.LOGIN}
-              className="font-semibold text-wedshare-light-primary dark:text-wedshare-dark-primary hover:text-wedshare-light-secondary dark:hover:text-wedshare-dark-secondary transition-colors duration-200"
-            >
-              Create here
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

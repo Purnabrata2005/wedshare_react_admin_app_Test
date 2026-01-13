@@ -2,43 +2,56 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { useNavigate } from "react-router-dom"
+import ROUTES from "@/routePath"
 import {
   sendOtpRequest,
   verifyOtpRequest,
 } from "@/redux/slices/authSlice"
+import { sendOtpSchema, verifyOtpSchema } from "@/redux/schemas/authSchemas"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState<{ email?: string; otp?: string }>({});
-  const [serverError, setServerError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
-  const { otpSent, otpLoading, otpError } = useAppSelector((s) => s.auth);
+  const navigate = useNavigate();
+  const { otpSent, otpLoading } = useAppSelector((s) => s.auth);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
-    setServerError(null);
 
-    // OTP login validation
-    const newErrors: { email?: string; otp?: string } = {};
-    if (!email) newErrors.email = "Email is required";
-    if (!otp) newErrors.otp = "OTP is required";
-    if (Object.keys(newErrors).length > 0) {
+    // Client-side validation with Zod
+    const validation = verifyOtpSchema.safeParse({
+      recipient: email,
+      recipientType: 1, // 1 for email
+      otp,
+    });
+
+    if (!validation.success) {
+      const newErrors: { email?: string; otp?: string } = {};
+      validation.error.issues.forEach((err: any) => {
+        if (err.path.includes("recipient")) newErrors.email = err.message;
+        if (err.path.includes("otp")) newErrors.otp = err.message;
+      });
       setErrors(newErrors);
       return;
     }
+
     dispatch(
       verifyOtpRequest({
         recipient: email,
-        recipientType: 2,
+        recipientType: 1, // 1 for email
         otp,
         onSuccess: () => {
           setOtp("");
           setErrors({});
-          setServerError(null);
+          navigate(ROUTES.DASHBOARD);
         },
-        onError: (msg: string) => setServerError(msg),
+        onError: () => {
+          // Error is handled by saga with toast
+        },
       } as any)
     );
   }
@@ -46,36 +59,37 @@ export default function LoginForm() {
   function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
-    setServerError(null);
     setOtp("");
-    if (!email) {
-      setErrors({ email: "Email is required" });
+
+    // Client-side validation with Zod
+    const validation = sendOtpSchema.safeParse({
+      recipient: email,
+      recipientType: 1, // 1 for email
+    });
+
+    if (!validation.success) {
+      const newErrors: { email?: string } = {};
+      validation.error.issues.forEach((err: any) => {
+        if (err.path.includes("recipient")) newErrors.email = err.message;
+      });
+      setErrors(newErrors);
       return;
     }
+
     dispatch(
       sendOtpRequest({
         recipient: email,
-        recipientType: 2,
+        recipientType: 1, // 1 for email
         onSuccess: () => {},
-        onError: (msg: string) => setServerError(msg),
+        onError: () => {
+          // Error is handled by saga with toast
+        },
       } as any)
     );
   }
 
-  function handleGoogleLogin() {
-    // Add your Google login logic here
-    console.log("Google login clicked");
-  }
-
   return (
     <form onSubmit={onSubmit} className="w-full space-y-4 sm:space-y-5">
-      {/* Error Message */}
-      {serverError && (
-        <div className="rounded-md bg-red-50 dark:bg-red-950 p-3 sm:p-4">
-          <p className="text-sm text-red-800 dark:text-red-200">{serverError}</p>
-        </div>
-      )}
-
       {/* Email Field */}
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary">
@@ -108,9 +122,6 @@ export default function LoginForm() {
           {otpLoading ? "Sending OTP..." : otpSent ? "Resend OTP" : "Send OTP"}
         </Button>
       </div>
-      {otpError && (
-        <p className="text-xs sm:text-sm text-wedshare-light-error dark:text-wedshare-dark-error mt-1">{otpError}</p>
-      )}
 
       {/* OTP Input - Shows after OTP is sent */}
       {otpSent && (
@@ -120,10 +131,11 @@ export default function LoginForm() {
           </label>
           <Input
             id="otp"
-            placeholder="Enter OTP"
+            placeholder="Enter 6-digit OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             type="text"
+            maxLength={6}
             className="bg-wedshare-light-surface dark:bg-wedshare-dark-surface border-gray-200 dark:border-slate-700 text-wedshare-light-text-primary dark:text-wedshare-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-slate-500"
             disabled={otpLoading}
           />
@@ -141,17 +153,6 @@ export default function LoginForm() {
           </Button>
         </div>
       )}
-
-      {/* Google Login Button */}
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
-        <Button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="w-full py-2 sm:py-2.5 text-sm sm:text-base font-semibold bg-white dark:bg-slate-800 text-gray-800 dark:text-white border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
-        >
-          Sign in with Google
-        </Button>
-      </div>
     </form>
   );
 }

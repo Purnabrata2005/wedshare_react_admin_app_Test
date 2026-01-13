@@ -1,28 +1,19 @@
 import { useEffect } from "react";
-import {  useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Calendar,
-  Edit,
-  Share2,
-  Users,
-  Camera,
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WeddingHeader } from "@/components/ui/wedding-header";
-import { EventScheduleCard } from "@/components/ui/eventScheduleCard";
-import { SectionTitle } from "@/components/ui/sectionTitle";
-import { Navbar } from "@/components/ui/navbar";
-import { ServiceCard } from "@/components/ui/serviceCard";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import {
   selectWedding,
   clearSelection,
 } from "@/redux/slices/weddingSlice";
 import { formatDateSafe } from "@/lib/dateUtils";
-import { cn } from "@/lib/utils";
 import ROUTES from "@/routePath";
+import { WeddingDetailsHeader } from "@/components/wedding-details/WeddingDetailsHeader";
+import { WeddingCeremonyCard } from "@/components/wedding-details/WeddingCeremonyCard";
+import { ReceptionCard } from "@/components/wedding-details/ReceptionCard";
+import { QuickInfoSection } from "@/components/wedding-details/QuickInfoSection";
+import { ServicesSection } from "@/components/wedding-details/ServicesSection";
 
 export default function WeddingDetailsPage() {
   const navigate = useNavigate();
@@ -34,10 +25,9 @@ export default function WeddingDetailsPage() {
 
   const wedding = selectedWedding;
 
-  // Redirect to dashboard if no wedding is selected
   useEffect(() => {
     if (!loading && !selectedWedding) {
-      navigate('/dashboard');
+      navigate(ROUTES.DASHBOARD);
     }
   }, [selectedWedding, loading, navigate]);
 
@@ -54,8 +44,15 @@ export default function WeddingDetailsPage() {
   };
 
   const handleShare = () => {
-    // TODO: Implement share functionality
     console.log("Share wedding:", wedding?.weddingId);
+  };
+
+  const handleInviteGuests = () => {
+    navigate("/invite-guests", { state: { weddingId: wedding?.weddingId } });
+  };
+
+  const handleUploadPhotos = () => {
+    navigate("/photo-upload", { state: { weddingId: wedding?.weddingId } });
   };
 
   if (loading) {
@@ -83,210 +80,31 @@ export default function WeddingDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Section */}
-      <Navbar
-        title="Wedding Details"
-        showBackButton
+      <WeddingDetailsHeader
+        brideName={wedding.brideName}
+        groomName={wedding.groomName}
         onBackClick={handleBack}
-      >
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShare}
-            className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
-          >
-            <Share2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Share</span>
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleEdit}
-            className="gap-2 bg-white/20 hover:bg-white/30"
-          >
-            <Edit className="w-4 h-4" />
-            <span className="hidden sm:inline">Edit</span>
-          </Button>
-        </div>
-      </Navbar>
+        onEditClick={handleEdit}
+        onShareClick={handleShare}
+      />
 
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background">
-        <div className="container mx-auto px-4 py-6">
-          {/* Wedding Header */}
-          <div className="text-center py-8">
-            <WeddingHeader
-              brideName={wedding.brideName}
-              groomName={wedding.groomName}
-              subtitle="Wedding Celebration"
-              className="mx-auto"
-            />
-            {/* <Badge variant="secondary" className="mt-4">
-              {wedding.invitationTemplate
-                ? `Template ${wedding.invitationTemplate}`
-                : "No Template Selected"}
-            </Badge> */}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Wedding Ceremony Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                Wedding Ceremony
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <EventScheduleCard
-                title="Wedding"
-                date={weddingDate}
-                location={wedding.weddingVenue || "Venue TBD"}
-              />
-              {/* {wedding.weddingTime && (
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  <Clock className="w-5 h-5" />
-                  <span>{wedding.weddingTime}</span>
-                </div>
-              )} */}
-            </CardContent>
-          </Card>
-
-          {/* Reception Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                Reception
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <EventScheduleCard
-                title="Reception"
-                date={receptionDate}
-                location={wedding.receptionVenue || "Venue TBD"}
-              />
-              {/* {wedding.receptionTime && (
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  <Clock className="w-5 h-5" />
-                  <span>{wedding.receptionTime}</span>
-                </div>
-              )} */}
-            </CardContent>
-          </Card>
+          <WeddingCeremonyCard
+            date={weddingDate}
+            venue={wedding.weddingVenue}
+          />
+          <ReceptionCard date={receptionDate} venue={wedding.receptionVenue} />
         </div>
 
-        {/* Additional Details Section */}
-        <div className="mt-8 space-y-6">
-          <SectionTitle size="md">Additional Details</SectionTitle>
-          {/* Quick Info Section */}
-          <div className="mt-8">
-            <Card className="bg-muted/50">
-              <CardContent className="py-6">
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-2 text-center">
-                  <QuickInfoItem
-                    label="Days Until Wedding"
-                    value={getDaysUntilWedding(wedding.weddingDate)}
-                  />
-                  <QuickInfoItem
-                    label="Status"
-                    value={getWeddingStatus(wedding.weddingDate)}
-                    valueClassName={cn(
-                      isUpcoming(wedding.weddingDate)
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <QuickInfoSection weddingDate={wedding.weddingDate} />
 
-        {/* Services Section */}
-        <div className="mt-8 space-y-6">
-          <SectionTitle size="md">Services</SectionTitle>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ServiceCard
-              icon={<Users className="w-6 h-6" />}
-              title="Invite Guests"
-              description="Send invitations to your guests"
-              onClick={() => navigate("/invite-guests", { state: { weddingId: wedding.weddingId } })}
-            />
-            <ServiceCard
-              icon={<Camera className="w-6 h-6" />}
-              title="Upload Photos"
-              description="Share your wedding moments"
-              onClick={() => navigate("/photo-upload", { state: { weddingId: wedding.weddingId } })}
-            />
-          </div>
-        </div>
+        <ServicesSection
+          weddingId={wedding.weddingId}
+          onInviteGuestsClick={handleInviteGuests}
+          onUploadPhotosClick={handleUploadPhotos}
+        />
       </div>
     </div>
   );
-}
-
-// Helper Components
-interface QuickInfoItemProps {
-  label: string;
-  value: string;
-  valueClassName?: string;
-}
-
-function QuickInfoItem({ label, value, valueClassName }: QuickInfoItemProps) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-muted-foreground uppercase tracking-wider">
-        {label}
-      </p>
-      <p className={cn("font-semibold text-foreground", valueClassName)}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-// Helper Functions
-function getDaysUntilWedding(dateString?: string): string {
-  if (!dateString) return "TBD";
-
-  const weddingDate = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  weddingDate.setHours(0, 0, 0, 0);
-
-  const diffTime = weddingDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
-  if (diffDays === 0) return "Today!";
-  if (diffDays === 1) return "Tomorrow";
-  return `${diffDays} days`;
-}
-
-function getWeddingStatus(dateString?: string): string {
-  if (!dateString) return "Pending";
-
-  const weddingDate = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  weddingDate.setHours(0, 0, 0, 0);
-
-  if (weddingDate.getTime() < today.getTime()) return "Completed";
-  if (weddingDate.getTime() === today.getTime()) return "Today";
-  return "Upcoming";
-}
-
-function isUpcoming(dateString?: string): boolean {
-  if (!dateString) return false;
-
-  const weddingDate = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  weddingDate.setHours(0, 0, 0, 0);
-
-  return weddingDate.getTime() >= today.getTime();
 }
