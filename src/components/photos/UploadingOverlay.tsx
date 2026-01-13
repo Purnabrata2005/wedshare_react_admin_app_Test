@@ -1,19 +1,34 @@
 import { Loader2 } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface UploadingOverlayProps {
   isVisible: boolean
+  title?: string
+  subtitle?: string
 }
 
-export function UploadingOverlay({ isVisible }: UploadingOverlayProps) {
+export function UploadingOverlay({
+  isVisible,
+  title = "Uploading Photos...",
+  subtitle = "Please wait while we upload your images",
+}: UploadingOverlayProps) {
   if (!isVisible) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-background rounded-lg p-6 flex flex-col items-center gap-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-lg font-medium">Uploading photos...</p>
-        <p className="text-sm text-muted-foreground">Please wait, do not close this page</p>
-      </div>
+    <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4 bg-black/50">
+      <Card className="max-w-sm w-full shadow-2xl">
+        <CardContent className="flex flex-col items-center gap-4 py-8">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <div className="text-center space-y-2">
+            <p className="text-base sm:text-lg font-semibold text-foreground">
+              {title}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {subtitle}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

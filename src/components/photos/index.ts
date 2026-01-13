@@ -1,5 +1,4 @@
 export { PhotoDropzone } from "./PhotoDropzone"
-export { PhotoCard } from "./PhotoCard"
+export { PhotoThumbnail } from "./PhotoThumbnail"
 export { PhotoGrid } from "./PhotoGrid"
 export { UploadingOverlay } from "./UploadingOverlay"
-export { UploadStats } from "./UploadStats"

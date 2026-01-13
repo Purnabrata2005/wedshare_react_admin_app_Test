@@ -12,7 +12,6 @@ import {
   PhotoDropzone,
   PhotoGrid,
   UploadingOverlay,
-
 } from "@/components/photos"
 import { uploadPhotosRequest } from "@/redux/slices/photoSlice"
 import type { RootState } from "@/redux/store"
@@ -69,7 +68,6 @@ export default function PhotoUploadPage() {
   const completedPhotos = Object.entries(progressMap).filter(
     ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "completed"
   ).length
-
   const uploadingPhotos = Object.entries(progressMap).filter(
     ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "uploading"
   ).length
