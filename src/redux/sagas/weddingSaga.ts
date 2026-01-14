@@ -40,22 +40,25 @@ function* fetchWeddings(): SagaIterator {
   const list: any[] = res?.data?.weddings || []
   const processPublicKey = res?.data?.processPublicKey || null
 
-  const normalized = list.map((w: any) => {
-    const normalizedWedding = {
-      ...w,
-      id: w.id || w._id || w.weddingId,
-      weddingId: w.weddingId,
-      albumPublicKey: w.albumPublicKey || null,
-    }
+  // Filter out null/undefined values and map to normalized format
+  const normalized = list
+    .filter((w: any) => w != null) // Remove null/undefined entries
+    .map((w: any) => {
+      const normalizedWedding = {
+        ...w,
+        id: w.id || w._id || w.weddingId,
+        weddingId: w.weddingId,
+        albumPublicKey: w.albumPublicKey || null,
+      }
 
-    // Soft validation (never crash UI)
-    const validation = weddingSchema.safeParse(normalizedWedding)
-    if (!validation.success) {
-      console.warn("Wedding validation warning:", validation.error)
-    }
+      // Soft validation (never crash UI)
+      const validation = weddingSchema.safeParse(normalizedWedding)
+      if (!validation.success) {
+        console.warn("Wedding validation warning:", validation.error)
+      }
 
-    return normalizedWedding
-  })
+      return normalizedWedding
+    })
 
   return { weddings: normalized, processPublicKey }
 }

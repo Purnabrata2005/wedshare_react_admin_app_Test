@@ -21,6 +21,9 @@ export default function DashboardPage() {
   const { weddings, loading, error } = useAppSelector((state) => state.weddings)
   const { rehydrated } = useAppSelector((state) => state.auth)
 
+  // Filter out null/undefined weddings
+  const validWeddings = weddings.filter((w) => w != null)
+
   // Load weddings on component mount or when rehydration completes
   useEffect(() => {
     if (rehydrated) {
@@ -72,7 +75,7 @@ export default function DashboardPage() {
       <Navbar
         icon={Calendar}
         title="Your Weddings"
-        subtitle={weddings.length > 0 ? `${weddings.length} wedding${weddings.length !== 1 ? 's' : ''} registered` : "Create your first wedding"}
+        subtitle={validWeddings.length > 0 ? `${validWeddings.length} wedding${validWeddings.length !== 1 ? 's' : ''} registered` : "Create your first wedding"}
       >
         <AvatarDropdown />
       </Navbar>
@@ -83,12 +86,12 @@ export default function DashboardPage() {
         {error && <ErrorAlert error={error} />}
 
         {/* Empty State */}
-        {weddings.length === 0 && !loading ? (
+        {validWeddings.length === 0 && !loading ? (
           <EmptyWeddingsState onAddWedding={handleAddWedding} />
         ) : (
           /* Weddings Grid */
           <WeddingsList 
-            weddings={weddings}
+            weddings={validWeddings}
             onSelectWedding={handleSelectWedding}
             onEditWedding={handleEditWedding}
           />

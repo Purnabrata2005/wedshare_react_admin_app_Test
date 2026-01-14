@@ -20,14 +20,17 @@ export function WeddingsList({ weddings, onSelectWedding, onEditWedding }: Weddi
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {weddings.map((wedding) => (
-          <WeddingCard
-            key={wedding.weddingId || wedding.id}
-            wedding={wedding}
-            onClick={onSelectWedding}
-            onEdit={onEditWedding}
-          />
-        ))}
+        {weddings
+          .filter((wedding) => wedding != null) // Filter out null/undefined weddings
+          .map((wedding) => (
+            <WeddingCard
+              key={wedding.weddingId || wedding.id}
+              wedding={wedding}
+              onClick={onSelectWedding}
+              onEdit={onEditWedding}
+            />
+          ))
+        }
       </div>
     </div>
   )
