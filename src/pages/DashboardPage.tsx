@@ -28,17 +28,19 @@ export default function DashboardPage() {
     }
   }, [dispatch, rehydrated])
 
-  const handleSelectWedding = (wedding: Wedding) => {
+  const handleSelectWedding = (wedding: Wedding | null | undefined) => {
+    if (!wedding) return
     console.log("Wedding selected:", wedding)
-    const weddingId = wedding.weddingId || wedding.id
+    const weddingId = wedding?.weddingId || wedding?.id
     if (weddingId) {
       dispatch(selectWedding(weddingId))
       navigate(ROUTES.WEDDING_DETAILS)
     }
   }
 
-  const handleEditWedding = (wedding: Wedding) => {
-    const weddingId = wedding.weddingId || wedding.id
+  const handleEditWedding = (wedding: Wedding | null | undefined) => {
+    if (!wedding) return
+    const weddingId = wedding?.weddingId || wedding?.id
     if (weddingId) {
       dispatch(selectWedding(weddingId))
       navigate(ROUTES.ADD_WEDDING)

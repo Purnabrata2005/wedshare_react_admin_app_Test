@@ -143,6 +143,11 @@ const weddingSlice = createSlice({
   extraReducers: (builder) => {
     // Handle rehydration from persisted storage
     builder.addCase(REHYDRATE as any, (state, action: any) => {
+      if (!action.payload) {
+        // No payload, keep initial state
+        return
+      }
+
       const inbound = action.payload?.weddings as WeddingState | undefined
       const auth = action.payload?.auth as any | undefined
 
@@ -157,7 +162,7 @@ const weddingSlice = createSlice({
       }
 
       // If authenticated, restore persisted wedding data
-      if (inbound?.weddings) {
+      if (inbound?.weddings && Array.isArray(inbound.weddings)) {
         state.weddings = inbound.weddings
         state.selectedWeddingId = inbound.selectedWeddingId ?? null
         state.processPublicKey = inbound.processPublicKey ?? null

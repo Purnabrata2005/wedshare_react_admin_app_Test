@@ -28,7 +28,8 @@ export function WeddingCard({ wedding, onClick, onEdit }: WeddingCardProps) {
   const navigate = useNavigate()
 
   const handleCardClick = () => {
-    const weddingId = wedding.weddingId || wedding.id
+    if (!wedding) return
+    const weddingId = wedding?.weddingId || wedding?.id
     if (weddingId) {
       dispatch(selectWedding(weddingId))
       if (onClick) {
@@ -41,24 +42,26 @@ export function WeddingCard({ wedding, onClick, onEdit }: WeddingCardProps) {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (onEdit) {
-      onEdit(wedding)
-    }
+    if (!wedding || !onEdit) return
+    onEdit(wedding)
   }
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    const weddingId = wedding.weddingId || wedding.id
+    if (!wedding) return
+    const weddingId = wedding?.weddingId || wedding?.id
     if (weddingId) {
       dispatch(deleteWeddingRequest(weddingId))
     }
   }
 
-  const formattedDate = new Date(wedding.weddingDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
+  const formattedDate = wedding?.weddingDate 
+    ? new Date(wedding.weddingDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : 'Date TBA'
 
   return (
     <Card
