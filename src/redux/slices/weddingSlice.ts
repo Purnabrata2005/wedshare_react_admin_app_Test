@@ -138,6 +138,16 @@ const weddingSlice = createSlice({
       state.processPublicKey = null
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase("auth/logoutUser/fulfilled", (state) => {
+        state.weddings = [];  // Reset wedding data on logout
+        state.selectedWeddingId = null;
+        state.processPublicKey = null;
+        state.loading = false;
+        state.error = null;
+      })
+  }
 })
 
 /* =======================
