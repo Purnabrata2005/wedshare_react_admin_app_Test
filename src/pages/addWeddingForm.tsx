@@ -37,7 +37,12 @@ const STEP_LABELS = [
   "Invitation Card",
 ]
 
-export const AddWeddingForm: FC = () => {
+interface AddWeddingFormProps {
+  onSave: () => void
+  onBack: () => void
+}
+
+export const AddWeddingForm: FC<AddWeddingFormProps> = ({  }) => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
