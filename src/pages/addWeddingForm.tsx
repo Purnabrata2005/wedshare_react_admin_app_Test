@@ -79,63 +79,58 @@ export const AddWeddingForm: FC<AddWeddingFormProps> = ({  }) => {
       receptionDate: "",
       receptionTime: "",
       receptionVenue: "",
-      invitationTemplate: WEDDING_TEMPLATES[0].id,
+      invitationTemplate: 1,
     },
   })
 
   const values = watch()
 
   const onSubmit = (data: WeddingFormData) => {
-    setIsSubmitting(true)
+  setIsSubmitting(true)
 
-    const selectedTemplate = WEDDING_TEMPLATES.find(
-      (t) => t.id === data.invitationTemplate
-    )
+  const selectedTemplate = WEDDING_TEMPLATES?.find(
+    (t) => t.id === data.invitationTemplate
+  )
 
-    const invitationText = selectedTemplate
-      ? selectedTemplate.text
-          .replace(/\[Bride\]/g, data.bride)
-          .replace(/\[Groom\]/g, data.groom)
-          .replace(/\[Date\]/g, data.date)
-          .replace(/\[Venue\]/g, data.venue)
-      : ""
+  const invitationText = selectedTemplate
+    ? selectedTemplate.text
+        .replace(/\[Bride\]/g, data.bride)
+        .replace(/\[Groom\]/g, data.groom)
+        .replace(/\[Date\]/g, data.date)
+        .replace(/\[Venue\]/g, data.venue)
+    : ""
 
-    const payload = {
-      groomName: data.groom,
-      brideName: data.bride,
-      weddingDate: data.date,
-      weddingTime: data.time,
-      weddingVenue: data.venue,
-      receptionDate: data.receptionSame
-        ? data.date
-        : data.receptionDate!,
-      receptionTime: data.receptionSame
-        ? data.time
-        : data.receptionTime!,
-      receptionVenue: data.receptionSame
-        ? data.venue
-        : data.receptionVenue!,
-      invitationTemplate: data.invitationTemplate,
-      invitationText,
-    }
-
-    if (isEditMode && selectedWedding) {
-      dispatch(
-        updateWeddingRequest({
-          weddingId: selectedWedding.id || selectedWedding.weddingId!,
-          data: payload,
-        })
-      )
-    } else {
-      dispatch(
-        addWeddingRequest({
-          ...payload,
-          weddingId: uuidv4(),
-          createdBy: userId ?? "",
-        })
-      )
-    }
+  const payload = {
+    groomName: data.groom,
+    brideName: data.bride,
+    weddingDate: data.date,
+    weddingTime: data.time,
+    weddingVenue: data.venue,
+    receptionDate: data.receptionSame ? data.date : data.receptionDate!,
+    receptionTime: data.receptionSame ? data.time : data.receptionTime!,
+    receptionVenue: data.receptionSame ? data.venue : data.receptionVenue!,
+    invitationTemplate: data.invitationTemplate,
+    invitationText,
   }
+
+  if (isEditMode && selectedWedding) {
+    dispatch(
+      updateWeddingRequest({
+        weddingId: selectedWedding.id || selectedWedding.weddingId!,
+        data: payload,
+      })
+    )
+  } else {
+    dispatch(
+      addWeddingRequest({
+        ...payload,
+        weddingId: uuidv4(),
+        createdBy: userId ?? "",
+      })
+    )
+  }
+}
+
 
   return (
     <>

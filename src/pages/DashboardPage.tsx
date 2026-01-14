@@ -47,6 +47,15 @@ export default function DashboardPage() {
     navigate(ROUTES.ADD_WEDDING);
   }
 
+  // Handle navigation back from ADD_WEDDING - reload weddings
+  useEffect(() => {
+    const handlePopState = () => {
+      dispatch(loadWeddingsRequest())
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [dispatch])
+
   // Loading State
   if (loading) {
     return <DashboardLoading />
