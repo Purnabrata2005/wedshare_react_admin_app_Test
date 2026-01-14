@@ -1,30 +1,51 @@
 import { z } from "zod";
 
-/* =======================
-   BASE WEDDING ENTITY
-======================= */
+/* =====================================================
+   COMMON FIELD VALIDATORS
+===================================================== */
 
-export const weddingSchema = z.object({
-  id: z.string().optional(),
-  weddingId: z.string().optional(), // FIXED: optional
+const nameSchema = z
+  .string()
+  .min(1, "Name is required")
+  .regex(/^[a-zA-Z\s'.-]+$/, "Only letters and valid characters allowed");
 
-  groomName: z.string().min(1, "Groom name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Groom name can only contain letters"),
-  brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
+const dateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format");
 
-  weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces"),
-  weddingTime: z.string().min(1, "Wedding time is required"),
+const timeSchema = z
+  .string()
+  .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:mm)");
 
-  receptionDate: z.string().min(1, "Reception date is required"),
-  receptionVenue: z.string().min(1, "Reception venue must be at least 1 characters"),
-  receptionTime: z.string().min(1, "Reception time is required"),
+/* =====================================================
+   BASE WEDDING DATA (SINGLE SOURCE OF TRUTH)
+===================================================== */
+
+export const weddingBaseSchema = z.object({
+  groomName: nameSchema,
+  brideName: nameSchema,
+
+  weddingDate: dateSchema,
+  weddingVenue: z.string().min(1, "Wedding venue is required"),
+  weddingTime: timeSchema,
+
+  receptionDate: dateSchema,
+  receptionVenue: z.string().min(1, "Reception venue is required"),
+  receptionTime: timeSchema,
 
   invitationTemplate: z.number().nullable().optional(),
   invitationText: z.string().nullable().optional(),
 
   coverImageKey: z.string().nullable().optional(),
   albumPublicKey: z.string().nullable().optional(),
+});
 
+/* =====================================================
+   FULL ENTITY (READ)
+===================================================== */
+
+export const weddingSchema = weddingBaseSchema.extend({
+  id: z.string(), // ONE ID ONLY
   createdBy: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -32,59 +53,26 @@ export const weddingSchema = z.object({
 
 export type WeddingData = z.infer<typeof weddingSchema>;
 
-/* =======================
+/* =====================================================
    CREATE WEDDING
-======================= */
+===================================================== */
 
-export const createWeddingSchema = z.object({
-  groomName: z.string().min(1, "Groom name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Groom name can only contain letters"),
-  brideName: z.string().min(1, "Bride name must be at least 1 characters").regex(/^[a-zA-Z]+$/, "Bride name can only contain letters"),
-
-  weddingDate: z.string().min(1, "Wedding date is required"),
-  weddingVenue: z.string().min(1, "Wedding venue must be at least 1 characters").regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces"),
-  weddingTime: z.string().min(1, "Wedding time is required"),
-
-  receptionDate: z.string().min(1, "Reception date is required"),
-  receptionVenue: z.string().min(1, "Reception venue must be at least 1 characters"),
-  receptionTime: z.string().min(1, "Reception time is required"),
-
-  invitationTemplate: z.number().nullable().optional(),
-  invitationText: z.string().nullable().optional(),
-
-  coverImageKey: z.string().nullable().optional(),
-});
+export const createWeddingSchema = weddingBaseSchema;
 
 export type CreateWeddingFormData = z.infer<typeof createWeddingSchema>;
 
-/* =======================
-   UPDATE WEDDING
-======================= */
+/* =====================================================
+   UPDATE WEDDING (PATCH SAFE)
+===================================================== */
 
-export const updateWeddingSchema = z.object({
-  groomName: z.string().min(1).regex(/^[a-zA-Z]+$/, "Groom name can only contain letters").optional(),
-  brideName: z.string().min(1).regex(/^[a-zA-Z]+$/, "Bride name can only contain letters").optional(),
-
-  weddingDate: z.string().min(1).optional(),
-  weddingVenue: z.string().min(1).regex(/^[a-zA-Z\s]+$/, "Wedding venue can only contain letters and spaces").optional(),
-  weddingTime: z.string().min(1).optional(),
-
-  receptionDate: z.string().min(1).optional(),
-  receptionVenue: z.string().min(1).optional(),
-  receptionTime: z.string().min(1).optional(),
-
-  invitationTemplate: z.number().nullable().optional(),
-  invitationText: z.string().nullable().optional(),
-
-  coverImageKey: z.string().nullable().optional(),
-  albumPublicKey: z.string().nullable().optional(),
-});
+export const updateWeddingSchema = weddingBaseSchema.partial();
 
 export type UpdateWeddingFormData = z.infer<typeof updateWeddingSchema>;
 
-/* =======================
+/* =====================================================
    DELETE WEDDING
-======================= */
+===================================================== */
 
 export const deleteWeddingSchema = z.object({
-  weddingId: z.string().min(1, "Wedding ID is required"),
+  id: z.string().min(1, "Wedding ID is required"),
 });
