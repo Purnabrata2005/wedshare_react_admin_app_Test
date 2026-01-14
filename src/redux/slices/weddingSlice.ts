@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+// import { persistenceManager } from "path-to-your-persistence-manager" // Adjust the import based on your project structure
 
 /* =======================
    TYPES
@@ -146,6 +147,17 @@ const weddingSlice = createSlice({
         state.processPublicKey = null;
         state.loading = false;
         state.error = null;
+        
+        // Clear persisted wedding data
+        localStorage.removeItem('selectedWedding'); // or whatever your key is
+        // or use your RYHIDRAT clear method
+        // persistenceManager.clearWeddingData();
+        
+        // Clear other auth data
+        localStorage.clear();
+        
+        // Redirect to login
+        // navigateToLogin(); // Uncomment and implement this line based on your navigation setup
       })
   }
 })
