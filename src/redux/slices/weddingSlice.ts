@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import { REHYDRATE } from "redux-persist"
 // import { persistenceManager } from "path-to-your-persistence-manager" // Adjust the import based on your project structure
 
 /* =======================
@@ -140,6 +141,33 @@ const weddingSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Handle rehydration from persisted storage
+    builder.addCase(REHYDRATE as any, (state, action: any) => {
+      const inbound = action.payload?.weddings as WeddingState | undefined
+      const auth = action.payload?.auth as any | undefined
+
+      // If user is not authenticated, reset weddings
+      if (!auth?.isAuthenticated || !auth?.user?.userid) {
+        state.weddings = []
+        state.selectedWeddingId = null
+        state.loading = false
+        state.error = null
+        state.processPublicKey = null
+        return
+      }
+
+      // If authenticated, restore persisted wedding data
+      if (inbound?.weddings) {
+        state.weddings = inbound.weddings
+        state.selectedWeddingId = inbound.selectedWeddingId ?? null
+        state.processPublicKey = inbound.processPublicKey ?? null
+      }
+      
+      // Reset loading/error states
+      state.loading = false
+      state.error = null
+    })
+
     builder
       .addCase("auth/logoutUser/fulfilled", (state) => {
         state.weddings = [];  // Reset wedding data on logout

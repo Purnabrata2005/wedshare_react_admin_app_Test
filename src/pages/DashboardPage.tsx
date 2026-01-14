@@ -19,11 +19,14 @@ export default function DashboardPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { weddings, loading, error } = useAppSelector((state) => state.weddings)
+  const { rehydrated } = useAppSelector((state) => state.auth)
 
-  // Load weddings on component mount
+  // Load weddings on component mount or when rehydration completes
   useEffect(() => {
-    dispatch(loadWeddingsRequest())
-  }, [dispatch])
+    if (rehydrated) {
+      dispatch(loadWeddingsRequest())
+    }
+  }, [dispatch, rehydrated])
 
   const handleSelectWedding = (wedding: Wedding) => {
     console.log("Wedding selected:", wedding)
@@ -57,7 +60,7 @@ export default function DashboardPage() {
   }, [dispatch])
 
   // Loading State
-  if (loading) {
+  if (loading || !rehydrated) {
     return <DashboardLoading />
   }
 
