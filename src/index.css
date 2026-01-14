@@ -40,6 +40,7 @@
    ================================ */
 
 @import "tailwindcss";
+@import "tailwindcss/utilities";
 @plugin "tailwindcss-animate";
 
 /* Enable class-based dark mode */
@@ -479,5 +480,62 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .event-card {
+    @apply relative overflow-hidden rounded-xl border border-border/50;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s ease;
+  }
+
+  .event-card:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: var(--shadow-rose);
+    transform: translateY(-2px);
+  }
+
+  .event-card-header {
+    @apply flex items-center gap-3 p-5 pb-4;
+  }
+
+  .event-card-icon {
+    @apply flex items-center justify-center w-10 h-10 rounded-lg;
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+  }
+
+  .event-card-title {
+    @apply text-lg font-semibold tracking-wide;
+    font-family: var(--font-display);
+  }
+
+  .event-card-content {
+    @apply px-5 pb-5;
+  }
+
+  .event-info-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .event-info-item {
+    @apply flex flex-col items-center gap-2 p-4 rounded-lg text-center;
+    background: hsl(var(--secondary));
+  }
+
+  .event-info-icon {
+    @apply flex items-center justify-center w-9 h-9 rounded-lg;
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+  }
+
+  .event-info-label {
+    @apply text-xs uppercase tracking-wider;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .event-info-value {
+    @apply text-sm font-medium;
+    color: hsl(var(--foreground));
   }
 }

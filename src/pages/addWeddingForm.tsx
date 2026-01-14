@@ -1,4 +1,4 @@
-import { type FC,  useState } from "react"
+import { type FC, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft } from "lucide-react"
@@ -6,7 +6,11 @@ import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { addWeddingRequest, updateWeddingRequest, clearSelection } from "@/redux/slices/weddingSlice"
+import {
+  addWeddingRequest,
+  updateWeddingRequest,
+  clearSelection,
+} from "@/redux/slices/weddingSlice"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -16,20 +20,35 @@ import { StepIndicator } from "../components/forms/step-indicator"
 import { InputField } from "../components/forms/input-field"
 import { DateVenueForm } from "../components/forms/dateVenueForm"
 import { CheckboxField } from "../components/forms/checkbox-field"
-import { InvitationTemplateSelector } from "../components/forms/invitationTemplateSelector"
+import {
+  InvitationTemplateSelector,
+} from "../components/forms/invitationTemplateSelector"
 
-import { addWeddingFormSchema} from "@/redux/schemas/addWeddingFormSchema"
-import type {WeddingFormData } from "@/redux/schemas/addWeddingFormSchema"
-const STEP_LABELS = ["Couple Info", "Wedding Details", "Reception Details", "Invitation Card"]
+import { WEDDING_TEMPLATES } from "@/components/wedding-details/weddingTemplates"
+import {
+  addWeddingFormSchema,
+  type WeddingFormData,
+} from "@/redux/schemas/addWeddingFormSchema"
 
-export const AddWeddingForm: FC<any> = ({  }) => {
+const STEP_LABELS = [
+  "Couple Info",
+  "Wedding Details",
+  "Reception Details",
+  "Invitation Card",
+]
+
+export const AddWeddingForm: FC = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
-  const { weddings, selectedWeddingId } = useAppSelector((s) => s.weddings)
+  const { weddings, selectedWeddingId } = useAppSelector(
+    (s) => s.weddings
+  )
   const userId = useAppSelector((s) => s.auth.user?.userid)
 
-  const selectedWedding = weddings.find(w => w.id === selectedWeddingId || w.weddingId === selectedWeddingId)
+  const selectedWedding = weddings.find(
+    (w) => w.id === selectedWeddingId || w.weddingId === selectedWeddingId
+  )
   const isEditMode = !!selectedWedding
 
   const [step, setStep] = useState(1)
@@ -55,7 +74,7 @@ export const AddWeddingForm: FC<any> = ({  }) => {
       receptionDate: "",
       receptionTime: "",
       receptionVenue: "",
-      invitationTemplate: 1,
+      invitationTemplate: WEDDING_TEMPLATES[0].id,
     },
   })
 
@@ -64,22 +83,52 @@ export const AddWeddingForm: FC<any> = ({  }) => {
   const onSubmit = (data: WeddingFormData) => {
     setIsSubmitting(true)
 
+    const selectedTemplate = WEDDING_TEMPLATES.find(
+      (t) => t.id === data.invitationTemplate
+    )
+
+    const invitationText = selectedTemplate
+      ? selectedTemplate.text
+          .replace(/\[Bride\]/g, data.bride)
+          .replace(/\[Groom\]/g, data.groom)
+          .replace(/\[Date\]/g, data.date)
+          .replace(/\[Venue\]/g, data.venue)
+      : ""
+
     const payload = {
       groomName: data.groom,
       brideName: data.bride,
       weddingDate: data.date,
       weddingTime: data.time,
       weddingVenue: data.venue,
-      receptionDate: data.receptionSame ? data.date : data.receptionDate!,
-      receptionTime: data.receptionSame ? data.time : data.receptionTime!,
-      receptionVenue: data.receptionSame ? data.venue : data.receptionVenue!,
+      receptionDate: data.receptionSame
+        ? data.date
+        : data.receptionDate!,
+      receptionTime: data.receptionSame
+        ? data.time
+        : data.receptionTime!,
+      receptionVenue: data.receptionSame
+        ? data.venue
+        : data.receptionVenue!,
       invitationTemplate: data.invitationTemplate,
+      invitationText,
     }
 
     if (isEditMode && selectedWedding) {
-      dispatch(updateWeddingRequest({ weddingId: selectedWedding.id || selectedWedding.weddingId!, data: payload }))
+      dispatch(
+        updateWeddingRequest({
+          weddingId: selectedWedding.id || selectedWedding.weddingId!,
+          data: payload,
+        })
+      )
     } else {
-      dispatch(addWeddingRequest({ ...payload, weddingId: uuidv4(), createdBy: userId ?? "" }))
+      dispatch(
+        addWeddingRequest({
+          ...payload,
+          weddingId: uuidv4(),
+          createdBy: userId ?? "",
+        })
+      )
     }
   }
 
@@ -101,14 +150,35 @@ export const AddWeddingForm: FC<any> = ({  }) => {
           <Card className="p-6 space-y-6">
             {step === 1 && (
               <>
-                <Controller name="groom" control={control} render={({ field }) =>
-                  <InputField label="Groom Name" {...field} error={errors.groom} />} />
-                <Controller name="bride" control={control} render={({ field }) =>
-                  <InputField label="Bride Name" {...field} error={errors.bride} />} />
+                <Controller
+                  name="groom"
+                  control={control}
+                  render={({ field }) => (
+                    <InputField
+                      label="Groom Name"
+                      {...field}
+                      error={errors.groom}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="bride"
+                  control={control}
+                  render={({ field }) => (
+                    <InputField
+                      label="Bride Name"
+                      {...field}
+                      error={errors.bride}
+                    />
+                  )}
+                />
 
                 <Button
                   type="button"
-                  onClick={async () => (await trigger(["groom", "bride"])) && setStep(2)}
+                  onClick={async () =>
+                    (await trigger(["groom", "bride"])) && setStep(2)
+                  }
                   className="w-full"
                 >
                   Next
@@ -121,7 +191,10 @@ export const AddWeddingForm: FC<any> = ({  }) => {
                 control={control}
                 setValue={setValue}
                 errors={errors}
-                onNext={async () => (await trigger(["date", "time", "venue"])) && setStep(3)}
+                onNext={async () =>
+                  (await trigger(["date", "time", "venue"])) &&
+                  setStep(3)
+                }
               />
             )}
 
@@ -130,7 +203,9 @@ export const AddWeddingForm: FC<any> = ({  }) => {
                 <CheckboxField
                   label="Reception same as wedding"
                   checked={values.receptionSame}
-                  onChange={(e) => setValue("receptionSame", e.target.checked)}
+                  onChange={(e) =>
+                    setValue("receptionSame", e.target.checked)
+                  }
                 />
 
                 {!values.receptionSame && (
@@ -145,7 +220,14 @@ export const AddWeddingForm: FC<any> = ({  }) => {
                 <Button
                   type="button"
                   onClick={async () => {
-                    if (values.receptionSame || await trigger(["receptionDate", "receptionTime", "receptionVenue"])) {
+                    if (
+                      values.receptionSame ||
+                      (await trigger([
+                        "receptionDate",
+                        "receptionTime",
+                        "receptionVenue",
+                      ]))
+                    ) {
                       setStep(4)
                     }
                   }}
@@ -159,21 +241,38 @@ export const AddWeddingForm: FC<any> = ({  }) => {
             {step === 4 && (
               <>
                 <InvitationTemplateSelector
-                  templates={[]}
+                  templates={WEDDING_TEMPLATES}
                   selectedId={values.invitationTemplate}
-                  onSelect={(id) => setValue("invitationTemplate", id)}
+                  onSelect={(id) =>
+                    setValue("invitationTemplate", id)
+                  }
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                  Save and Continue
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting
+                    ? isEditMode
+                      ? "Updating..."
+                      : "Saving..."
+                    : isEditMode
+                    ? "Update Wedding"
+                    : "Save and Continue"}
                 </Button>
               </>
             )}
           </Card>
 
           {step > 1 && (
-            <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" /> Previous
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep((s) => s - 1)}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Previous
             </Button>
           )}
         </form>
