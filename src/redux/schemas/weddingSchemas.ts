@@ -45,7 +45,7 @@ export const weddingBaseSchema = z.object({
 ===================================================== */
 
 export const weddingSchema = weddingBaseSchema.extend({
-  id: z.string(), // SINGLE ID ONLY
+  id: z.string().default(""), // Add default
   createdBy: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),

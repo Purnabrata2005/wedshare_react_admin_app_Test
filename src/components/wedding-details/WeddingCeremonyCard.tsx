@@ -7,28 +7,36 @@ interface WeddingCeremonyCardProps {
 
 export function WeddingCeremonyCard({ date, venue }: WeddingCeremonyCardProps) {
   return (
-    <div className="event-card">
-      <div className="event-card-header">
-        <div className="event-card-icon">
-          <Calendar className="w-5 h-5" />
+    <div className="wedding-card rounded-2xl p-6">
+      <div className="wedding-card-header flex items-center gap-3 mb-5">
+        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+          <Calendar className="w-6 h-6 text-primary" />
         </div>
-        <h3 className="event-card-title">Wedding Ceremony</h3>
+        <h3 className="wedding-card-title text-2xl">Wedding Ceremony</h3>
       </div>
-      <div className="event-card-content">
-        <div className="event-info-grid">
-          <div className="event-info-item">
-            <div className="event-info-icon">
-              <Calendar className="w-4 h-4" />
+      <div className="wedding-card-content">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-background/60 rounded-xl p-4 flex flex-col gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mb-1">
+              <Calendar className="w-4 h-4 text-primary" />
             </div>
-            <span className="event-info-label">Wedding</span>
-            <span className="event-info-value">{date}</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              WEDDING
+            </span>
+            <span className="text-lg font-semibold text-foreground">
+              {date}
+            </span>
           </div>
-          <div className="event-info-item">
-            <div className="event-info-icon">
-              <MapPin className="w-4 h-4" />
+          <div className="bg-background/60 rounded-xl p-4 flex flex-col gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mb-1">
+              <MapPin className="w-4 h-4 text-primary" />
             </div>
-            <span className="event-info-label">Location</span>
-            <span className="event-info-value">{venue || "Venue TBD"}</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              LOCATION
+            </span>
+            <span className="text-lg font-semibold text-foreground">
+              {venue || "Digha"}
+            </span>
           </div>
         </div>
       </div>
