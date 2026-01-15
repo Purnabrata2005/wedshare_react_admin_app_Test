@@ -1,7 +1,12 @@
-// src/db/photoDB.ts
 import Dexie, { type Table } from "dexie"
 
-export type UploadStatus = "pending" | "uploading" | "failed" | "completed"
+export type UploadStatus =
+  | "queued"
+  | "uploading"
+  | "paused"
+  | "failed"
+  | "completed"
+  | "cancelled"
 
 export interface PendingPhoto {
   uuid: string
@@ -9,10 +14,15 @@ export interface PendingPhoto {
   file: Blob
   extension: string
   originalFilename: string
+
   status: UploadStatus
   progress: number
   retries: number
   createdAt: number
+
+  metadataRegistered: boolean
+  uploadSessionId: string
+  lastError?: string
 
   crypto?: {
     wrappedPhotoKey?: string
@@ -20,29 +30,15 @@ export interface PendingPhoto {
   }
 }
 
-
 class PhotoDB extends Dexie {
   queue!: Table<PendingPhoto, string>
 
   constructor() {
     super("PhotoUploadDB")
 
-    // Version 2: Added originalFilename field
-    this.version(2).stores({
-      // primary key: uuid
-      // indexes: weddingId, status, createdAt
-      queue: "uuid,weddingId,status,createdAt",
-    }).upgrade(tx => {
-      // Migrate existing records to include originalFilename
-      return tx.table("queue").toCollection().modify(photo => {
-        if (!photo.originalFilename) {
-          photo.originalFilename = `${photo.uuid}.${photo.extension}`
-        }
-      })
-    })
-
-    this.version(1).stores({
-      queue: "uuid,weddingId,status,createdAt",
+    this.version(3).stores({
+      queue:
+        "uuid,weddingId,status,createdAt,metadataRegistered,uploadSessionId",
     })
 
     this.queue = this.table("queue")
