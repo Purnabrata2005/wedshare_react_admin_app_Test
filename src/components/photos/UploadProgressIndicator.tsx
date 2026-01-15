@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react"
 import type { RootState } from "@/redux/store"
 import { Progress } from "@/components/ui/progress"
 import { Card } from "@/components/ui/card"
-import type { UploadStatus } from "@/DB/uploadDB"
+// import type { UploadStatus } from "@/DB/uploadDB"
 
 export function UploadProgressIndicator() {
   /**

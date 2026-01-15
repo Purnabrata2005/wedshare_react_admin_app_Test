@@ -1,4 +1,4 @@
-import { X, CheckCircle2, Loader2 } from "lucide-react"
+import { X, CheckCircle2, Loader2, Pause, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { UploadStatus } from "@/DB/uploadDB"
 
@@ -8,29 +8,44 @@ interface PhotoCardProps {
   filename: string
   progress?: number
   status?: UploadStatus
-  isUploading?: boolean
   onDelete: () => void
+  onPause?: () => void
+  onResume?: () => void
+  onCancel?: () => void
 }
 
 export function PhotoCard({
   url,
   filename,
   progress = 0,
-  status = "pending",
-  isUploading = false,
+  status = "queued",
   onDelete,
+  onPause,
+  onResume,
+  onCancel,
 }: PhotoCardProps) {
+  const isUploading = status === "uploading"
+  const isQueued = status === "queued"
+  const isPaused = status === "paused"
+  const isCompleted = status === "completed"
+  const isFailed = status === "failed"
+  const isCancelled = status === "cancelled"
+
   const getStatusIcon = () => {
-    if (status === "completed") {
-      return <CheckCircle2 className="w-6 h-6 text-green-500" />
+    switch (status) {
+      case "completed":
+        return <CheckCircle2 className="w-6 h-6 text-green-500" />
+      case "uploading":
+        return <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+      case "paused":
+        return <Pause className="w-6 h-6 text-yellow-500" />
+      case "failed":
+        return <X className="w-6 h-6 text-red-500" />
+      case "cancelled":
+        return <X className="w-6 h-6 text-muted-foreground" />
+      default:
+        return null
     }
-    if (status === "uploading") {
-      return <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-    }
-    if (status === "failed") {
-      return <X className="w-6 h-6 text-red-500" />
-    }
-    return null
   }
 
   return (
@@ -45,7 +60,7 @@ export function PhotoCard({
       </div>
 
       {/* Progress Bar */}
-      {status === "uploading" && (
+      {(isUploading || isPaused) && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
           <div
             className="h-full bg-primary transition-all"
@@ -54,23 +69,65 @@ export function PhotoCard({
         </div>
       )}
 
-      {/* Status Badge */}
+      {/* Status Icon */}
       <div className="absolute top-2 right-2">
         {getStatusIcon()}
       </div>
 
-      {/* Overlay on Hover */}
+      {/* Hover Controls */}
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={onDelete}
-          disabled={isUploading}
-          className="gap-2"
-        >
-          <X className="w-4 h-4" />
-          Delete
-        </Button>
+
+        {/* Pause */}
+        {isUploading && onPause && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={onPause}
+            className="gap-2"
+          >
+            <Pause className="w-4 h-4" />
+            Pause
+          </Button>
+        )}
+
+        {/* Resume */}
+        {isPaused && onResume && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={onResume}
+            className="gap-2"
+          >
+            <Play className="w-4 h-4" />
+            Resume
+          </Button>
+        )}
+
+        {/* Cancel */}
+        {(isQueued || isUploading || isPaused) && onCancel && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={onCancel}
+            className="gap-2"
+          >
+            <X className="w-4 h-4" />
+            Cancel
+          </Button>
+        )}
+
+        {/* Delete (only after finished states) */}
+        {(isCompleted || isFailed || isCancelled) && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={onDelete}
+            className="gap-2"
+          >
+            <X className="w-4 h-4" />
+            Delete
+          </Button>
+        )}
       </div>
 
       {/* Filename */}
