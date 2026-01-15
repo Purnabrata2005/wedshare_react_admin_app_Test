@@ -48,11 +48,9 @@ export default function PhotoUploadPage() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
-  /**
-   * ============================
-   * V3: DERIVED UPLOADING STATE
-   * ============================
-   */
+  /* ============================
+     V3: DERIVED UPLOADING STATE
+  ============================ */
   const progressMap = useSelector(
     (state: RootState) =>
       (state.photos.byWeddingId?.[weddingId] as Record<
@@ -61,17 +59,17 @@ export default function PhotoUploadPage() {
       >) || {}
   )
 
-  const isUploading = useMemo(() => {
-    return Object.values(progressMap).some(
-      (p) => p.status === "queued" || p.status === "uploading"
-    )
-  }, [progressMap])
+  const isUploading = useMemo(
+    () =>
+      Object.values(progressMap).some(
+        (p) => p.status === "queued" || p.status === "uploading"
+      ),
+    [progressMap]
+  )
 
-  /**
-   * ============================
-   * UPLOAD STATS (SELECTED ONLY)
-   * ============================
-   */
+  /* ============================
+     UPLOAD STATS (SELECTED ONLY)
+  ============================ */
   const totalPhotos = photos.length
   const selectedPhotoUuids = useMemo(
     () => new Set(photos.map((p) => p.uuid)),
@@ -89,11 +87,9 @@ export default function PhotoUploadPage() {
       (p.status === "queued" || p.status === "uploading")
   ).length
 
-  /**
-   * ============================
-   * FILE PROCESSING
-   * ============================
-   */
+  /* ============================
+     FILE PROCESSING
+  ============================ */
   const processFiles = useCallback((files: FileList | null) => {
     if (!files) return
 
@@ -117,11 +113,9 @@ export default function PhotoUploadPage() {
     setPhotos((prev) => [...prev, ...newItems])
   }, [])
 
-  /**
-   * ============================
-   * DRAG & DROP HANDLERS
-   * ============================
-   */
+  /* ============================
+     DRAG & DROP HANDLERS
+  ============================ */
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(true)
@@ -142,11 +136,9 @@ export default function PhotoUploadPage() {
     processFiles(e.dataTransfer.files)
   }
 
-  /**
-   * ============================
-   * PHOTO MANAGEMENT
-   * ============================
-   */
+  /* ============================
+     PHOTO MANAGEMENT
+  ============================ */
   const handleDeletePhoto = (index: number) => {
     setPhotos((prev) => {
       const photo = prev[index]
@@ -176,15 +168,11 @@ export default function PhotoUploadPage() {
     setPhotos([])
   }
 
-  const handleBack = () => {
-    navigate(-1)
-  }
+  const handleBack = () => navigate(-1)
 
-  /**
-   * ============================
-   * RENDER
-   * ============================
-   */
+  /* ============================
+     RENDER
+  ============================ */
   return (
     <div className="min-h-screen bg-background">
       <Navbar
@@ -309,9 +297,9 @@ export default function PhotoUploadPage() {
 
               <CardContent>
                 <PhotoGrid
+                  weddingId={weddingId}
                   photos={photos}
                   progressMap={progressMap}
-                  isUploading={isUploading}
                   onDeletePhoto={handleDeletePhoto}
                 />
               </CardContent>

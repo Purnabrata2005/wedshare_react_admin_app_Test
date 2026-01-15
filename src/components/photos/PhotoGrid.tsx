@@ -1,5 +1,11 @@
+import { useDispatch } from "react-redux"
 import { PhotoThumbnail } from "./PhotoThumbnail"
 import type { UploadStatus } from "@/DB/uploadDB"
+import {
+  pausePhoto,
+  resumePhoto,
+  cancelPhoto,
+} from "@/redux/slices/photoSlice"
 
 interface LocalPhoto {
   uuid: string
@@ -14,18 +20,20 @@ interface PhotoProgressInfo {
 }
 
 interface PhotoGridProps {
+  weddingId: string
   photos: LocalPhoto[]
   progressMap: Record<string, PhotoProgressInfo>
-  isUploading?: boolean
   onDeletePhoto: (index: number) => void
 }
 
 export function PhotoGrid({
+  weddingId,
   photos,
   progressMap,
-  isUploading = false,
   onDeletePhoto,
 }: PhotoGridProps) {
+  const dispatch = useDispatch()
+
   if (photos.length === 0) return null
 
   return (
@@ -33,7 +41,8 @@ export function PhotoGrid({
       {photos.map((item, index) => {
         const progressInfo = progressMap[item.uuid]
         const progress = progressInfo?.progress ?? 0
-        const status = progressInfo?.status ?? "pending"
+        const status: UploadStatus =
+          progressInfo?.status ?? "queued"
 
         return (
           <PhotoThumbnail
@@ -44,7 +53,30 @@ export function PhotoGrid({
             index={index}
             progress={progress}
             status={status}
-            isUploading={isUploading}
+            onPause={() =>
+              dispatch(
+                pausePhoto({
+                  weddingId,
+                  uuid: item.uuid,
+                })
+              )
+            }
+            onResume={() =>
+              dispatch(
+                resumePhoto({
+                  weddingId,
+                  uuid: item.uuid,
+                })
+              )
+            }
+            onCancel={() =>
+              dispatch(
+                cancelPhoto({
+                  weddingId,
+                  uuid: item.uuid,
+                })
+              )
+            }
             onDelete={onDeletePhoto}
           />
         )

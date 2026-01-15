@@ -23,8 +23,6 @@ interface PhotoItemState {
 
 interface PhotoState {
   byWeddingId: Record<string, Record<string, PhotoItemState>>
-  activeUploads: number
-  maxConcurrentUploads: number
 }
 
 /* ======================
@@ -33,8 +31,6 @@ interface PhotoState {
 
 const initialState: PhotoState = {
   byWeddingId: {},
-  activeUploads: 0,
-  maxConcurrentUploads: 4,
 }
 
 /* ======================
@@ -45,16 +41,12 @@ const photoSlice = createSlice({
   name: "photos",
   initialState,
   reducers: {
-    /**
-     * V3 ENTRY POINT
-     * Enqueue photos for upload
-     */
+    /* ========= ENTRY ========= */
     uploadPhotosRequest(
       state,
       action: PayloadAction<UploadPhotosPayload>
     ) {
       const { weddingId, photos } = action.payload
-
       state.byWeddingId[weddingId] ??= {}
 
       for (const p of photos) {
@@ -65,6 +57,7 @@ const photoSlice = createSlice({
       }
     },
 
+    /* ========= UPDATES ========= */
     updatePhotoProgress(
       state,
       action: PayloadAction<{
@@ -103,6 +96,7 @@ const photoSlice = createSlice({
       }
     },
 
+    /* ========= CONTROLS ========= */
     pausePhoto(
       state,
       action: PayloadAction<{ weddingId: string; uuid: string }>
@@ -129,6 +123,11 @@ const photoSlice = createSlice({
         action.payload.uuid
       ].status = "cancelled"
     },
+
+    /* ========= REQUIRED FIX ========= */
+    clearPhotos() {
+      return initialState
+    },
   },
 })
 
@@ -143,6 +142,7 @@ export const {
   pausePhoto,
   resumePhoto,
   cancelPhoto,
+  clearPhotos, // ✅ NOW EXISTS
 } = photoSlice.actions
 
 export default photoSlice.reducer
