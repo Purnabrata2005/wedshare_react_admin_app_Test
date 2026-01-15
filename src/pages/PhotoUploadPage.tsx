@@ -1,7 +1,7 @@
-import { useState, type DragEvent, useCallback } from "react"
+import { useState, type DragEvent, useCallback, useMemo } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
-import { Upload,  ImageIcon } from "lucide-react"
+import { Upload, ImageIcon } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 
 import { Button } from "@/components/ui/button"
@@ -11,8 +11,8 @@ import { Navbar } from "@/components/ui/navbar"
 import {
   PhotoDropzone,
   PhotoGrid,
-  UploadingOverlay,
 } from "@/components/photos"
+
 import { uploadPhotosRequest } from "@/redux/slices/photoSlice"
 import type { RootState } from "@/redux/store"
 import type { UploadStatus } from "@/DB/uploadDB"
@@ -38,11 +38,9 @@ export default function PhotoUploadPage() {
   const dispatch = useDispatch()
   const location = useLocation()
 
-  // Get weddingId from location state
   const state = location.state as LocationState | null
   const weddingId = state?.weddingId || ""
 
-  // Redirect if no weddingId provided
   if (!weddingId) {
     navigate("/dashboard", { replace: true })
   }
@@ -50,36 +48,58 @@ export default function PhotoUploadPage() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
-  // Redux state selectors
-  const uploading = useSelector((state: RootState) => state.photos?.uploading)
+  /**
+   * ============================
+   * V3: DERIVED UPLOADING STATE
+   * ============================
+   */
   const progressMap = useSelector(
     (state: RootState) =>
-      (state.photos?.byWeddingId?.[weddingId] as Record<string, PhotoProgressInfo>) || {}
+      (state.photos.byWeddingId?.[weddingId] as Record<
+        string,
+        PhotoProgressInfo
+      >) || {}
   )
 
-  const isUploading = Boolean(uploading)
+  const isUploading = useMemo(() => {
+    return Object.values(progressMap).some(
+      (p) => p.status === "queued" || p.status === "uploading"
+    )
+  }, [progressMap])
 
-
-  // Calculate upload stats - only count photos that are currently selected
+  /**
+   * ============================
+   * UPLOAD STATS (SELECTED ONLY)
+   * ============================
+   */
   const totalPhotos = photos.length
-  const selectedPhotoUuids = new Set(photos.map(p => p.uuid))
-  
-  // Only count progress for currently selected photos
+  const selectedPhotoUuids = useMemo(
+    () => new Set(photos.map((p) => p.uuid)),
+    [photos]
+  )
+
   const completedPhotos = Object.entries(progressMap).filter(
-    ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "completed"
-  ).length
-  const uploadingPhotos = Object.entries(progressMap).filter(
-    ([uuid, p]) => selectedPhotoUuids.has(uuid) && p.status === "uploading"
+    ([uuid, p]) =>
+      selectedPhotoUuids.has(uuid) && p.status === "completed"
   ).length
 
-  // Process selected files
+  const uploadingPhotos = Object.entries(progressMap).filter(
+    ([uuid, p]) =>
+      selectedPhotoUuids.has(uuid) &&
+      (p.status === "queued" || p.status === "uploading")
+  ).length
+
+  /**
+   * ============================
+   * FILE PROCESSING
+   * ============================
+   */
   const processFiles = useCallback((files: FileList | null) => {
     if (!files) return
 
     const newItems: LocalPhoto[] = []
 
     Array.from(files).forEach((file) => {
-      // Only accept image files
       if (!file.type.startsWith("image/")) return
 
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
@@ -97,46 +117,47 @@ export default function PhotoUploadPage() {
     setPhotos((prev) => [...prev, ...newItems])
   }, [])
 
-  // Drag and drop handlers
+  /**
+   * ============================
+   * DRAG & DROP HANDLERS
+   * ============================
+   */
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-    e.stopPropagation()
     setIsDragging(true)
   }
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-    e.stopPropagation()
     setIsDragging(false)
   }
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-    e.stopPropagation()
   }
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-    e.stopPropagation()
     setIsDragging(false)
     processFiles(e.dataTransfer.files)
   }
 
-  // Delete a photo from the list
+  /**
+   * ============================
+   * PHOTO MANAGEMENT
+   * ============================
+   */
   const handleDeletePhoto = (index: number) => {
     setPhotos((prev) => {
       const photo = prev[index]
-      if (photo) {
-        // Revoke the object URL to free memory
-        URL.revokeObjectURL(photo.url)
-      }
+      if (photo) URL.revokeObjectURL(photo.url)
       return prev.filter((_, i) => i !== index)
     })
   }
 
-  // Upload photos to server
   const handleUploadToServer = () => {
     if (photos.length === 0 || isUploading) return
+
     dispatch(
       uploadPhotosRequest({
         weddingId,
@@ -150,7 +171,6 @@ export default function PhotoUploadPage() {
     )
   }
 
-  // Clear all selected photos
   const handleClearAll = () => {
     photos.forEach((photo) => URL.revokeObjectURL(photo.url))
     setPhotos([])
@@ -160,12 +180,13 @@ export default function PhotoUploadPage() {
     navigate(-1)
   }
 
+  /**
+   * ============================
+   * RENDER
+   * ============================
+   */
   return (
     <div className="min-h-screen bg-background">
-      {/* Uploading Overlay */}
-      <UploadingOverlay isVisible={isUploading} />
-
-      {/* Navbar */}
       <Navbar
         title="Upload Photos"
         subtitle="Add photos to your wedding gallery"
@@ -173,10 +194,9 @@ export default function PhotoUploadPage() {
         onBackClick={handleBack}
       />
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="space-y-6">
-          {/* Upload Stats Card */}
+          {/* Upload Stats */}
           {totalPhotos > 0 && (
             <Card>
               <CardContent className="py-4">
@@ -184,22 +204,35 @@ export default function PhotoUploadPage() {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <ImageIcon className="w-5 h-5 text-primary" />
-                      <span className="font-medium">Selected Photos:</span>
-                      <Badge variant="secondary">{totalPhotos}</Badge>
+                      <span className="font-medium">
+                        Selected Photos:
+                      </span>
+                      <Badge variant="secondary">
+                        {totalPhotos}
+                      </Badge>
                     </div>
+
                     {completedPhotos > 0 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Uploaded:</span>
-                        <Badge variant="default">{completedPhotos}</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Uploaded:
+                        </span>
+                        <Badge>{completedPhotos}</Badge>
                       </div>
                     )}
+
                     {uploadingPhotos > 0 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">In Progress:</span>
-                        <Badge variant="outline">{uploadingPhotos}</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          In Progress:
+                        </span>
+                        <Badge variant="outline">
+                          {uploadingPhotos}
+                        </Badge>
                       </div>
                     )}
                   </div>
+
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -209,6 +242,7 @@ export default function PhotoUploadPage() {
                     >
                       Clear All
                     </Button>
+
                     <Button
                       size="sm"
                       onClick={handleUploadToServer}
@@ -216,7 +250,9 @@ export default function PhotoUploadPage() {
                       className="gap-2"
                     >
                       <Upload className="w-4 h-4" />
-                      {isUploading ? "Uploading..." : "Upload Photos"}
+                      {isUploading
+                        ? "Uploading..."
+                        : "Upload Photos"}
                     </Button>
                   </div>
                 </div>
@@ -224,7 +260,7 @@ export default function PhotoUploadPage() {
             </Card>
           )}
 
-          {/* Dropzone Card */}
+          {/* Dropzone */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -257,16 +293,20 @@ export default function PhotoUploadPage() {
                       {photos.length}
                     </Badge>
                   </CardTitle>
+
                   <Button
                     onClick={handleUploadToServer}
-                    disabled={isUploading || photos.length === 0}
+                    disabled={isUploading}
                     className="gap-2"
                   >
                     <Upload className="w-4 h-4" />
-                    {isUploading ? "Uploading..." : "Upload All"}
+                    {isUploading
+                      ? "Uploading..."
+                      : "Upload All"}
                   </Button>
                 </div>
               </CardHeader>
+
               <CardContent>
                 <PhotoGrid
                   photos={photos}
@@ -288,7 +328,7 @@ export default function PhotoUploadPage() {
                     No photos selected yet
                   </p>
                   <p className="text-sm text-muted-foreground/70">
-                    Start by dragging and dropping images above, or click to browse
+                    Drag & drop images above or click to browse
                   </p>
                 </div>
               </CardContent>

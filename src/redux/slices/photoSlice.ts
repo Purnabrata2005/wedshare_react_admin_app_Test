@@ -1,6 +1,9 @@
-// src/redux/slices/photoSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { UploadStatus } from "@/DB/uploadDB"
+
+/* ======================
+   TYPES
+====================== */
 
 export interface UploadPhotosPayload {
   weddingId: string
@@ -12,139 +15,134 @@ export interface UploadPhotosPayload {
   }[]
 }
 
-// Response from API after successful upload
-export interface UploadedPhotoResponse {
-  originalFilename: string
-  storageKey: string
-  uploadedBy: string
-  uploadSource: "ADMIN" | "USER"
-}
-
 interface PhotoItemState {
   progress: number
   status: UploadStatus
-  originalFilename?: string
-  storageKey?: string
+  error?: string
 }
 
 interface PhotoState {
-  // Organized by weddingId, then by uuid
   byWeddingId: Record<string, Record<string, PhotoItemState>>
-  // Uploaded photos response from server
-  uploadedPhotos: Record<string, UploadedPhotoResponse[]>
-  uploading: boolean
-  error: string | null
+  activeUploads: number
+  maxConcurrentUploads: number
 }
+
+/* ======================
+   INITIAL STATE
+====================== */
 
 const initialState: PhotoState = {
   byWeddingId: {},
-  uploadedPhotos: {},
-  uploading: false,
-  error: null,
+  activeUploads: 0,
+  maxConcurrentUploads: 4,
 }
+
+/* ======================
+   SLICE
+====================== */
 
 const photoSlice = createSlice({
   name: "photos",
   initialState,
   reducers: {
-    uploadPhotosRequest: (state, action: PayloadAction<UploadPhotosPayload>) => {
-      const { weddingId } = action.payload
-      if (!state.byWeddingId[weddingId]) {
-        state.byWeddingId[weddingId] = {}
+    /**
+     * V3 ENTRY POINT
+     * Enqueue photos for upload
+     */
+    uploadPhotosRequest(
+      state,
+      action: PayloadAction<UploadPhotosPayload>
+    ) {
+      const { weddingId, photos } = action.payload
+
+      state.byWeddingId[weddingId] ??= {}
+
+      for (const p of photos) {
+        state.byWeddingId[weddingId][p.uuid] = {
+          progress: 0,
+          status: "queued",
+        }
       }
-      state.uploading = true
-      state.error = null
-    },
-    uploadPhotosEnqueued: () => {
-      // Keep uploading true - it will be set to false by uploadPhotosCompleted
-      // This allows the modal to stay visible during the upload process
-    },
-    uploadPhotosCompleted: (state) => {
-      state.uploading = false
-      state.error = null
-    },
-    uploadPhotosFailure: (state, action: PayloadAction<string>) => {
-      state.uploading = false
-      state.error = action.payload
     },
 
-    updatePhotoProgress: (
+    updatePhotoProgress(
       state,
-      action: PayloadAction<{ weddingId: string; uuid: string; progress: number }>
-    ) => {
+      action: PayloadAction<{
+        weddingId: string
+        uuid: string
+        progress: number
+      }>
+    ) {
       const { weddingId, uuid, progress } = action.payload
-      if (!state.byWeddingId[weddingId]) {
-        state.byWeddingId[weddingId] = {}
-      }
-      if (!state.byWeddingId[weddingId][uuid]) {
-        state.byWeddingId[weddingId][uuid] = { progress: 0, status: "pending" }
+      state.byWeddingId[weddingId] ??= {}
+      state.byWeddingId[weddingId][uuid] ??= {
+        progress: 0,
+        status: "queued",
       }
       state.byWeddingId[weddingId][uuid].progress = progress
     },
 
-    updatePhotoStatus: (
+    updatePhotoStatus(
       state,
-      action: PayloadAction<{ weddingId: string; uuid: string; status: UploadStatus }>
-    ) => {
-      const { weddingId, uuid, status } = action.payload
-      if (!state.byWeddingId[weddingId]) {
-        state.byWeddingId[weddingId] = {}
-      }
-      if (!state.byWeddingId[weddingId][uuid]) {
-        state.byWeddingId[weddingId][uuid] = { progress: 0, status }
+      action: PayloadAction<{
+        weddingId: string
+        uuid: string
+        status: UploadStatus
+        error?: string
+      }>
+    ) {
+      const { weddingId, uuid, status, error } = action.payload
+      state.byWeddingId[weddingId] ??= {}
+      state.byWeddingId[weddingId][uuid] ??= {
+        progress: 0,
+        status,
       }
       state.byWeddingId[weddingId][uuid].status = status
-    },
-
-    clearPhotosForWedding: (state, action: PayloadAction<string>) => {
-      const weddingId = action.payload
-      delete state.byWeddingId[weddingId]
-    },
-
-    clearPhotos: (state) => {
-      state.byWeddingId = {}
-      state.uploadedPhotos = {}
-      state.uploading = false
-      state.error = null
-    },
-
-    cancelUpload: (state) => {
-      state.uploading = false
-      state.error = null
-    },
-
-    // Add uploaded photos from server response
-    addUploadedPhotos: (
-      state,
-      action: PayloadAction<{ weddingId: string; photos: UploadedPhotoResponse[] }>
-    ) => {
-      const { weddingId, photos } = action.payload
-      if (!state.uploadedPhotos[weddingId]) {
-        state.uploadedPhotos[weddingId] = []
+      if (error) {
+        state.byWeddingId[weddingId][uuid].error = error
       }
-      state.uploadedPhotos[weddingId].push(...photos)
     },
 
-    // Clear uploaded photos for a wedding
-    clearUploadedPhotos: (state, action: PayloadAction<string>) => {
-      const weddingId = action.payload
-      delete state.uploadedPhotos[weddingId]
+    pausePhoto(
+      state,
+      action: PayloadAction<{ weddingId: string; uuid: string }>
+    ) {
+      state.byWeddingId[action.payload.weddingId][
+        action.payload.uuid
+      ].status = "paused"
+    },
+
+    resumePhoto(
+      state,
+      action: PayloadAction<{ weddingId: string; uuid: string }>
+    ) {
+      state.byWeddingId[action.payload.weddingId][
+        action.payload.uuid
+      ].status = "queued"
+    },
+
+    cancelPhoto(
+      state,
+      action: PayloadAction<{ weddingId: string; uuid: string }>
+    ) {
+      state.byWeddingId[action.payload.weddingId][
+        action.payload.uuid
+      ].status = "cancelled"
     },
   },
 })
 
+/* ======================
+   EXPORTS
+====================== */
+
 export const {
   uploadPhotosRequest,
-  uploadPhotosEnqueued,
-  uploadPhotosCompleted,
-  uploadPhotosFailure,
   updatePhotoProgress,
   updatePhotoStatus,
-  clearPhotosForWedding,
-  clearPhotos,
-  cancelUpload,
-  addUploadedPhotos,
-  clearUploadedPhotos,
+  pausePhoto,
+  resumePhoto,
+  cancelPhoto,
 } = photoSlice.actions
 
 export default photoSlice.reducer
