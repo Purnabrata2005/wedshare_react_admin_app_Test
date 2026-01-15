@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react"
+import { Trash2, Pause, Play, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -12,8 +12,10 @@ interface PhotoThumbnailProps {
   index: number
   progress?: number
   status?: UploadStatus
-  isUploading?: boolean
   onDelete: (index: number) => void
+  onPause?: () => void
+  onResume?: () => void
+  onCancel?: () => void
 }
 
 export function PhotoThumbnail({
@@ -22,12 +24,23 @@ export function PhotoThumbnail({
   fileSize,
   index,
   progress = 0,
-  status = "pending",
-  isUploading = false,
+  status = "queued",
   onDelete,
+  onPause,
+  onResume,
+  onCancel,
 }: PhotoThumbnailProps) {
-  const canDelete = status !== "completed" && status !== "uploading"
   const fileSizeFormatted = (fileSize / 1024 / 1024).toFixed(2)
+
+  const isQueued = status === "queued"
+  const isUploading = status === "uploading"
+  const isPaused = status === "paused"
+  const isCompleted = status === "completed"
+  const isFailed = status === "failed"
+  const isCancelled = status === "cancelled"
+
+  const canDelete =
+    isCompleted || isFailed || isCancelled
 
   const getStatusBadgeVariant = () => {
     switch (status) {
@@ -35,8 +48,12 @@ export function PhotoThumbnail({
         return "default"
       case "uploading":
         return "secondary"
+      case "paused":
+        return "outline"
       case "failed":
         return "destructive"
+      case "cancelled":
+        return "outline"
       default:
         return "outline"
     }
@@ -44,7 +61,7 @@ export function PhotoThumbnail({
 
   return (
     <div className="group relative rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 bg-card border border-border">
-      {/* Image Container */}
+      {/* Image */}
       <div className="aspect-square relative overflow-hidden bg-muted">
         <img
           src={url}
@@ -52,30 +69,67 @@ export function PhotoThumbnail({
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
 
-        {/* Delete Button */}
-        {canDelete && (
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => onDelete(index)}
-            disabled={isUploading}
-            className={cn(
-              "absolute top-1 right-1 sm:top-2 sm:right-2",
-              "h-7 w-7 sm:h-8 sm:w-8 rounded-full",
-              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
-              "transition-all duration-200 shadow-md"
-            )}
-          >
-            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-          </Button>
-        )}
+        {/* Hover Controls */}
+        <div
+          className={cn(
+            "absolute inset-0 bg-black/40 flex items-center justify-center gap-2",
+            "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+          )}
+        >
+          {/* Pause */}
+          {isUploading && onPause && (
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={onPause}
+            >
+              <Pause className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Resume */}
+          {isPaused && onResume && (
+            <Button
+              size="icon"
+              variant="secondary"
+              onClick={onResume}
+            >
+              <Play className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Cancel */}
+          {(isQueued || isUploading || isPaused) && onCancel && (
+            <Button
+              size="icon"
+              variant="destructive"
+              onClick={onCancel}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Delete */}
+          {canDelete && (
+            <Button
+              size="icon"
+              variant="destructive"
+              onClick={() => onDelete(index)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
 
         {/* Progress Overlay */}
-        {status !== "pending" && (
+        {(isUploading || isPaused) && (
           <div className="absolute inset-x-0 bottom-0 p-2 pt-8 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <Badge variant={getStatusBadgeVariant()} className="text-[10px] capitalize h-5">
+                <Badge
+                  variant={getStatusBadgeVariant()}
+                  className="text-[10px] capitalize h-5"
+                >
                   {status}
                 </Badge>
                 <span className="text-[10px] text-white font-medium">
@@ -86,9 +140,21 @@ export function PhotoThumbnail({
             </div>
           </div>
         )}
+
+        {/* Completed / Failed / Cancelled Badge */}
+        {(isCompleted || isFailed || isCancelled) && (
+          <div className="absolute bottom-2 left-2">
+            <Badge
+              variant={getStatusBadgeVariant()}
+              className="text-[10px] capitalize"
+            >
+              {status}
+            </Badge>
+          </div>
+        )}
       </div>
 
-      {/* File Info (visible on md+) */}
+      {/* File Info (md+) */}
       <div className="p-2 hidden md:block">
         <p className="text-xs truncate font-medium text-muted-foreground">
           {fileName}
