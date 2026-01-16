@@ -1,4 +1,5 @@
-import { call, delay, fork } from "redux-saga/effects"
+import { call, delay, fork, takeEvery } from "redux-saga/effects"
+import type { PayloadAction } from "@reduxjs/toolkit"
 import AxiosWedding from "@/redux/service/axiosWedding"
 import { photoDB, type PendingPhoto } from "@/DB/uploadDB"
 import { encryptPhotoOrFail } from "@/crypto/photoEncryption"
@@ -6,6 +7,8 @@ import { store } from "@/redux/store"
 import {
   updatePhotoProgress,
   updatePhotoStatus,
+  uploadPhotosRequest,
+  type UploadPhotosPayload,
 } from "@/redux/slices/photoSlice"
 
 const xhrMap = new Map<string, XMLHttpRequest>()
@@ -131,6 +134,32 @@ function* uploadScheduler(): Generator<any, void, any> {
   }
 }
 
+function* handleUploadPhotosRequest(
+  action: PayloadAction<UploadPhotosPayload>
+): Generator<any, void, any> {
+  const { weddingId, photos } = action.payload
+  const uploadSessionId = Date.now().toString()
+
+  for (const photo of photos) {
+    const pendingPhoto: PendingPhoto = {
+      uuid: photo.uuid,
+      weddingId,
+      file: photo.file,
+      extension: photo.extension,
+      originalFilename: photo.originalFilename,
+      status: "queued",
+      progress: 0,
+      retries: 0,
+      createdAt: Date.now(),
+      metadataRegistered: false,
+      uploadSessionId,
+    }
+
+    yield call(() => photoDB.queue.put(pendingPhoto))
+  }
+}
+
 export function* photoSaga() {
   yield fork(uploadScheduler)
+  yield takeEvery(uploadPhotosRequest.type, handleUploadPhotosRequest)
 }
